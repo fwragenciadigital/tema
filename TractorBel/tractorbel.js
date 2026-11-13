@@ -1,12 +1,12 @@
 /*
- * TractorBel 2026 - FWR Agencia Digital - v1.3.0
+ * TractorBel 2026 - FWR Agencia Digital - v1.4.0
  * Camada visual da Loja Integrada. Sem checkout ou precificacao paralela.
  * Editavel por window.TractorBelSettings no HTML da LI.
  */
 (function (win, doc) {
   'use strict';
   if (win.TractorBel2026) return;
-  var VERSION = '1.3.0';
+  var VERSION = '1.4.0';
   // Assets oficiais da TractorBel, ja hospedados na Loja Integrada.
   // Manter os nomes e extensoes ORIGINAIS, sem converter .jpg/.png para .webp.
   // O nome logico pode continuar .webp para compatibilidade com os componentes existentes.
@@ -46,7 +46,7 @@
     home: { ativo: true },
     rodape: { ativo: true },
     vitrines: { ativo: true, destaques: 10, miniaturas: 8, maisVendidos: 10 },
-    carrinho: { ativo: true },
+    carrinho: { ativo: true, parcelamento: { maximo: null, semJuros: null, minimoParcela: null } },
     movimento: { ativo: true, fadeIn: true, hover: true, duracao: 740, distancia: 25, intervalo: 80 },
     conteudo: {
       fraseMarcas: 'Temos de imediato FPS com o melhor preço do mercado!',
@@ -144,18 +144,37 @@
     for (var i = 0; i < selectors.length; i++) { var node = root.querySelector(selectors[i]); if (node) return node; }
     return null;
   }
+  // A arvore de categorias vem DIRETAMENTE do painel da Loja Integrada.
+  // Preserva ordem, links, subcategorias e ate 3 niveis quando cadastrados.
   function navItems() {
-    var desired = [
-      ['PEÇAS NOVAS', '/pecas-novas'], ['PEÇAS SEMINOVAS', '/pecas-seminovas'],
-      ['CRBT', '/crbt'], ['FERRAMENTAS DE PENETRAÇÃO DE SOLO', '/fps'],
-      ['LUBRIFICANTES', '/lubrificantes'], ['MINIATURAS', '/miniaturas'],
-      ['EQUIPAMENTOS', '/equipamentos-novos']
-    ];
-    var nativeLinks = [].slice.call(doc.querySelectorAll('#cabecalho .menu a, .menu.superior a, .menu-principal a'));
-    return desired.map(function (entry) {
-      var match = nativeLinks.find(function (n) { return n.textContent.trim().replace(/\s+/g, ' ').toUpperCase() === (entry[0] === 'FERRAMENTAS DE PENETRAÇÃO DE SOLO' ? 'FPS' : entry[0]); });
-      return { title: entry[0], href: match && safeUrl(match.getAttribute('href')) || entry[1] };
-    });
+    var list = firstElement(doc, [
+      '#cabecalho .menu.superior > ul.nivel-um',
+      '#cabecalho .menu.superior ul.nivel-um',
+      '#cabecalho ul.nivel-um',
+      '#cabecalho .menu-principal > ul'
+    ]);
+    function walk(li, depth) {
+      if (!li || depth > 3) return null;
+      var a = firstElement(li, [':scope > a[href]']);
+      if (!a) return null;
+      var href = safeUrl(a.getAttribute('href'));
+      if (!href || !/^https?:$/.test(new URL(href).protocol)) return null;
+      var title = (a.getAttribute('title') || firstText(a,['strong','.titulo']) || a.textContent || '').replace(/\s+/g,' ').trim();
+      if (!title || /--[A-Z_]+--/.test(title)) return null;
+      var ul = firstElement(li, [':scope > ul.nivel-dois', ':scope > ul.nivel-tres', ':scope > ul']);
+      var children = ul ? [].slice.call(ul.children).filter(function(n){ return n.tagName === 'LI'; }).map(function(n){ return walk(n, depth+1); }).filter(Boolean) : [];
+      if (depth === 1 && title.toUpperCase() === 'FPS') title = 'FERRAMENTAS DE PENETRAÇÃO DE SOLO';
+      return {title:title, href:href, children:children};
+    }
+    if (list) {
+      var nodes = [].slice.call(list.children).filter(function(n){return n.tagName === 'LI';});
+      var nativeTree = nodes.map(function(n){return walk(n,1);}).filter(Boolean);
+      if (nativeTree.length) { state.categories = {origem:'menu LI', principais:nativeTree.length, subcategorias:nativeTree.reduce(function(n,it){return n+it.children.length;},0)}; return nativeTree; }
+    }
+    warn('Categorias nativas indisponiveis; mantidos links principais para navegacao.');
+    return [['PEÇAS NOVAS','/pecas-novas'],['PEÇAS SEMINOVAS','/pecas-seminovas'],['CRBT','/crbt'],
+      ['FERRAMENTAS DE PENETRAÇÃO DE SOLO','/fps'],['LUBRIFICANTES','/lubrificantes'],['MINIATURAS','/miniaturas'],
+      ['EQUIPAMENTOS','/equipamentos-novos']].map(function(x){return {title:x[0],href:x[1],children:[]};});
   }
   function mountHeader() {
     if (!cfg.topo.ativo || doc.getElementById('tb26-header')) return;
@@ -164,8 +183,36 @@
     var header = e('header', 'tb26-header'); header.id = 'tb26-header';
     var top = e('div', 'tb26-header__wrap tb26-container');
     var brand = link('/', 'tb26-logo'); append(brand, image('logo-top.webp', 'TractorBel Tratores e Peças - Desde 1983', 741, 176, true));
-    var nav = e('nav', 'tb26-nav'); nav.id = 'tb26-menu'; nav.setAttribute('aria-label', 'Categorias principais');
-    navItems().forEach(function (it) { nav.appendChild(link(it.href, 'tb26-nav__link', it.title)); });
+    var nav = e('nav', 'tb26-nav'); nav.id = 'tb26-menu'; nav.setAttribute('aria-label','Categorias principais');
+    function createSubmenu(items, depth) {
+      var ul = e('ul', depth === 2 ? 'tb26-nav__submenu' : 'tb26-nav__sublist');
+      items.forEach(function(it){
+        var li = e('li','tb26-nav__submenu-item');
+        li.appendChild(link(it.href,'tb26-nav__submenu-link',it.title));
+        if (it.children && it.children.length) li.appendChild(createSubmenu(it.children,depth+1));
+        ul.appendChild(li);
+      });
+      return ul;
+    }
+    var allGroups=[];
+    navItems().forEach(function (it,index) {
+      var group = e('div','tb26-nav__group');
+      group.appendChild(link(it.href,'tb26-nav__link',it.title));
+      if (it.children && it.children.length) {
+        group.classList.add('tb26-nav__group--has-submenu');
+        var submenu = createSubmenu(it.children,2); submenu.id = 'tb26-submenu-'+index;
+        var btn=e('button','tb26-nav__toggle');btn.type='button';btn.setAttribute('aria-label','Mostrar subcategorias de '+it.title);
+        btn.setAttribute('aria-expanded','false');btn.setAttribute('aria-controls',submenu.id);
+        btn.innerHTML='<svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="m5 7 5 5 5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
+        btn.addEventListener('click',function(ev){
+          ev.preventDefault();ev.stopPropagation();var open=!group.classList.contains('is-expanded');
+          allGroups.forEach(function(g){g.classList.remove('is-expanded');var b=g.querySelector('.tb26-nav__toggle');if(b)b.setAttribute('aria-expanded','false');});
+          group.classList.toggle('is-expanded',open);btn.setAttribute('aria-expanded',String(open));
+        });
+        group.appendChild(btn);group.appendChild(submenu);
+      }
+      nav.appendChild(group);allGroups.push(group);
+    });
     var action = e('div', 'tb26-actions');
     var searchOpen = e('button', 'tb26-icon tb26-search-open', '⌕'); searchOpen.type = 'button'; searchOpen.setAttribute('aria-label', 'Abrir busca'); searchOpen.setAttribute('aria-expanded', 'false');
     var search = e('form', 'tb26-search'); search.method = 'get'; search.action = '/buscar'; search.role = 'search';
@@ -177,16 +224,30 @@
     var count = firstText(doc, ['#cabecalho .qtd-carrinho', '#cabecalho .carrinho .qtd-carrinho', '.carrinho .qtd-carrinho']);
     if (/^\d{1,3}$/.test(count)) cart.appendChild(e('span', 'tb26-cart__count', count));
     var menuBtn = e('button', 'tb26-icon tb26-mobile-toggle', '☰'); menuBtn.type = 'button'; menuBtn.setAttribute('aria-controls', 'tb26-menu'); menuBtn.setAttribute('aria-expanded', 'false'); menuBtn.setAttribute('aria-label', 'Abrir menu');
-    menuBtn.addEventListener('click', function () { var open = header.classList.toggle('tb26-menu-open'); menuBtn.setAttribute('aria-expanded', String(open)); menuBtn.textContent = open ? '×' : '☰'; });
-    nav.addEventListener('click', function (ev) { if (ev.target.closest('a')) { header.classList.remove('tb26-menu-open'); menuBtn.setAttribute('aria-expanded', 'false'); menuBtn.textContent = '☰'; } });
+    function closeMenu() {
+      header.classList.remove('tb26-menu-open'); menuBtn.setAttribute('aria-expanded','false');
+      menuBtn.textContent='☰';
+      allGroups.forEach(function(g){g.classList.remove('is-expanded');var b=g.querySelector('.tb26-nav__toggle');if(b)b.setAttribute('aria-expanded','false');});
+    }
+    menuBtn.addEventListener('click', function () {
+      var open = !header.classList.contains('tb26-menu-open');
+      if(!open)closeMenu();else {header.classList.add('tb26-menu-open');menuBtn.setAttribute('aria-expanded','true');menuBtn.textContent='×';}
+    });
+    nav.addEventListener('click',function(ev){ if(ev.target.closest('.tb26-nav__submenu-link, .tb26-nav__link'))closeMenu(); });
+    doc.addEventListener('click',function(ev){ if(!header.contains(ev.target))closeMenu(); });
+    doc.addEventListener('keydown',function(ev){if(ev.key==='Escape' && !ev.target.closest('#tb26-cart-drawer')){closeMenu();header.classList.remove('tb26-search-visible');searchOpen.setAttribute('aria-expanded','false');}});
+    var scheduled=false;
+    function setStickyState(){ scheduled=false;header.classList.toggle('is-scrolled',(win.scrollY||doc.documentElement.scrollTop||0)>18); }
+    win.addEventListener('scroll',function(){if(!scheduled){scheduled=true;win.requestAnimationFrame(setStickyState);}}, {passive:true});
     append(action, searchOpen, account, cart, menuBtn); append(top, brand, nav, action); append(header, top, search);
     native.parentNode.insertBefore(header, native);
     native.classList.add('tb26-native-header');
     doc.body.classList.add('tb26-with-header'); state.header = true;
+    setStickyState();
     if (cfg.carrinho.ativo) mountCartDrawer(cart);
     else cart.addEventListener('click', function () { location.assign('/carrinho/index'); });
   }
-  // Carrinho lateral: exibe somente dados reais da Loja Integrada.
+
   // Nao altera quantidades, preco, sessao ou rotas de checkout da plataforma.
   var cartDrawerApi = null;
   function mountCartDrawer(trigger) {
@@ -234,6 +295,37 @@
       // Nunca interpretar placeholders de preco (R$ *** / --PRODUTO_PRECO_POR--).
       var matched = String(text || '').match(/R\$\s*(?:\d{1,3}(?:\.\d{3})*|\d+),\d{2}/g);
       return matched ? matched[matched.length - 1].replace(/\s+/g, ' ') : '';
+    }
+    function moneyValue(str) {
+      var m = moneyFrom(str).match(/R\$\s*([\d.]+,\d{2})/);
+      return m ? Number(m[1].replace(/\./g,'').replace(',','.')) : null;
+    }
+    function moneyBRL(value) { return new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(value); }
+    function readInstallments(root) {
+      if (!root) return '';
+      var nodes = root.querySelectorAll('.parcelamento, .parcelas, .preco-parcelado, .preco-parcela, .valor-parcela, .condicoes-parcelamento, [data-parcelas], [data-installments]');
+      for (var i=0;i<nodes.length;i++) {
+        if (nodes[i].closest('.minicart-placeholder')) continue;
+        var text=(nodes[i].getAttribute('data-parcelas') || nodes[i].getAttribute('data-installments') || textOf(nodes[i])).replace(/\s+/g,' ');
+        var m=text.match(/(?:at[eé]\s*)?(\d{1,2})\s*x\s*(?:de\s*)?(R\$\s*(?:\d{1,3}(?:\.\d{3})*|\d+),\d{2})(?:\s*(sem juros|com juros))?/i);
+        if (m && Number(m[1])>=2 && Number(m[1])<=24) return (/(?:at[eé])/i.test(m[0])?'Até ':'')+Number(m[1])+'x de '+moneyFrom(m[2])+(m[3]?' '+m[3].toLowerCase():'');
+      }
+      return '';
+    }
+    function calculateSubtotal(items) {
+      if (!items.length || items.some(function(it){return !it.price || !Number.isFinite(it.quantity) || it.quantity<1;})) return '';
+      var sum=items.reduce(function(acc,it){return acc+moneyValue(it.price)*it.quantity;},0);
+      return Number.isFinite(sum) ? moneyBRL(sum) : '';
+    }
+    function configuredInstallments(total) {
+      var conf=cfg.carrinho && cfg.carrinho.parcelamento;
+      if (!conf || conf.semJuros!==true || !Number.isInteger(Number(conf.maximo)) || !Number.isFinite(moneyValue(total))) return '';
+      var max=Number(conf.maximo),number=moneyValue(total);
+      if(max<2 || max>24 || number<=0) return '';
+      var min=Number(conf.minimoParcela);
+      if(Number.isFinite(min) && min>0) max=Math.min(max,Math.floor(number/min));
+      if(max<2) return '';
+      return 'Até '+max+'x de '+moneyBRL(number/max)+' sem juros';
     }
     function textOf(node) { return node ? (node.textContent || '').replace(/\s+/g, ' ').trim() : ''; }
     function readQuantity(node) {
@@ -327,10 +419,15 @@
       ];
       var items = readLines(doc, selectors);
       var total = findTotal(doc, [
+        '#cabecalho .carrinho-interno-ajax .carrino-total strong',
+        '#cabecalho .carrinho-interno .carrino-total strong',
+        '#cabecalho .carrinho-rodape .carrino-total strong',
         '#cabecalho .carrinho-interno .total strong',
         '#cabecalho .carrinho-interno .total .valor',
         '#cabecalho .carrinho-interno .total',
         '#cabecalho .carrinho-interno-ajax .total strong',
+        '.carrinho-interno-ajax .carrino-total strong',
+        '.carrinho-interno .carrino-total strong',
         '.carrinho-interno .total', '.carrinho-interno-ajax .total'
       ]);
       var count = countFromHeader();
@@ -339,7 +436,7 @@
         var href = safeUrl(nativeLink.getAttribute('href'));
         if (href && new URL(href).origin === location.origin) cartLink = href;
       }
-      return { items: items, total: total, count: count, source: 'minicarrinho-nativo' };
+      return { items: items, total: total || calculateSubtotal(items), estimated: !total && !!calculateSubtotal(items), installments: readInstallments(doc.querySelector('#cabecalho .carrinho-interno-ajax') || doc.querySelector('#cabecalho .carrinho-interno')), count: count, source: 'minicarrinho-nativo' };
     }
     function cartPage(parsed) {
       var items = readLines(parsed, [
@@ -348,12 +445,15 @@
         '.carrinho-produtos .produto', '.pagina-carrinho .carrinho-item'
       ]);
       var total = findTotal(parsed, [
-        '.tabela-carrinho .total .valor', '.pagina-carrinho .total .valor',
-        '.total-carrinho .valor', '.total-carrinho strong',
-        '.pagina-carrinho .subtotal .valor', '.tabela-carrinho tfoot .total'
+        '.tabela-carrinho .subtotal .valor', '.pagina-carrinho .subtotal .valor',
+        '.tabela-carrinho .total-itens strong', '.total-itens strong',
+        '.total-subtotal strong', '.subtotal .valor',
+        '.pagina-carrinho .subtotal .valor', '.tabela-carrinho tfoot .subtotal',
+        '.carrino-total strong'
       ]);
       var explicitEmpty = !!parsed.querySelector('.carrinho-vazio, .carrinho-empty, .carrinho-sem-produtos');
-      return { items: items, total: total, count: null, empty: explicitEmpty, source: 'carrinho-pagina' };
+      var paymentScope = firstElement(parsed,['.resumo-carrinho','.carrinho-rodape','.total-carrinho','.pagamento-carrinho','.resumo-pedido']);
+      return { items: items, total: total || calculateSubtotal(items), estimated: !total && !!calculateSubtotal(items), installments: readInstallments(paymentScope), count: null, empty: explicitEmpty, source: 'carrinho-pagina' };
     }
     function updateBadge(count) {
       if (count === null || !Number.isFinite(count)) return;
@@ -389,11 +489,17 @@
         });
         main.appendChild(list);
         var summary = e('div', 'tb26-cart-drawer__summary');
-        if (data.total) {
-          append(summary, e('span', '', 'Total informado pela loja'), e('strong', '', data.total));
-        } else summary.appendChild(e('span', '', 'Valores e descontos confirmados no carrinho.'));
-        main.appendChild(summary);
-        foot.appendChild(e('small', 'tb26-cart-drawer__note', 'Frete e condições de pagamento calculados pela Loja Integrada.'));
+        var total = data.total || calculateSubtotal(items);
+        if (total) {
+          var totalLabel = data.estimated ? 'Subtotal estimado dos itens' : 'Total dos itens';
+          append(summary, e('span', '', totalLabel), e('strong', '', total));
+        } else append(summary,e('span','','Total dos itens'),e('span','tb26-cart-drawer__pending','Consulte no carrinho'));
+        foot.appendChild(summary);
+        var installment = data.installments || configuredInstallments(total);
+        var payment = e('div', 'tb26-cart-drawer__installments');
+        append(payment,e('span','tb26-cart-drawer__installments-icon','▣'),e('span','',installment || 'Confira as opções de parcelamento no carrinho'));
+        foot.appendChild(payment);
+        foot.appendChild(e('small', 'tb26-cart-drawer__note', 'Condições de pagamento, descontos e frete confirmados pela Loja Integrada.'));
       } else {
         var empty = e('div', 'tb26-cart-drawer__status');
         var icon = e('span', 'tb26-cart-drawer__empty-icon', mode === 'empty' ? '🛒' : 'ⓘ');
@@ -412,12 +518,12 @@
       }
       if (data) updateBadge(data.count);
     }
-    function fetchCartFallback() {
+    function fetchCartFallback(existing) {
       if (!opened) return;
       if (pending) pending.abort();
       pending = new AbortController();
       var controller = pending;
-      render(null, 'loading');
+      if (!existing || !existing.items || !existing.items.length) render(null, 'loading');
       fetch(cartLink, { method: 'GET', credentials: 'same-origin', cache: 'no-store', headers: { Accept: 'text/html' }, signal: controller.signal })
         .then(function (r) {
           if (!r.ok || !r.headers.get('content-type') || r.headers.get('content-type').indexOf('text/html') < 0 || new URL(r.url).origin !== location.origin) throw Error('Carrinho indisponivel');
@@ -427,11 +533,16 @@
           if (!opened || controller.signal.aborted) return;
           var data = cartPage(new DOMParser().parseFromString(html, 'text/html'));
           var count = countFromHeader();
-          if (data.items.length) render(data, 'items');
+          if (existing && existing.items && existing.items.length) {
+            var merged = {items:existing.items,total:existing.estimated ? (data.total || existing.total) : (existing.total || data.total),
+              estimated:existing.estimated && !data.total,installments:existing.installments || data.installments,
+              count:existing.count===null ? count : existing.count};
+            render(merged,'items');
+          } else if (data.items.length) { data.count=count;render(data, 'items'); }
           else if (data.empty || count === 0) render({items:[], count:0}, 'empty');
           else render({items:[], count:count}, 'unavailable');
         })
-        .catch(function (err) { if (opened && !controller.signal.aborted) { warn('Carrinho lateral: ' + err.message); render({items:[], count:countFromHeader()}, 'unavailable'); } })
+        .catch(function (err) { if (opened && !controller.signal.aborted) { warn('Carrinho lateral: ' + err.message); if (existing && existing.items && existing.items.length) render(existing, 'items'); else render({items:[], count:countFromHeader()}, 'unavailable'); } })
         .finally(function () { if (pending === controller) pending = null; });
     }
     function refreshDrawer(fallback) {
@@ -439,8 +550,9 @@
       updateBadge(data.count);
       if (!opened) return;
       if (data.items.length) {
-        if (pending) { pending.abort(); pending = null; }
         render(data, 'items');
+        if (fallback && (!data.total || data.estimated)) fetchCartFallback(data);
+        else if (pending) { pending.abort(); pending = null; }
       } else if (data.count === 0) {
         if (pending) { pending.abort(); pending = null; }
         render(data, 'empty');
@@ -499,7 +611,7 @@
     watchNative();
     refreshDrawer(false);
     cartDrawerApi = Object.freeze({ open:openDrawer, close:closeDrawer, refresh:function () { refreshDrawer(true); }, get aberto() { return opened; } });
-    state.cart = {ativo:true, fonte:'minicarrinho nativo; pagina oficial sob demanda'};
+    state.cart = {ativo:true, fonte:'minicarrinho LI (carrino-total) + consulta oficial sob demanda',parcelamento:'extraido da LI ou configuracao verificada'};
   }
 
   function getProducts(scope, limit) {
@@ -525,6 +637,7 @@
   function findNativeShelf(partial) {
     var lists = [].slice.call(doc.querySelectorAll('#corpo .listagem, #corpo .listagem-linha, #corpo .vitrine'));
     var wanted = lists.find(function (n) { var t = firstText(n, ['.titulo-categoria', '.titulo', 'h2']); return t.toLowerCase().indexOf(partial.toLowerCase()) >= 0 && n.querySelector('.listagem-item'); });
+    if (partial === 'Mais vendidos') return wanted || null;
     return wanted || (partial === 'Destaques' ? lists[1] : lists[0]) || doc.querySelector('#corpo');
   }
   function productCard(p) {
@@ -561,7 +674,12 @@
   }
   function benefits() {
     var bar = e('div', 'tb26-benefits'); var inner = e('div', 'tb26-container tb26-benefits__grid');
-    [['⬡', 'ENVIAMOS PARA TODO O BRASIL'], ['▣', 'PARCELE NO CARTÃO DE CRÉDITO'], ['%', 'PAGUE À VISTA E GANHE DESCONTO'], ['♙', 'AMBIENTE DE COMPRA 100% SEGURO']].forEach(function (v) { var cell = e('div', 'tb26-benefits__item'); append(cell, e('b', '', v[0]), e('span', '', v[1])); inner.appendChild(cell); }); append(bar, inner); return bar;
+    [
+      ['<path d="m12 2 9 5v10l-9 5-9-5V7l9-5Z"/><path d="m3 7 9 5 9-5M12 12v10"/>','ENVIAMOS PARA TODO O BRASIL'],
+      ['<rect x="2" y="4" width="20" height="16" rx="2"/><path d="M2 9h20M6 16h5"/>','PARCELE NO CARTÃO DE CRÉDITO'],
+      ['<path d="M19 5 5 19"/><circle cx="6.5" cy="6.5" r="2"/><circle cx="17.5" cy="17.5" r="2"/>','PAGUE À VISTA E GANHE DESCONTO'],
+      ['<rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/>','AMBIENTE DE COMPRA 100% SEGURO']
+    ].forEach(function (v) { var cell = e('div', 'tb26-benefits__item'); var icon=e('span','tb26-benefits__icon'); icon.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+v[0]+'</svg>'; append(cell, icon, e('span', '', v[1])); inner.appendChild(cell); }); append(bar, inner); return bar;
   }
   function institutionalBanner() {
     var sec = e('section', 'tb26-institutional-banner tb26-container');
@@ -594,7 +712,8 @@
   function instagram() {
     var sec = e('section', 'tb26-instagram'); var inner = e('div', 'tb26-container');
     inner.appendChild(e('h2', 'tb26-title tb26-title--dark tb26-title--left', 'ÚLTIMAS POSTAGENS'));
-    var a = link(cfg.conteudo.instagram || 'https://www.instagram.com/', 'tb26-instagram__feed'); a.target = '_blank'; a.rel = 'noopener noreferrer'; a.setAttribute('aria-label', 'Acompanhe a TractorBel nas redes sociais');
+    var a = cfg.conteudo.instagram ? link(cfg.conteudo.instagram, 'tb26-instagram__feed') : e('div','tb26-instagram__feed');
+    if(cfg.conteudo.instagram){ a.target = '_blank'; a.rel = 'noopener noreferrer'; a.setAttribute('aria-label', 'Acompanhe a TractorBel nas redes sociais'); }
     a.appendChild(image('insta.webp', 'Publicações da TractorBel sobre máquinas, peças e ofertas', 1720, 522)); append(inner, a); append(sec, inner); return sec;
   }
   // Animacao uma unica vez ao entrar no viewport. Transform/opacity nao provocam CLS.
@@ -666,6 +785,8 @@
     append(root, brands(), hero(), benefits(), institutionalBanner());
     var homeProducts = getProducts(findNativeShelf('Destaques') || native, Math.max(10, cfg.vitrines.destaques));
     var latest = getProducts(findNativeShelf('Lançamentos') || native, Math.max(10, cfg.vitrines.maisVendidos));
+    var bestNative = findNativeShelf('Mais vendidos');
+    var best = bestNative ? getProducts(bestNative,Math.max(10,cfg.vitrines.maisVendidos)) : [];
     if (cfg.vitrines.ativo && homeProducts.length) { root.appendChild(carousel('destaques', 'PRODUTOS EM DESTAQUE', homeProducts, 'tb26-carousel--featured')); state.products.destaques = homeProducts.length; }
     append(root, categories());
     var miniatureProducts = latest.filter(function (p) { return /miniatura/i.test(p.title); });
@@ -678,9 +799,30 @@
       append(layout, art, holder); append(miniInner, layout); append(miniSec, miniInner); root.appendChild(miniSec);
       function fillMini(items) { holder.replaceChildren(); if (items.length) { var slider = carousel('miniaturas', '', items.slice(0, cfg.vitrines.miniaturas), 'tb26-miniatures__slider'); holder.appendChild(slider); state.products.miniaturas = items.length; } else { holder.appendChild(link('/miniaturas', 'tb26-miniatures__fallback', 'VER TODAS AS MINIATURAS →')); warn('Miniaturas sem resposta; exibido link de categoria.'); } if (state.home) setupMotion(holder); }
       if (miniatureProducts.length >= 3) fillMini(miniatureProducts);
-      else fetch('/miniaturas', { credentials: 'same-origin' }).then(function (resp) { if (!resp.ok) throw Error('Resposta ' + resp.status); return resp.text(); }).then(function (html) { return getProducts(new DOMParser().parseFromString(html, 'text/html'), cfg.vitrines.miniaturas); }).then(fillMini).catch(function () { fillMini(miniatureProducts); });
+      else {
+        // Consulta extra de categoria contabiliza pageview na LI: buscar apenas quando a seção estiver próxima.
+        holder.appendChild(e('span','tb26-miniatures__loading','Carregando miniaturas...'));
+        var startedMini=false;
+        function loadMini() {
+          if(startedMini)return;
+          startedMini=true;
+          fetch('/miniaturas', { credentials: 'same-origin' }).then(function (resp) { if (!resp.ok) throw Error('Resposta ' + resp.status); return resp.text(); }).then(function (html) { return getProducts(new DOMParser().parseFromString(html, 'text/html'), cfg.vitrines.miniaturas); }).then(fillMini).catch(function () { fillMini(miniatureProducts); });
+        }
+        if ('IntersectionObserver' in win) {
+          var miniObserver=new IntersectionObserver(function(entries,observer){
+            entries.forEach(function(entry){ if(entry.isIntersecting){observer.disconnect();loadMini();} });
+          },{rootMargin:'500px 0px'});
+          miniObserver.observe(miniSec);
+        } else loadMini();
+      }
     }
-    if (cfg.vitrines.ativo && latest.length) { root.appendChild(carousel('mais-vendidas', 'PEÇAS MAIS VENDIDAS', latest, 'tb26-carousel--best')); state.products.maisVendidos = latest.length; }
+    if (cfg.vitrines.ativo && (best.length || latest.length)) {
+      var source = best.length ? best : latest;
+      var heading = best.length ? 'PEÇAS MAIS VENDIDAS' : 'PEÇAS EM DESTAQUE';
+      root.appendChild(carousel('mais-vendidas', heading, source, 'tb26-carousel--best'));
+      state.products.maisVendidos = best.length;
+      if(!best.length)warn('Vitrine mais vendidos ausente na LI: exibido titulo neutro para nao confundir lançamentos com ranking de vendas.');
+    }
     append(root, solutions(), company(), instagram());
     native.parentNode.insertBefore(root, native); native.classList.add('tb26-native-home'); doc.body.classList.add('tb26-with-home'); state.home = true;
     setupMotion(root);
@@ -691,8 +833,15 @@
     var footer = e('footer', 'tb26-footer'); footer.id = 'tb26-footer';
     var left = e('div', 'tb26-footer__art'); setBackground(left, 'bg-footer.webp');
     var social = e('div', 'tb26-footer__social'); social.appendChild(e('span', '', 'SIGA-NOS:'));
-    if (cfg.conteudo.instagram) social.appendChild(link(cfg.conteudo.instagram, '', 'Instagram'));
-    if (cfg.conteudo.facebook) social.appendChild(link(cfg.conteudo.facebook, '', 'Facebook'));
+    // Fontes reais: prioriza links do painel da LI, nunca aponta para perfil generico.
+    var instagramURL = cfg.conteudo.instagram;
+    var facebookURL = cfg.conteudo.facebook;
+    var instagramNative = native.querySelector('a[href*="instagram.com/"]');
+    var facebookNative = native.querySelector('a[href*="facebook.com/"]');
+    if (!instagramURL && instagramNative) instagramURL=instagramNative.href;
+    if (!facebookURL && facebookNative) facebookURL=facebookNative.href;
+    if (instagramURL) social.appendChild(link(instagramURL, 'tb26-footer__social-icon', 'Instagram'));
+    if (facebookURL) social.appendChild(link(facebookURL, 'tb26-footer__social-icon', 'Facebook'));
     left.appendChild(social);
     var right = e('div', 'tb26-footer__right'); var grid = e('div', 'tb26-footer__grid');
     function column(title, items) { var c = e('div', 'tb26-footer__col'); c.appendChild(e('h3', '', title)); items.forEach(function (item) { c.appendChild(link(item[1], '', item[0])); }); return c; }
@@ -701,11 +850,23 @@
       column('INSTITUCIONAL', [['Sobre Nós', '/pagina/sobre-nos.html'], ['Frete & Entrega', '/pagina/frete-e-entrega.html'], ['Trocas & Devoluções', '/pagina/trocas-e-devolucoes.html'], ['Política de Privacidade', '/pagina/politica-de-privacidade.html']])
     );
     var secure = e('div', 'tb26-footer__col tb26-footer__secure'); secure.appendChild(e('h3', '', 'COMPRA SEGURA'));
-    var seal = firstElement(native, ['.selos', '.selos-seguranca', '.pagamento-selos', '.formas-pagamento', '.bandeiras-pagamento']);
-    if (seal) { var imgs = [].slice.call(seal.querySelectorAll('img')).slice(0, 12); if (imgs.length) { var wrap = e('div', 'tb26-footer__native-seals'); imgs.forEach(function (n) { var img = n.cloneNode(true); img.removeAttribute('style'); img.loading = 'lazy'; wrap.appendChild(img); }); secure.appendChild(wrap); } }
-    if (!secure.querySelector('img')) secure.appendChild(e('p', '', 'Pagamento processado pela Loja Integrada.'));
+    function copyLogos(selectors, parent, limit) {
+      var seen = new Set(); var wrap = e('div','tb26-footer__native-seals');
+      [].slice.call(native.querySelectorAll(selectors)).forEach(function(n) {
+        var src=n.getAttribute('data-src') || n.getAttribute('src') || '';
+        var clean=safeUrl(src);
+        if(!clean || seen.has(clean) || seen.size>=limit)return;
+        seen.add(clean); var img=e('img');img.src=clean;img.alt=n.getAttribute('alt')||'';img.loading='lazy';img.decoding='async';
+        wrap.appendChild(img);
+      });
+      if(wrap.children.length) parent.appendChild(wrap);
+      return wrap.children.length;
+    }
+    var seals=copyLogos('.selos img, .selos-seguranca img, .seguranca img, .compra-segura img, .certificados img',secure,8);
+    if(!seals) secure.appendChild(e('p', '', 'Compra protegida pela Loja Integrada.'));
     secure.appendChild(e('h3', '', 'FORMAS DE PAGAMENTO'));
-    secure.appendChild(e('p', '', 'Consulte os meios disponíveis no checkout.'));
+    var paymentIcons=copyLogos('.pagamento img, .formas-pagamento img, .bandeiras-pagamento img, .bandeiras img, .meios-pagamento img',secure,12);
+    if(!paymentIcons) secure.appendChild(e('p', '', 'Consulte os meios disponíveis no checkout.'));
     grid.appendChild(secure); right.appendChild(grid);
     var legal = e('div', 'tb26-footer__bottom'); append(legal, e('small', '', 'TRACTORBEL TRATORES E PEÇAS BELO HORIZONTE LTDA · CNPJ 17.713.959/0001-77 · © ' + new Date().getFullYear()), e('span', '', 'by FWR Agência Digital'));
     right.appendChild(legal); append(footer, left, right);

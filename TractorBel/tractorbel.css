@@ -1,6 +1,6 @@
-/* TractorBel 2026 - FWR Agencia Digital v1.3.0 - CSS escopado */
+/* TractorBel 2026 - FWR Agencia Digital v1.4.0 - CSS escopado */
 :root{--tb26-yellow:#ffbc00;--tb26-yellow-strong:#ffc400;--tb26-dark:#191919;--tb26-ink:#252525;--tb26-muted:#929292;--tb26-width:1660px;--tb26-gutter:clamp(16px,4vw,70px)}
-.tb26-active{overflow-x:hidden}
+.tb26-active{overflow-x:clip}
 .tb26-active .tb26-home,.tb26-active .tb26-header,.tb26-active .tb26-footer{box-sizing:border-box;font-family:'Century Gothic','Eurostile',Montserrat,Arial,sans-serif}
 .tb26-active .tb26-home *, .tb26-active .tb26-header *, .tb26-active .tb26-footer *{box-sizing:border-box}
 .tb26-active .tb26-home img,.tb26-active .tb26-header img,.tb26-active .tb26-footer img{max-width:100%;display:block}
@@ -9,7 +9,7 @@
 .tb26-with-home #corpo.tb26-native-home{display:none!important}
 .tb26-with-footer #rodape.tb26-native-footer{display:none!important}
 .tb26-active .tb26-home a:focus-visible,.tb26-active .tb26-header a:focus-visible,.tb26-active .tb26-header button:focus-visible,.tb26-active .tb26-home button:focus-visible,.tb26-active .tb26-footer a:focus-visible{outline:3px solid var(--tb26-yellow);outline-offset:3px}
-.tb26-header{position:relative;z-index:990;border-top:5px solid var(--tb26-yellow);background:#1d1d1d;color:#fff;min-height:118px}
+.tb26-header{position:sticky;top:0;z-index:990;isolation:isolate;border-top:5px solid var(--tb26-yellow);background:#1d1d1d;color:#fff;min-height:118px}
 .tb26-header__wrap{height:118px;display:flex;align-items:center;gap:clamp(20px,2.4vw,48px)}
 .tb26-logo{flex:0 0 clamp(180px,15vw,270px);display:block}
 .tb26-logo img{width:100%;height:auto;aspect-ratio:741/176;object-fit:contain}
@@ -211,3 +211,65 @@
 .tb26-cart__count[hidden]{display:none!important}
 @media(max-width:767px){.tb26-cart-drawer__panel{width:min(100%,420px)}.tb26-cart-drawer__head{padding:22px 20px 19px}.tb26-cart-drawer__body{padding:6px 18px 20px}.tb26-cart-drawer__foot{padding:15px 18px max(18px,env(safe-area-inset-bottom))}.tb26-cart-drawer__item{grid-template-columns:74px minmax(0,1fr);gap:13px}.tb26-cart-drawer__image{width:74px;height:74px}}
 @media(prefers-reduced-motion:reduce){.tb26-cart-drawer__backdrop,.tb26-cart-drawer__panel,.tb26-cart-drawer__close,.tb26-cart-drawer__checkout{transition:none!important}.tb26-cart-drawer__spinner{animation:none!important}}
+
+/* === TractorBel 1.4 | Navegacao nativa, sticky header e subtotal/parcelamento === */
+.tb26-header{box-shadow:0 0 0 transparent;transition:box-shadow .23s ease,background .23s ease}
+.tb26-header.is-scrolled{box-shadow:0 12px 24px rgba(0,0,0,.27);background:#191919}
+.tb26-nav{min-width:0}
+.tb26-nav__group{position:relative;display:flex;align-items:center;min-width:0;flex:none}
+.tb26-nav__group>.tb26-nav__link{display:block;max-width:100%}
+.tb26-nav__toggle{flex:none;margin-left:3px;width:18px;height:26px;padding:0;background:transparent;border:0;color:var(--tb26-yellow);display:grid;place-items:center;cursor:pointer}
+.tb26-nav__toggle svg{width:15px;height:15px;transition:transform .22s ease}
+.tb26-nav__group.is-expanded .tb26-nav__toggle svg{transform:rotate(180deg)}
+.tb26-nav__submenu{position:absolute;z-index:999;left:0;top:100%;display:none;list-style:none;margin:0;padding:22px;box-shadow:0 22px 45px rgba(0,0,0,.36);background:#202020;border-top:3px solid var(--tb26-yellow);color:#fff;width:min(720px,calc(100vw - 42px));max-height:min(68vh,660px);overflow-y:auto;overscroll-behavior:contain;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px 20px}
+.tb26-nav__group:nth-last-child(-n+3)>.tb26-nav__submenu{left:auto;right:0}
+.tb26-nav__group.is-expanded>.tb26-nav__submenu,.tb26-nav__group:focus-within>.tb26-nav__submenu{display:grid}
+@media(hover:hover) and (pointer:fine){.tb26-nav__group:hover>.tb26-nav__submenu{display:grid}}
+.tb26-nav__submenu-item{list-style:none;min-width:0;padding:0;margin:0}
+.tb26-nav__submenu-link{display:block;padding:10px 7px;color:#e9e9e9!important;font:500 12px/1.25 Arial,sans-serif;text-decoration:none!important;border-bottom:1px solid #373737;white-space:normal;overflow-wrap:anywhere}
+.tb26-nav__submenu-link:hover,.tb26-nav__submenu-link:focus-visible{color:var(--tb26-yellow)!important;background:#2c2c2c}
+.tb26-nav__sublist{list-style:none;margin:0;padding:0 0 4px 10px;border-left:1px solid #444}
+.tb26-nav__sublist .tb26-nav__submenu-link{font-size:11px}
+.tb26-nav__submenu::-webkit-scrollbar{width:7px}.tb26-nav__submenu::-webkit-scrollbar-thumb{background:#655316;border-radius:7px}
+.tb26-benefits__icon{display:inline-grid;place-items:center;flex:none;width:32px;height:32px;color:#e3e3e3}
+.tb26-benefits__icon svg{display:block;width:30px;height:30px}
+.tb26-cart-drawer__foot .tb26-cart-drawer__summary{margin:0;padding:15px 14px;align-items:center}
+.tb26-cart-drawer__foot .tb26-cart-drawer__summary strong{font-size:24px}
+.tb26-cart-drawer__pending{font-size:12px;color:#666;font-weight:650}
+.tb26-cart-drawer__installments{display:flex;align-items:flex-start;gap:9px;padding:2px 7px 5px;color:#444;font:650 12px/1.45 Arial,sans-serif}
+.tb26-cart-drawer__installments-icon{font-size:18px;line-height:1.1;color:#b68800}
+.tb26-cart-drawer__note{padding-bottom:0}
+@media(min-width:1281px){
+ .tb26-nav__group>.tb26-nav__link{font-size:clamp(10px,.72vw,13px)}
+ .tb26-header__wrap{gap:clamp(10px,1.7vw,34px)}
+}
+@media(max-width:1320px){
+ .tb26-header,.tb26-header__wrap{min-height:85px}
+ .tb26-header__wrap{height:85px}
+ .tb26-logo{flex-basis:195px}
+ .tb26-nav{position:absolute;top:100%;left:0;right:0;display:none;flex-direction:column;align-items:stretch;justify-content:flex-start;gap:0;background:#1b1b1b;padding:10px var(--tb26-gutter) 26px;max-height:calc(100dvh - 85px);overflow-y:auto;overscroll-behavior:contain;box-shadow:0 20px 30px rgba(0,0,0,.4)}
+ .tb26-menu-open .tb26-nav{display:flex}
+ .tb26-nav__group{width:100%;display:grid;grid-template-columns:minmax(0,1fr) 42px;border-bottom:1px solid #393939;align-items:center}
+ .tb26-nav__group>.tb26-nav__link{font-size:14px;padding:15px 5px;border:0;white-space:normal}
+ .tb26-nav__toggle{width:42px;height:42px;margin:0;border:1px solid #474747;border-radius:4px}
+ .tb26-nav__toggle svg{width:20px;height:20px}
+ .tb26-nav__submenu{grid-column:1/-1;position:static;left:auto!important;right:auto!important;width:100%;max-height:none;display:none!important;grid-template-columns:repeat(2,minmax(0,1fr));padding:8px 9px 16px;margin-bottom:9px;box-shadow:none;border-top:1px solid #574913;background:#242424;overflow:visible;gap:2px 10px}
+ .tb26-nav__group.is-expanded>.tb26-nav__submenu{display:grid!important}
+ .tb26-nav__group:not(.is-expanded):focus-within>.tb26-nav__submenu{display:none!important}
+ .tb26-mobile-toggle{display:grid}
+}
+@media(max-width:767px){
+ .tb26-nav{max-height:calc(100dvh - 72px)}
+ .tb26-nav__submenu{grid-template-columns:1fr}
+ .tb26-nav__submenu-link{font-size:13px;padding:12px 9px}
+ .tb26-cart-drawer__foot .tb26-cart-drawer__summary strong{font-size:21px}
+ .tb26-benefits__icon{width:25px;height:25px}
+ .tb26-benefits__icon svg{width:23px;height:23px}
+}
+@media(prefers-reduced-motion:reduce){.tb26-header,.tb26-nav__toggle svg{transition:none!important}}
+
+/* Links de redes sociais são renderizados apenas com URL real da loja. */
+.tb26-footer__social-icon{display:inline-flex;align-items:center;justify-content:center;padding:8px 10px;border:1px solid #3a3324;border-radius:50px;font-size:12px;text-decoration:none}
+.tb26-footer__social-icon:hover{background:#191919;color:#ffbc00!important}
+
+.tb26-miniatures__loading{display:block;padding:18px 10px;color:#d7d7d7;font-size:13px;min-height:70px}

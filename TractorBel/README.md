@@ -1,6 +1,6 @@
 # TractorBel 2026 · FWR Agência Digital
 
-**Plataforma:** Loja Integrada. **Projeto:** `TractorBel` na Vercel/GitHub. **Versão:** 1.3.0.
+**Plataforma:** Loja Integrada. **Projeto:** `TractorBel` na Vercel/GitHub. **Versão:** 1.4.0.
 
 ## Estrutura
 - `tractorbel.js`: adaptação DOM-first da LI (topo, home, rodapé, vitrines com produtos reais, menu e carrinho lateral).
@@ -26,12 +26,37 @@
 - Suporta `prefers-reduced-motion` e fallback para navegadores sem `IntersectionObserver`: conteúdos ficam visíveis.
 - As configurações padrão de `movimento` já estão em `tractorbel.js`, incluindo `ativo`, `fadeIn`, `hover`, `duracao` (ms), `distancia` (px) e `intervalo` (ms). Não é necessário colar as configurações no HTML. Ajustes podem ser feitos direto no JS. A configuração legada via `window.TractorBelSettings` continua aceita se necessário.
 
-## Carrinho lateral (v1.3)
+## Correções de experiência v1.4 (13/11/2026)
+- **Header sticky:** `position:sticky; top:0`; soma sombra após iniciar o scroll, sem alterar altura ou provocar deslocamento (CLS). `overflow-x:clip` evita quebrar sticky no `body`.
+- **Subcategorias 100% do painel:** árvore lida de `#cabecalho .menu.superior ul.nivel-um > li`, com níveis 2 e 3, mantendo os links registrados na Loja Integrada. Mega menu com rolagem no desktop; submenu expansível no mobile; teclado e Escape.
+- **Carrinho:** leitura priorizada de `.carrino-total strong` (grafia real no tema LI), depois demais seletores; subtotal calculado apenas quando todas as linhas têm preço e quantidade reais, marcado como *estimado*. O subtotal fica fixo junto do CTA do drawer.
+- **Parcelamento:** procura expressões explícitas da LI no minicarrinho ou no resumo do pedido. Nunca deduz número de parcelas a partir de mensagens publicitárias. Quando uma regra *sem juros* tiver sido validada no painel, pode-se informar o limite em `carrinho.parcelamento` para calcular o valor correto; sem regra conhecida, exibe instrução para consultar condições no carrinho nativo.
+- **Fidelidade visual:** benefícios usam SVGs equivalentes aos ícones de entrega, cartão, desconto e compra segura. Rodapé lê selos, bandeiras e redes sociais diretamente do HTML nativo quando presentes.
+- **Vitrine Peças Mais Vendidas:** somente usa esse nome se existir a seção nativa correspondente. Sem fonte real, apresenta `PEÇAS EM DESTAQUE` (não atribui falsamente popularidade a lançamentos).
+- **Performance:** categoria Miniaturas consultada apenas quando o módulo estiver próximo do viewport, evitando pageviews adicionais desnecessárias no carregamento inicial.
+
+### Configuração *opcional* de parcelamento
+A loja atualmente divulga parcelamento, mas o HTML público consultado **não expôs o número máximo de parcelas e os juros aplicáveis ao total do carrinho**. Para exibir um valor calculado em todos os casos, após verificar no painel Pagali/intermediador a condição vigente, altere **diretamente no JS**:
+
+```javascript
+carrinho: {
+  ativo: true,
+  parcelamento: {
+    maximo: null,       // substituir pelo limite confirmado (ex.: 3/6/10 somente se for REAL)
+    semJuros: null,     // informar true apenas se for sem juros na quantidade acima
+    minimoParcela: null // informar valor mínimo por parcela, se a loja exigir
+  }
+}
+```
+
+Enquanto estiver `null`, o drawer só mostra número e valor de parcelas quando a loja disponibiliza os dados no seu próprio HTML; caso contrário, mostra `Confira as opções de parcelamento no carrinho` sem prometer valores falsos.
+
+## Carrinho lateral (v1.4)
 - Clique em `tb26-icon tb26-cart` abre um painel à direita com identidade TractorBel.
 - Utiliza primeiro os dados do minicarrinho **nativo** (`.carrinho-interno-ajax` e `.carrinho-interno`); conserva os nós nativos e seus eventos, sem criar pedido ou precificar produtos.
 - Se o carrinho nativo indicar itens mas não fornecer linhas, faz uma consulta sob demanda **somente ao abrir** a página oficial `/carrinho/index` para tentar recuperar os dados. A LI alerta que esse tipo de requisição pode contabilizar uma visualização extra. Não consulta automaticamente no carregamento.
 - Nunca exibe placeholders de preço ou fabrica total. Se as linhas não puderem ser recuperadas, oferece botão seguro para abrir o carrinho oficial.
-- Carrega nome, imagem, quantidade e preço da origem real, com total apenas se vier da Loja Integrada. Frete e cupons permanecem no fluxo oficial.
+- Carrega nome, imagem, quantidade e preço da origem real, com total priorizado da Loja Integrada (ou estimado com preço unitário e quantidade realmente presentes). Frete e cupons permanecem no fluxo oficial.
 - O botão conduz à rota nativa do carrinho. O drawer não altera itens, quantidades, pagamentos, cupons ou checkout.
 - `MutationObserver` observa as atualizações da miniárea nativa, para atualizar a badge/itens enquanto aberto. Fechamento via clique fora, botão × ou Escape; foco e scroll são restaurados; possui suporte mobile e redução de movimento.
 - Padrão ativo em `defaults.carrinho.ativo`, dentro do JS; desative em `window.TractorBelSettings.carrinho.ativo=false` se precisar.
