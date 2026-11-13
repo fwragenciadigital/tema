@@ -1,6 +1,6 @@
 # TractorBel 2026 · FWR Agência Digital
 
-**Plataforma:** Loja Integrada. **Projeto:** `TractorBel` na Vercel/GitHub.
+**Plataforma:** Loja Integrada. **Projeto:** `TractorBel` na Vercel/GitHub. **Versão:** 1.1.0.
 
 ## Estrutura
 - `tractorbel.js`: adaptação DOM-first da LI (topo, home, rodapé, vitrines com produtos reais e menu).
@@ -16,6 +16,15 @@
 4. No DevTools, confira `TractorBel2026.diagnostico()` e eventuais avisos.
 5. Após homologação, altere `geral.publicarNaLoja: true`. Essa decisão pode ser revertida em segundos.
 6. Para desabilitar: `geral.ativo: false` ou remover as duas tags `<link>` e `<script>`.
+
+## Movimentos e transições (v1.1)
+- Fade-in progressivo ao rolar a home: títulos, cards, banners internos, vitrines e rodapé.
+- Usa `IntersectionObserver` para animar **uma única vez** a entrada na tela, sem loop nem listener de scroll; a hero principal não é animada (preserva LCP).
+- Entrada via `opacity` e `transform`, sem ocupar/remover espaço nem alterar layout (CLS).
+- Miniaturas carregadas via requisição assíncrona também recebem fade-in.
+- Cartões possuem hover discreto (zoom de produto, brilho do CTA e realce), apenas em dispositivos com mouse.
+- Suporta `prefers-reduced-motion` e fallback para navegadores sem `IntersectionObserver`: conteúdos ficam visíveis.
+- Em `window.TractorBelSettings.movimento`, ajuste: `ativo`, `fadeIn`, `hover`, `duracao` (ms), `distancia` (px) e `intervalo` (ms). Para desligar todo movimento: `movimento: { ativo: false }`.
 
 ## Produtos e preços
 O JS lê produtos já renderizados pela LI (`#corpo .listagem-item`) e miniaturas na página da categoria via `fetch('/miniaturas')` no mesmo domínio. As informações comerciais não são calculadas, replicadas via API externa nem inventadas. Se a página de miniaturas estiver indisponível ou não expuser preços, aparece um link para a categoria, em vez de uma vitrine com preços simulados. Os botões direcionam à página real do produto, preservando seleções de variação e checkout nativo.

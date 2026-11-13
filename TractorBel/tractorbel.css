@@ -1,4 +1,4 @@
-/* TractorBel 2026 - FWR Agencia Digital v1.0.0 - CSS escopado */
+/* TractorBel 2026 - FWR Agencia Digital v1.1.0 - CSS escopado */
 :root{--tb26-yellow:#ffbc00;--tb26-yellow-strong:#ffc400;--tb26-dark:#191919;--tb26-ink:#252525;--tb26-muted:#929292;--tb26-width:1660px;--tb26-gutter:clamp(16px,4vw,70px)}
 .tb26-active{overflow-x:hidden}
 .tb26-active .tb26-home,.tb26-active .tb26-header,.tb26-active .tb26-footer{box-sizing:border-box;font-family:'Century Gothic','Eurostile',Montserrat,Arial,sans-serif}
@@ -116,3 +116,54 @@
 @media(max-width:767px){:root{--tb26-gutter:16px}.tb26-header,.tb26-header__wrap{min-height:72px}.tb26-header__wrap{height:72px;gap:8px}.tb26-logo{flex-basis:clamp(160px,47vw,205px)}.tb26-icon{width:30px;height:34px;font-size:29px}.tb26-account{display:none}.tb26-header__wrap{gap:5px}.tb26-icon svg{width:25px;height:25px}.tb26-brands{padding:25px 0 18px}.tb26-brands__title{font-size:clamp(18px,5vw,24px);margin-bottom:20px}.tb26-brands__logos{width:130%;max-width:none!important;transform:translateX(-11%)}.tb26-hero img{height:auto;aspect-ratio:2549/986;min-height:0;object-position:center}.tb26-benefits{padding:18px 0;background:#454545}.tb26-benefits__grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.tb26-benefits__item{font-size:10px;gap:5px}.tb26-benefits__item b{font-size:23px}.tb26-institutional-banner{padding-top:25px;padding-bottom:24px}.tb26-institutional-banner img{aspect-ratio:1719/402;min-height:130px;object-position:center}.tb26-section{padding-block:42px}.tb26-title{font-size:20px;margin-bottom:28px}.tb26-title:after{height:4px;margin-top:10px}.tb26-product{flex-basis:clamp(180px,68vw,250px)}.tb26-product__title{font-size:12px!important}.tb26-product__details{min-height:120px}.tb26-product__price{font-size:22px}.tb26-product__cta{font-size:14px}.tb26-categories{padding:48px 0}.tb26-categories__grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}.tb26-categories__card img{width:100%}.tb26-miniatures{padding:45px 0}.tb26-miniatures__layout{grid-template-columns:1fr;gap:20px;min-height:0}.tb26-miniatures__art{min-height:220px;background-position:left center;background-size:cover}.tb26-miniatures__products .tb26-product{flex-basis:clamp(170px,65vw,255px)}.tb26-solutions{padding:50px 0}.tb26-solutions__grid{display:grid;grid-auto-flow:column;grid-auto-columns:clamp(180px,62vw,270px);grid-template-columns:none;overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:12px;gap:18px}.tb26-solutions__card{scroll-snap-align:start}.tb26-company{padding:30px 0 45px}.tb26-company__grid{grid-template-columns:1fr;gap:20px}.tb26-company__info{min-height:330px;padding:32px 24px}.tb26-company__info img{margin-bottom:25px}.tb26-company__contact{max-width:440px;min-height:550px}.tb26-instagram{padding:40px 0 65px}.tb26-instagram__feed{width:100%;overflow:hidden}.tb26-instagram__feed img{width:200%;max-width:none!important;aspect-ratio:1720/522}.tb26-footer{grid-template-columns:1fr}.tb26-footer__art{min-height:220px;background-position:center 35%;background-size:cover}.tb26-footer__social{padding:22px}.tb26-footer__right{padding:42px 23px 28px}.tb26-footer__grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:30px 20px}.tb26-footer__col:not(:first-child){border-left:0;padding-left:0}.tb26-footer__secure{grid-column:1/-1}.tb26-footer__col{gap:15px}.tb26-footer__bottom{align-items:flex-start;flex-direction:column;margin-top:38px;gap:12px}}
 @media(max-width:390px){.tb26-logo{flex-basis:151px}.tb26-header__wrap{padding-inline:12px}.tb26-actions{gap:1px}.tb26-benefits__item{font-size:9px}.tb26-brands__title{font-size:17px}}
 @media(prefers-reduced-motion:reduce){.tb26-active .tb26-home *,.tb26-active .tb26-header *{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
+
+/* === Motion System v1.1 | fade-in sob demanda, sem deslocar o layout === */
+/* Somente componentes criados pela TractorBel; nada da vitrine nativa e afetado. */
+.tb26-motion-ready .tb26-reveal{
+  transition-property:opacity,transform;
+  transition-duration:var(--tb26-reveal-duration,740ms);
+  transition-timing-function:cubic-bezier(.22,1,.36,1);
+  transition-delay:var(--tb26-reveal-delay,0ms);
+}
+.tb26-motion-ready .tb26-reveal:not(.tb26-visible){
+  opacity:0;
+  transform:translate3d(0,var(--tb26-reveal-distance,25px),0);
+}
+.tb26-motion-ready .tb26-reveal.tb26-visible{
+  opacity:1;
+  transform:translate3d(0,0,0);
+}
+/* Microinteracoes so em dispositivos com hover, sem animacao infinita. */
+@media (hover:hover) and (pointer:fine){
+  .tb26-hover-motion .tb26-product__image img{
+    transition:transform .5s cubic-bezier(.22,1,.36,1);
+  }
+  .tb26-hover-motion .tb26-product:hover .tb26-product__image img{transform:scale(1.055)}
+  .tb26-hover-motion .tb26-product__cta{overflow:hidden}
+  .tb26-hover-motion .tb26-product__cta::after{
+    content:"";position:absolute;inset:-50% -40%;pointer-events:none;
+    background:linear-gradient(100deg,transparent 40%,#fff8 50%,transparent 60%);
+    transform:translateX(-130%) skewX(-12deg);
+    transition:transform .7s cubic-bezier(.22,1,.36,1)
+  }
+  .tb26-hover-motion .tb26-product:hover .tb26-product__cta::after{transform:translateX(130%) skewX(-12deg)}
+  .tb26-hover-motion .tb26-arrow{transition:background-color .25s ease,color .25s ease,transform .25s ease}
+  .tb26-hover-motion .tb26-arrow:hover{background:var(--tb26-yellow);color:#161616;transform:scale(1.06)}
+  .tb26-hover-motion .tb26-categories__card img,
+  .tb26-hover-motion .tb26-solutions__card img{transition:filter .35s ease}
+  .tb26-hover-motion .tb26-categories__card:hover img,
+  .tb26-hover-motion .tb26-solutions__card:hover img{filter:brightness(1.075)}
+  /* Preserva os hovers existentes mesmo apos o fade-in controlar transform. */
+  .tb26-motion-ready .tb26-product.tb26-visible:hover{transform:translate3d(0,-4px,0)}
+  .tb26-motion-ready .tb26-categories__card.tb26-visible:hover{transform:translate3d(0,-6px,0)}
+  .tb26-motion-ready .tb26-solutions__card.tb26-visible:hover{transform:translate3d(0,-5px,0)}
+}
+@media(prefers-reduced-motion:reduce){
+  .tb26-motion-ready .tb26-reveal,
+  .tb26-motion-ready .tb26-reveal:not(.tb26-visible),
+  .tb26-motion-ready .tb26-reveal.tb26-visible{opacity:1!important;transform:none!important;transition:none!important;animation:none!important}
+  .tb26-hover-motion .tb26-product__image img,
+  .tb26-hover-motion .tb26-arrow,
+  .tb26-hover-motion .tb26-product__cta::after{transition:none!important;transform:none!important}
+  .tb26-hover-motion .tb26-product__cta::after{content:none!important}
+}

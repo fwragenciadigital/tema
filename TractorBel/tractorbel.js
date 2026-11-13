@@ -1,12 +1,12 @@
 /*
- * TractorBel 2026 - FWR Agencia Digital - v1.0.0
+ * TractorBel 2026 - FWR Agencia Digital - v1.1.0
  * Camada visual da Loja Integrada. Sem checkout ou precificacao paralela.
  * Editavel por window.TractorBelSettings no HTML da LI.
  */
 (function (win, doc) {
   'use strict';
   if (win.TractorBel2026) return;
-  var VERSION = '1.0.0';
+  var VERSION = '1.1.0';
   var script = doc.currentScript;
   var defaultAssetBase = script && script.src ? new URL('./assets/', script.src).href : '/assets/';
   var defaults = {
@@ -16,6 +16,7 @@
     home: { ativo: true },
     rodape: { ativo: true },
     vitrines: { ativo: true, destaques: 10, miniaturas: 8, maisVendidos: 10 },
+    movimento: { ativo: true, fadeIn: true, hover: true, duracao: 740, distancia: 25, intervalo: 80 },
     conteudo: {
       fraseMarcas: 'Temos de imediato FPS com o melhor preço do mercado!',
       whatsapp: '5531996573930',
@@ -39,7 +40,9 @@
   var isStore = /(?:^|\.)lojatractorbel\.com\.br$/i.test(location.hostname);
   var preview = /(?:^|[?&])tractorbel_preview=1(?:&|$)/.test(location.search);
   var enabled = cfg.geral.ativo && (!isStore || cfg.geral.publicarNaLoja || preview);
-  var state = { header: false, home: false, footer: false, products: {}, warnings: [] };
+  var state = { header: false, home: false, footer: false, products: {}, motion: { ativo: false, observados: 0, revelados: 0 }, warnings: [] };
+  var motionObserver = null;
+  var motionSeen = new WeakSet();
   function debug() { if (cfg.geral.debug && console && console.info) console.info.apply(console, ['[TractorBel]'].concat([].slice.call(arguments))); }
   function warn(msg) { state.warnings.push(msg); debug(msg); }
   function e(tag, cls, text) { var x = doc.createElement(tag); if (cls) x.className = cls; if (text !== undefined && text !== null) x.textContent = text; return x; }
@@ -198,6 +201,67 @@
     var a = link(cfg.conteudo.instagram || 'https://www.instagram.com/', 'tb26-instagram__feed'); a.target = '_blank'; a.rel = 'noopener noreferrer'; a.setAttribute('aria-label', 'Acompanhe a TractorBel nas redes sociais');
     a.appendChild(image('insta.webp', 'Publicações da TractorBel sobre máquinas, peças e ofertas', 1720, 522)); append(inner, a); append(sec, inner); return sec;
   }
+  // Animacao uma unica vez ao entrar no viewport. Transform/opacity nao provocam CLS.
+  // Nao aplicar na hero, para preservar LCP. Nem no conteudo nativo da plataforma.
+  function setupMotion(root) {
+    if (!root || !cfg.movimento || cfg.movimento.ativo === false) return;
+    var motion = cfg.movimento;
+    var reduce = win.matchMedia && win.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduce) return;
+    doc.body.classList.toggle('tb26-hover-motion', motion.hover !== false);
+    if (motion.fadeIn === false || !('IntersectionObserver' in win)) return;
+
+    function cap(n, min, max, fallback) {
+      n = Number(n);
+      return isFinite(n) ? Math.min(max, Math.max(min, n)) : fallback;
+    }
+    doc.body.style.setProperty('--tb26-reveal-duration', cap(motion.duracao, 200, 1400, 740) + 'ms');
+    doc.body.style.setProperty('--tb26-reveal-distance', cap(motion.distancia, 0, 65, 25) + 'px');
+    var gap = cap(motion.intervalo, 0, 200, 80);
+
+    if (!motionObserver) {
+      motionObserver = new IntersectionObserver(function (entries, observer) {
+        entries.forEach(function (entry) {
+          if (!entry.isIntersecting) return;
+          if (!entry.target.classList.contains('tb26-visible')) {
+            entry.target.classList.add('tb26-visible');
+            state.motion.revelados++;
+          }
+          observer.unobserve(entry.target);
+        });
+      }, { root: null, rootMargin: '0px 0px -32px 0px', threshold: 0.08 });
+    }
+    var selectors = [
+      '.tb26-benefits__item', '.tb26-institutional-banner img', '.tb26-title',
+      '.tb26-product', '.tb26-categories__card', '.tb26-miniatures__art',
+      '.tb26-solutions__card', '.tb26-company__info', '.tb26-company__contact',
+      '.tb26-instagram__feed', '.tb26-footer__col', '.tb26-footer__bottom'
+    ];
+    // Inclui a home e o footer; o segundo parametro permite registrar produtos carregados por fetch.
+    var targets = root.querySelectorAll(selectors.join(','));
+    [].forEach.call(targets, function (el) {
+      if (motionSeen.has(el)) return;
+      motionSeen.add(el);
+      var group = el.parentElement;
+      var siblings = group ? [].filter.call(group.children, function (child) {
+        return child.matches && (child.matches('.tb26-product, .tb26-categories__card, .tb26-solutions__card, .tb26-benefits__item, .tb26-footer__col'));
+      }) : [];
+      var order = Math.max(0, siblings.indexOf(el)) % 5;
+      el.style.setProperty('--tb26-reveal-delay', order * gap + 'ms');
+      el.classList.add('tb26-reveal');
+      state.motion.observados++;
+      // Nunca ocultar componentes que ficaram para cima do viewport ao ativar a animacao.
+      if (el.getBoundingClientRect().bottom <= 0) {
+        el.classList.add('tb26-visible');
+        state.motion.revelados++;
+      } else motionObserver.observe(el);
+    });
+    if (targets.length) {
+      doc.body.classList.add('tb26-motion-ready');
+      state.motion.ativo = true;
+    }
+  }
+
   function mountHome() {
     if (!isHome || !cfg.home.ativo || doc.getElementById('tb26-home')) return;
     var native = doc.querySelector('#corpo');
@@ -216,13 +280,14 @@
       art.style.backgroundImage = 'url("' + asset('bg-miniaturas.webp') + '")';
       var holder = e('div', 'tb26-miniatures__products');
       append(layout, art, holder); append(miniInner, layout); append(miniSec, miniInner); root.appendChild(miniSec);
-      function fillMini(items) { holder.replaceChildren(); if (items.length) { var slider = carousel('miniaturas', '', items.slice(0, cfg.vitrines.miniaturas), 'tb26-miniatures__slider'); holder.appendChild(slider); state.products.miniaturas = items.length; } else { holder.appendChild(link('/miniaturas', 'tb26-miniatures__fallback', 'VER TODAS AS MINIATURAS →')); warn('Miniaturas sem resposta; exibido link de categoria.'); } }
+      function fillMini(items) { holder.replaceChildren(); if (items.length) { var slider = carousel('miniaturas', '', items.slice(0, cfg.vitrines.miniaturas), 'tb26-miniatures__slider'); holder.appendChild(slider); state.products.miniaturas = items.length; } else { holder.appendChild(link('/miniaturas', 'tb26-miniatures__fallback', 'VER TODAS AS MINIATURAS →')); warn('Miniaturas sem resposta; exibido link de categoria.'); } if (state.home) setupMotion(holder); }
       if (miniatureProducts.length >= 3) fillMini(miniatureProducts);
       else fetch('/miniaturas', { credentials: 'same-origin' }).then(function (resp) { if (!resp.ok) throw Error('Resposta ' + resp.status); return resp.text(); }).then(function (html) { return getProducts(new DOMParser().parseFromString(html, 'text/html'), cfg.vitrines.miniaturas); }).then(fillMini).catch(function () { fillMini(miniatureProducts); });
     }
     if (cfg.vitrines.ativo && latest.length) { root.appendChild(carousel('mais-vendidas', 'PEÇAS MAIS VENDIDAS', latest, 'tb26-carousel--best')); state.products.maisVendidos = latest.length; }
     append(root, solutions(), company(), instagram());
     native.parentNode.insertBefore(root, native); native.classList.add('tb26-native-home'); doc.body.classList.add('tb26-with-home'); state.home = true;
+    setupMotion(root);
   }
   function mountFooter() {
     if (!cfg.rodape.ativo || doc.getElementById('tb26-footer')) return;
@@ -249,6 +314,7 @@
     var legal = e('div', 'tb26-footer__bottom'); append(legal, e('small', '', 'TRACTORBEL TRATORES E PEÇAS BELO HORIZONTE LTDA · CNPJ 17.713.959/0001-77 · © ' + new Date().getFullYear()), e('span', '', 'by FWR Agência Digital'));
     right.appendChild(legal); append(footer, left, right);
     native.parentNode.insertBefore(footer, native); native.classList.add('tb26-native-footer'); doc.body.classList.add('tb26-with-footer'); state.footer = true;
+    setupMotion(footer);
   }
   function mount() {
     if (!enabled || !doc.body) return;
