@@ -1,9 +1,9 @@
 # TractorBel 2026 · FWR Agência Digital
 
-**Plataforma:** Loja Integrada. **Projeto:** `TractorBel` na Vercel/GitHub. **Versão:** 1.2.0.
+**Plataforma:** Loja Integrada. **Projeto:** `TractorBel` na Vercel/GitHub. **Versão:** 1.3.0.
 
 ## Estrutura
-- `tractorbel.js`: adaptação DOM-first da LI (topo, home, rodapé, vitrines com produtos reais e menu).
+- `tractorbel.js`: adaptação DOM-first da LI (topo, home, rodapé, vitrines com produtos reais, menu e carrinho lateral).
 - `tractorbel.css`: identidade visual preto/amarelo, mobile-first em pontos críticos, layout fluido.
 - Imagens: carregadas diretamente de `https://cdn.awsli.com.br/901/901888/arquivos/`, com nomes e extensões do ZIP original. Não dependem mais da Vercel.
 - `INTEGRACAO-LOJA-INTEGRADA.html`: settings editáveis e carregamento externo (HTML personalizado).
@@ -26,6 +26,16 @@
 - Suporta `prefers-reduced-motion` e fallback para navegadores sem `IntersectionObserver`: conteúdos ficam visíveis.
 - As configurações padrão de `movimento` já estão em `tractorbel.js`, incluindo `ativo`, `fadeIn`, `hover`, `duracao` (ms), `distancia` (px) e `intervalo` (ms). Não é necessário colar as configurações no HTML. Ajustes podem ser feitos direto no JS. A configuração legada via `window.TractorBelSettings` continua aceita se necessário.
 
+## Carrinho lateral (v1.3)
+- Clique em `tb26-icon tb26-cart` abre um painel à direita com identidade TractorBel.
+- Utiliza primeiro os dados do minicarrinho **nativo** (`.carrinho-interno-ajax` e `.carrinho-interno`); conserva os nós nativos e seus eventos, sem criar pedido ou precificar produtos.
+- Se o carrinho nativo indicar itens mas não fornecer linhas, faz uma consulta sob demanda **somente ao abrir** a página oficial `/carrinho/index` para tentar recuperar os dados. A LI alerta que esse tipo de requisição pode contabilizar uma visualização extra. Não consulta automaticamente no carregamento.
+- Nunca exibe placeholders de preço ou fabrica total. Se as linhas não puderem ser recuperadas, oferece botão seguro para abrir o carrinho oficial.
+- Carrega nome, imagem, quantidade e preço da origem real, com total apenas se vier da Loja Integrada. Frete e cupons permanecem no fluxo oficial.
+- O botão conduz à rota nativa do carrinho. O drawer não altera itens, quantidades, pagamentos, cupons ou checkout.
+- `MutationObserver` observa as atualizações da miniárea nativa, para atualizar a badge/itens enquanto aberto. Fechamento via clique fora, botão × ou Escape; foco e scroll são restaurados; possui suporte mobile e redução de movimento.
+- Padrão ativo em `defaults.carrinho.ativo`, dentro do JS; desative em `window.TractorBelSettings.carrinho.ativo=false` se precisar.
+
 ## Produtos e preços
 O JS lê produtos já renderizados pela LI (`#corpo .listagem-item`) e miniaturas na página da categoria via `fetch('/miniaturas')` no mesmo domínio. As informações comerciais não são calculadas, replicadas via API externa nem inventadas. Se a página de miniaturas estiver indisponível ou não expuser preços, aparece um link para a categoria, em vez de uma vitrine com preços simulados. Os botões direcionam à página real do produto, preservando seleções de variação e checkout nativo.
 
@@ -34,7 +44,7 @@ O JS lê produtos já renderizados pela LI (`#corpo .listagem-item`) e miniatura
 - Valide as URLs institucionais (`/pagina/...`) e as redes sociais em `conteudo` no snippet; são opcionais e podem variar por loja.
 - A prova de funcionamento em produção exige testes de desktop/mobile e carregamento real do JS/CSS na loja.
 - **Imagens já na Loja Integrada:** o JS contém a constante `ASSET_CDN_BASE` e `ASSET_FILES` com todos os 20 nomes originais (`.png`/`.jpg`). O HTML antigo com `imagensBase` da Vercel é ignorado a favor do CDN oficial. Para corrigir algum nome renomeado pelo painel, edite o mapeamento no JS. Os três fundos antes fixos no CSS também usam o CDN oficial por variáveis configuradas pelo JS. Depois da homologação, basta hospedar os arquivos JS/CSS na própria Loja Integrada e alterar os dois links de carregamento.
-- Recomendamos versionar arquivos no próximo ciclo (`tractorbel.v1.0.1.js/css`) para permitir cache longo e rollback.
+- Os arquivos permanecem com nomes e URLs **fixos** `tractorbel.js` e `tractorbel.css`, conforme acordado. O CDN permite revalidação periódica (cache de 300 segundos); em atualizações, aguarde a expiração do cache quando necessário.
 
 ## Qualidade
 - JavaScript sem dependências, sem CSS global da LI reescrito; navegabilidade via links nativos.
