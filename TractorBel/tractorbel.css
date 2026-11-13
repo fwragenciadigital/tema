@@ -1,4 +1,4 @@
-/* TractorBel 2026 - FWR Agencia Digital v1.1.0 - CSS escopado */
+/* TractorBel 2026 - FWR Agencia Digital v1.2.0 - CSS escopado */
 :root{--tb26-yellow:#ffbc00;--tb26-yellow-strong:#ffc400;--tb26-dark:#191919;--tb26-ink:#252525;--tb26-muted:#929292;--tb26-width:1660px;--tb26-gutter:clamp(16px,4vw,70px)}
 .tb26-active{overflow-x:hidden}
 .tb26-active .tb26-home,.tb26-active .tb26-header,.tb26-active .tb26-footer{box-sizing:border-box;font-family:'Century Gothic','Eurostile',Montserrat,Arial,sans-serif}
@@ -44,7 +44,7 @@
 .tb26-title--dark{color:#242424}
 .tb26-title--left{margin-left:0;text-align:left}
 .tb26-title--left:after{margin-left:0}
-.tb26-carousel{background:#202020 url('assets/fundo-destaques.webp') center/cover no-repeat}
+.tb26-carousel{background:#202020 var(--tb26-bg-featured,none) center/cover no-repeat}
 .tb26-carousel__track{display:flex;gap:12px;overflow-x:auto;scrollbar-width:none;scroll-snap-type:x mandatory;overscroll-behavior-x:contain;scroll-behavior:smooth;padding:6px 0 8px}
 .tb26-carousel__track::-webkit-scrollbar{display:none}
 .tb26-product{display:flex;flex-flow:column nowrap;flex:0 0 calc((100% - 48px)/5);min-width:0;background:#fff;color:#242424!important;text-decoration:none!important;scroll-snap-align:start;position:relative;clip-path:polygon(0 0,100% 0,100% calc(100% - 18px),calc(100% - 18px) 100%,0 100%);transition:transform .2s}
@@ -74,7 +74,7 @@
 .tb26-miniatures__products .tb26-container{padding:0}
 .tb26-miniatures__products .tb26-product{flex-basis:calc((100% - 24px)/3)}
 .tb26-miniatures__fallback{display:block;padding:25px;font-size:18px;color:var(--tb26-yellow)!important;text-decoration:none}
-.tb26-carousel--best{background:#222 url('assets/novo-projeto-5.webp') center/cover no-repeat}
+.tb26-carousel--best{background:#222 var(--tb26-bg-best,none) center/cover no-repeat}
 .tb26-solutions{padding:clamp(65px,7vw,130px) 0;background:#fff}
 .tb26-solutions__grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:clamp(14px,2vw,38px);align-items:end}
 .tb26-solutions__card{display:block;transition:transform .2s ease}
@@ -82,7 +82,7 @@
 .tb26-solutions__card img{width:100%;aspect-ratio:480/685;height:auto;object-fit:contain}
 .tb26-company{background:linear-gradient(to bottom,#fff 0%,#fff 16%,#ffc400 16%,#ffc400 90%,#fff 90%);padding:0 0 70px}
 .tb26-company__grid{display:grid;grid-template-columns:62% 36%;gap:2%;align-items:center}
-.tb26-company__info{min-height:460px;background:#171717 url('assets/novo-projeto-6.webp') center/cover no-repeat;padding:clamp(32px,4vw,70px);color:#ddd;display:flex;flex-direction:column;justify-content:center}
+.tb26-company__info{min-height:460px;background:#171717 var(--tb26-bg-company,none) center/cover no-repeat;padding:clamp(32px,4vw,70px);color:#ddd;display:flex;flex-direction:column;justify-content:center}
 .tb26-company__info img{width:min(100%,530px);height:auto;aspect-ratio:698/103;margin-bottom:50px}
 .tb26-company__info p{font:400 clamp(12px,1vw,16px)/1.65 Arial,sans-serif;color:#eee;margin:0 0 22px}
 .tb26-company__contact{position:relative;min-height:520px;max-width:490px;width:100%;margin:0 auto;display:flex;align-items:flex-end;overflow:hidden;border-radius:42px 40px 75px 40px;background:#222}

@@ -1,17 +1,47 @@
 /*
- * TractorBel 2026 - FWR Agencia Digital - v1.1.0
+ * TractorBel 2026 - FWR Agencia Digital - v1.2.0
  * Camada visual da Loja Integrada. Sem checkout ou precificacao paralela.
  * Editavel por window.TractorBelSettings no HTML da LI.
  */
 (function (win, doc) {
   'use strict';
   if (win.TractorBel2026) return;
-  var VERSION = '1.1.0';
-  var script = doc.currentScript;
-  var defaultAssetBase = script && script.src ? new URL('./assets/', script.src).href : '/assets/';
+  var VERSION = '1.2.0';
+  // Assets oficiais da TractorBel, ja hospedados na Loja Integrada.
+  // Manter os nomes e extensoes ORIGINAIS, sem converter .jpg/.png para .webp.
+  // O nome logico pode continuar .webp para compatibilidade com os componentes existentes.
+  var ASSET_CDN_BASE = 'https://cdn.awsli.com.br/901/901888/arquivos/';
+  var ASSET_FILES = Object.freeze({
+    'peca3.webp': 'peca3.png',
+    'bg-footer.webp': 'bg-footer.png',
+    'vendedores.webp': 'vendedores.jpg',
+    'fullbanner.webp': 'fullbanner.jpg',
+    'bg-miniaturas.webp': 'bg-miniaturas.jpg',
+    'box-contato.webp': 'box-contato.png',
+    'novo-projeto-6.webp': 'Novo Projeto (6).jpg',
+    'minibox2.webp': 'minibox2.png',
+    'peca1.webp': 'peca1.png',
+    'minibox4.webp': 'minibox4.png',
+    'bg-pecas.webp': 'bg-pecas.jpg',
+    'insta.webp': 'insta.jpg',
+    'minibox1.webp': 'minibox1.png',
+    'novo-projeto-11.webp': 'Novo Projeto (11).png',
+    'logo-empresa-footer.webp': 'logo-empresa-footer.png',
+    'novo-projeto-5.webp': 'Novo Projeto (5).jpg',
+    'logo-top.webp': 'logo-top.png',
+    'fundo-destaques.webp': 'fundo-destaques.jpg',
+    'minibox3.webp': 'minibox3.png',
+    'peca2.webp': 'peca2.png'
+  });
+  // A LI pode normalizar os nomes com espacos. Se o original falhar, tenta o alias.
+  var ASSET_ALIASES = Object.freeze({
+    'novo-projeto-5.webp': ['novo-projeto-5.jpg', 'novo-projeto-(5).jpg'],
+    'novo-projeto-6.webp': ['novo-projeto-6.jpg', 'novo-projeto-(6).jpg'],
+    'novo-projeto-11.webp': ['novo-projeto-11.png', 'novo-projeto-(11).png']
+  });
   var defaults = {
     geral: { ativo: true, publicarNaLoja: false, debug: false },
-    imagensBase: defaultAssetBase,
+    imagensBase: ASSET_CDN_BASE,
     topo: { ativo: true, menu: true },
     home: { ativo: true },
     rodape: { ativo: true },
@@ -36,6 +66,9 @@
     return r;
   }
   var cfg = merge(defaults, win.TractorBelSettings || {});
+  // Prioridade ao CDN oficial mesmo que o HTML antigo ainda aponte para /assets/ da Vercel.
+  cfg.imagensBase = ASSET_CDN_BASE;
+
   var isHome = /^\/?(?:index\.html)?\/?$/.test(location.pathname);
   var isStore = /(?:^|\.)lojatractorbel\.com\.br$/i.test(location.hostname);
   var preview = /(?:^|[?&])tractorbel_preview=1(?:&|$)/.test(location.search);
@@ -48,12 +81,56 @@
   function e(tag, cls, text) { var x = doc.createElement(tag); if (cls) x.className = cls; if (text !== undefined && text !== null) x.textContent = text; return x; }
   function append(parent) { for (var i = 1; i < arguments.length; i++) if (arguments[i]) parent.appendChild(arguments[i]); return parent; }
   function link(href, cls, text) { var x = e('a', cls, text); x.href = href; return x; }
-  function asset(name) { return String(cfg.imagensBase || defaultAssetBase).replace(/\/?$/, '/') + encodeURI(name); }
+  function asset(name, attempt) {
+    var filename = (attempt > 0 && ASSET_ALIASES[name] && ASSET_ALIASES[name][attempt - 1]) || ASSET_FILES[name] || name;
+    return ASSET_CDN_BASE + encodeURIComponent(filename);
+  }
   function image(name, alt, width, height, eager) {
     var x = e('img'); x.src = asset(name); x.alt = alt || ''; x.width = width; x.height = height;
     x.loading = eager ? 'eager' : 'lazy'; x.decoding = 'async';
     if (eager) x.setAttribute('fetchpriority', 'high');
+    if (ASSET_ALIASES[name]) {
+      var attempt = 0;
+      x.addEventListener('error', function () {
+        attempt++;
+        if (attempt <= ASSET_ALIASES[name].length) x.src = asset(name, attempt);
+        else warn('Imagem indisponivel no CDN da LI: ' + name);
+      });
+    }
     return x;
+  }
+  function setBackground(node, logicalName, overlay) {
+    if (!node) return;
+    // Backgrounds tambem usam a Loja Integrada; fallback nos nomes normalizados.
+    var attempt = 0;
+    function apply() {
+      var url = asset(logicalName, attempt);
+      var value = (overlay ? overlay + ', ' : '') + 'url("' + url + '")';
+      node.style.backgroundImage = value;
+      if (!ASSET_ALIASES[logicalName] || attempt >= ASSET_ALIASES[logicalName].length) return;
+      var probe = new Image();
+      probe.onerror = function () { attempt++; apply(); };
+      probe.src = url;
+    }
+    apply();
+  }
+  function setBackgroundVariable(prop, name) {
+    var attempt = 0;
+    function apply() {
+      var url = asset(name, attempt);
+      doc.body.style.setProperty(prop, 'url("' + url + '")');
+      if (!ASSET_ALIASES[name] || attempt >= ASSET_ALIASES[name].length) return;
+      var probe = new Image();
+      probe.onerror = function () { attempt++; apply(); };
+      probe.src = url;
+    }
+    apply();
+  }
+  function configureBackgrounds() {
+    // Os fundos da vitrine e do institucional tambem seguem o mapeamento do JS.
+    setBackgroundVariable('--tb26-bg-featured', 'fundo-destaques.webp');
+    setBackgroundVariable('--tb26-bg-best', 'novo-projeto-5.webp');
+    setBackgroundVariable('--tb26-bg-company', 'novo-projeto-6.webp');
   }
   function safeUrl(raw) {
     try { var url = new URL(raw, location.href); return /^https?:$/.test(url.protocol) ? url.href : ''; } catch (_e) { return ''; }
@@ -172,7 +249,7 @@
     sec.appendChild(image('vendedores.webp', 'A TractorBel é referência em peças, equipamentos e serviços no Brasil há mais de 40 anos', 1719, 402)); return sec;
   }
   function categories() {
-    var sec = e('section', 'tb26-categories'); sec.style.backgroundImage = 'linear-gradient(#201811b8,#201811b8),url("' + asset('bg-pecas.webp') + '")';
+    var sec = e('section', 'tb26-categories'); setBackground(sec, 'bg-pecas.webp', 'linear-gradient(#201811b8,#201811b8)');
     var inner = e('div', 'tb26-container'); inner.appendChild(e('h2', 'tb26-title', 'ENCONTRE AS PEÇAS CERTAS PARA SUA DEMANDA'));
     var grid = e('div', 'tb26-categories__grid');
     [['peca1.webp', 'Peças novas', '/pecas-novas'], ['peca2.webp', 'Peças seminovas', '/pecas-seminovas'], ['peca3.webp', 'Equipamentos', '/equipamentos-novos']].forEach(function (it) { var a = link(it[2], 'tb26-categories__card'); a.setAttribute('aria-label', it[1]); a.appendChild(image(it[0], it[1], 592, 530)); grid.appendChild(a); }); append(inner, grid); append(sec, inner); return sec;
@@ -187,7 +264,7 @@
   }
   function company() {
     var sec = e('section', 'tb26-company'); var inner = e('div', 'tb26-container tb26-company__grid');
-    var info = e('div', 'tb26-company__info'); append(info, image('logo-empresa-footer.webp', 'TractorBel e TTL', 698, 103), e('p', '', cfg.conteudo.sobre));
+    var info = e('div', 'tb26-company__info'); setBackground(info, 'novo-projeto-6.webp'); append(info, image('logo-empresa-footer.webp', 'TractorBel e TTL', 698, 103), e('p', '', cfg.conteudo.sobre));
     info.appendChild(e('p', '', 'Peças, equipamentos e atendimento especializado para manter o seu maquinário em movimento.'));
     var contact = e('div', 'tb26-company__contact');
     contact.appendChild(image('box-contato.webp', 'Atendimento especializado TractorBel', 586, 820));
@@ -277,7 +354,7 @@
       var miniSec = e('section', 'tb26-miniatures'); miniSec.id = 'tb26-miniatures';
       var miniInner = e('div', 'tb26-container'); miniInner.appendChild(e('h2', 'tb26-title tb26-title--left', 'MINIATURAS EXCLUSIVAS'));
       var layout = e('div', 'tb26-miniatures__layout'); var art = e('div', 'tb26-miniatures__art');
-      art.style.backgroundImage = 'url("' + asset('bg-miniaturas.webp') + '")';
+      setBackground(art, 'bg-miniaturas.webp');
       var holder = e('div', 'tb26-miniatures__products');
       append(layout, art, holder); append(miniInner, layout); append(miniSec, miniInner); root.appendChild(miniSec);
       function fillMini(items) { holder.replaceChildren(); if (items.length) { var slider = carousel('miniaturas', '', items.slice(0, cfg.vitrines.miniaturas), 'tb26-miniatures__slider'); holder.appendChild(slider); state.products.miniaturas = items.length; } else { holder.appendChild(link('/miniaturas', 'tb26-miniatures__fallback', 'VER TODAS AS MINIATURAS →')); warn('Miniaturas sem resposta; exibido link de categoria.'); } if (state.home) setupMotion(holder); }
@@ -293,7 +370,7 @@
     if (!cfg.rodape.ativo || doc.getElementById('tb26-footer')) return;
     var native = doc.querySelector('#rodape') || doc.querySelector('footer'); if (!native) { warn('Rodapé nativo não identificado.'); return; }
     var footer = e('footer', 'tb26-footer'); footer.id = 'tb26-footer';
-    var left = e('div', 'tb26-footer__art'); left.style.backgroundImage = 'url("' + asset('bg-footer.webp') + '")';
+    var left = e('div', 'tb26-footer__art'); setBackground(left, 'bg-footer.webp');
     var social = e('div', 'tb26-footer__social'); social.appendChild(e('span', '', 'SIGA-NOS:'));
     if (cfg.conteudo.instagram) social.appendChild(link(cfg.conteudo.instagram, '', 'Instagram'));
     if (cfg.conteudo.facebook) social.appendChild(link(cfg.conteudo.facebook, '', 'Facebook'));
@@ -321,10 +398,11 @@
     if (doc.documentElement.dataset.tb26Mount === '1') return;
     doc.documentElement.dataset.tb26Mount = '1';
     doc.body.classList.add('tb26-active');
+    configureBackgrounds();
     try { mountHeader(); mountHome(); mountFooter(); }
     catch (err) { console.error('[TractorBel] Erro no layout, loja nativa preservada onde possível:', err); state.warnings.push(String(err.message)); }
     debug('Inicialização', state);
   }
-  win.TractorBel2026 = Object.freeze({ version: VERSION, enabled: enabled, config: cfg, diagnostico: function () { return JSON.parse(JSON.stringify(state)); }, refresh: function () { return mount(); } });
+  win.TractorBel2026 = Object.freeze({ version: VERSION, enabled: enabled, config: cfg, arquivos: ASSET_FILES, diagnostico: function () { return JSON.parse(JSON.stringify(state)); }, refresh: function () { return mount(); } });
   if (doc.readyState === 'loading') doc.addEventListener('DOMContentLoaded', mount, {once:true}); else mount();
 })(window, document);
