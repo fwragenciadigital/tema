@@ -1,12 +1,12 @@
 /*
- * TractorBel 2026 - FWR Agencia Digital - v1.7.0
+ * TractorBel 2026 - FWR Agencia Digital - v1.8.0
  * Camada visual da Loja Integrada. Sem checkout ou precificacao paralela.
  * Editavel por window.TractorBelSettings no HTML da LI.
  */
 (function (win, doc) {
   'use strict';
   if (win.TractorBel2026) return;
-  var VERSION = '1.7.0';
+  var VERSION = '1.8.0';
   // Assets oficiais da TractorBel, ja hospedados na Loja Integrada.
   // Manter os nomes e extensoes ORIGINAIS, sem converter .jpg/.png para .webp.
   // O nome logico pode continuar .webp para compatibilidade com os componentes existentes.
@@ -72,6 +72,7 @@
       textoDepois: ' é referência no segmento de peças novas, seminovas e insumos mecânicos para tratores, escavadeiras e máquinas pesadas.'
     },
     home: { ativo: true },
+    produto: { ativo: true, compraFixaMobile: true },
     rodape: { ativo: true },
     vitrines: { ativo: true, destaques: 10, miniaturas: 8, maisVendidos: 10 },
     carrinho: { ativo: true, parcelamento: { maximo: null, semJuros: null, minimoParcela: null } },
@@ -1086,13 +1087,168 @@
     native.parentNode.insertBefore(footer, native); native.classList.add('tb26-native-footer'); doc.body.classList.add('tb26-with-footer'); state.footer = true;
     setupMotion(footer);
   }
+  // v1.8 | PDP premium - progressive enhancement of the real Loja Integrada page.
+  // Does NOT duplicate checkout, variations, pricing rules, payment or stock data.
+  function mountProductPage() {
+    if (!cfg.produto || cfg.produto.ativo === false || !doc.body.classList.contains('pagina-produto')) return;
+    if (doc.body.classList.contains('tb26-with-pdp')) return;
+    var root = doc.querySelector('#corpo .secao-principal .produto');
+    if (!root) { warn('PDP: container nativo nao encontrado.'); return; }
+    var grid = root.querySelector(':scope > .row-fluid');
+    if (!grid) return;
+    var columns = [].filter.call(grid.children, function (node) { return node.nodeType === 1 && node.classList.contains('span6'); });
+    if (columns.length !== 2 || !columns[0].querySelector('#imagemProduto') || !columns[1].querySelector('.info-principal-produto')) {
+      warn('PDP: estrutura nao reconhecida; mantida a pagina nativa.'); return;
+    }
+    var media = columns[0], details = columns[1];
+    var mainImage = media.querySelector('#imagemProduto');
+    var nativeBuy = details.querySelector('.acoes-produto .comprar .botao-comprar');
+    var nativePrice = details.querySelector('.acoes-produto .preco-produto');
+    root.classList.add('tb26-pdp'); grid.classList.add('tb26-pdp__grid');
+    media.classList.add('tb26-pdp__media'); details.classList.add('tb26-pdp__details');
+    var imageContainer = media.querySelector('.conteiner-imagem');
+    if (imageContainer) imageContainer.classList.add('tb26-pdp__image-stage');
+    var crumbs = details.querySelector('.info-principal-produto .breadcrumbs');
+    if (crumbs) {
+      crumbs.classList.add('tb26-pdp__breadcrumbs');
+      root.insertBefore(crumbs, grid);
+    }
+    var headline = details.querySelector('.info-principal-produto');
+    if (headline) headline.classList.add('tb26-pdp__headline');
+    var purchase = details.querySelector('.principal');
+    if (purchase) purchase.classList.add('tb26-pdp__purchase');
+    if (nativePrice) nativePrice.classList.add('tb26-pdp__price');
+    if (nativeBuy) {
+      nativeBuy.classList.add('tb26-pdp__buy-native');
+      if (!nativeBuy.getAttribute('aria-label')) nativeBuy.setAttribute('aria-label', 'Adicionar ao carrinho');
+    }
+    var thumbLinks = [].slice.call(media.querySelectorAll('.produto-thumbs .miniaturas a[data-imagem-grande]'));
+    if (thumbLinks.length > 1) {
+      var thumbs = media.querySelector('.produto-thumbs');
+      if (thumbs) thumbs.classList.add('tb26-pdp__has-thumbs');
+      // The native slider and click handlers remain intact.
+      thumbLinks.forEach(function (a, i) {
+        a.setAttribute('aria-label','Ver imagem '+(i+1)+' do produto');
+        if (i === 0) a.classList.add('tb26-pdp__thumb-current');
+        a.addEventListener('click', function () {
+          thumbLinks.forEach(function(x){x.classList.remove('tb26-pdp__thumb-current');});
+          a.classList.add('tb26-pdp__thumb-current');
+        });
+      });
+    }
+    // Zoom: real large images from the platform only; one image if only one exists.
+    if (imageContainer && mainImage) {
+      var zoomButton = e('button','tb26-pdp__zoom-button','↗');
+      zoomButton.type = 'button'; zoomButton.setAttribute('aria-label','Ampliar imagem do produto');
+      imageContainer.appendChild(zoomButton);
+      var zoomLayer=null, zoomReturn=null;
+      function closeZoom() {
+        if (!zoomLayer) return;
+        zoomLayer.remove(); zoomLayer=null;
+        doc.body.classList.remove('tb26-pdp-zoom-open');
+        doc.removeEventListener('keydown', zoomKeys);
+        if (zoomReturn && zoomReturn.isConnected) zoomReturn.focus();
+      }
+      function zoomKeys(ev) { if (ev.key === 'Escape') closeZoom(); else if (ev.key === 'Tab' && zoomLayer) { ev.preventDefault(); var b=zoomLayer.querySelector('button'); if(b)b.focus(); } }
+      function openZoom() {
+        if (zoomLayer) return;
+        var source = mainImage.currentSrc || mainImage.src;
+        var matching = thumbLinks.find(function (a) {
+          var small = a.querySelector('img');
+          return a.classList.contains('tb26-pdp__thumb-current') || (small && mainImage.currentSrc && small.getAttribute('data-mediumimg') === mainImage.currentSrc);
+        });
+        var large = matching && matching.getAttribute('data-imagem-grande');
+        if (!large) { var nativeZoom = media.querySelector('#abreZoom'); large = nativeZoom && nativeZoom.getAttribute('href'); }
+        var validated = safeUrl(large || source);
+        if (!validated) return;
+        zoomReturn=doc.activeElement;
+        zoomLayer=e('div','tb26-pdp__lightbox');zoomLayer.setAttribute('role','dialog');
+        zoomLayer.setAttribute('aria-modal','true');zoomLayer.setAttribute('aria-label','Imagem ampliada do produto');
+        var lightboxImg=e('img');lightboxImg.src=validated;lightboxImg.alt=mainImage.alt || 'Imagem ampliada';
+        var close=e('button','tb26-pdp__lightbox-close','×');close.type='button';close.setAttribute('aria-label','Fechar imagem ampliada');
+        close.addEventListener('click',closeZoom);
+        zoomLayer.addEventListener('click',function(ev){if(ev.target===zoomLayer)closeZoom();});
+        append(zoomLayer,lightboxImg,close);doc.body.appendChild(zoomLayer);
+        doc.body.classList.add('tb26-pdp-zoom-open');doc.addEventListener('keydown',zoomKeys);
+        close.focus();
+      }
+      zoomButton.addEventListener('click',openZoom);
+      mainImage.style.cursor='zoom-in';mainImage.addEventListener('click',openZoom);
+    }
+    // A real stock indicator, mirrored from LI's availability state.
+    var availability=details.querySelector('.acoes-produto .disponibilidade-produto');
+    if (availability) availability.classList.add('tb26-pdp__availability');
+    // Payment methods remain controlled by the platform. Collapse ONLY the native list,
+    // never its shipping form (.cep), which is often nested in .parcelas-produto.
+    var payments=details.querySelector('.parcelas-produto');
+    if (payments) {
+      payments.classList.add('tb26-pdp__payments');
+      var payList=payments.querySelector(':scope > ul.accordion');
+      if (payList) {
+        var payToggle=e('button','tb26-pdp__payment-toggle');payToggle.type='button';
+        payToggle.textContent='Ver formas de pagamento';
+        var payId=payList.id || 'tb26-pdp-payment-methods';if(!payList.id)payList.id=payId;
+        payToggle.setAttribute('aria-controls',payId);payToggle.setAttribute('aria-expanded','false');
+        payList.hidden=true;payments.insertBefore(payToggle,payList);
+        payToggle.addEventListener('click',function(){var opening=payList.hidden;payList.hidden=!opening;payToggle.setAttribute('aria-expanded',String(opening));payToggle.textContent=opening?'Ocultar formas de pagamento':'Ver formas de pagamento';});
+      }
+      if (payments.querySelector('#formCalcularCep, form[action*="frete"], form[action*="cep"]')) {
+        payments.classList.add('tb26-pdp__has-freight');
+      }
+    }
+    var tabs=root.querySelector('.abas-custom');
+    if (tabs) tabs.classList.add('tb26-pdp__tabs');
+    var described=root.querySelector('#descricao');
+    if (described) described.classList.add('tb26-pdp__description');
+    // Additional information is subordinate to native availability/payment widgets.
+    if (nativeBuy) {
+      var tips=e('div','tb26-pdp__assurance');
+      append(tips,e('span','','✓ Atendimento especializado'),e('span','','✓ Compra pelo ambiente oficial da loja'));
+      var block=nativeBuy.closest('.comprar');
+      if (block) block.insertAdjacentElement('afterend',tips);
+    }
+    var floatingBar=null;
+    if (nativeBuy && cfg.produto.compraFixaMobile !== false) {
+      floatingBar=e('div','tb26-pdp__mobile-bar');
+      var barInfo=e('div','tb26-pdp__mobile-info');
+      var barLabel=e('small','','Preço do produto');
+      var barPrice=e('strong','tb26-pdp__mobile-price');
+      append(barInfo,barLabel,barPrice);
+      var barButton=e('button','tb26-pdp__mobile-cta','COMPRAR');barButton.type='button';
+      barButton.setAttribute('aria-label','Comprar este produto');
+      barButton.addEventListener('click',function(){if(nativeBuy && nativeBuy.isConnected && !nativeBuy.classList.contains('desativado')) nativeBuy.click();});
+      append(floatingBar,barInfo,barButton);doc.body.appendChild(floatingBar);doc.body.classList.add('tb26-pdp-mobile-fixed');
+      function syncPrice() {
+        var node=details.querySelector('.acoes-produto .preco-promocional') || details.querySelector('.acoes-produto .preco-venda');
+        var price=node && (node.textContent || '').replace(/\s+/g,' ').trim();
+        barPrice.textContent=price || 'Consulte o preço';
+        var unavailable=!!details.querySelector('.acoes-produto.indisponivel, .acoes-produto.sem-estoque');
+        barButton.disabled=unavailable || !nativeBuy.isConnected;
+      }
+      syncPrice();
+      var priceSource=details.querySelector('.acoes-produto');
+      if (priceSource && 'MutationObserver' in win) {
+        var priceObserver=new MutationObserver(function(){syncPrice();});
+        priceObserver.observe(priceSource,{subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:['class']});
+      }
+      // Keep the bar out of view when the original purchase button is already visible.
+      if ('IntersectionObserver' in win) {
+        var io=new IntersectionObserver(function(entries){entries.forEach(function(entry){floatingBar.classList.toggle('tb26-pdp__mobile-bar--visible',!entry.isIntersecting);});},{threshold:0.05});
+        io.observe(nativeBuy);
+      } else floatingBar.classList.add('tb26-pdp__mobile-bar--visible');
+    }
+    doc.body.classList.add('tb26-with-pdp');
+    state.produto={ativo:true,galeria:thumbLinks.length||1,compraNativa:!!nativeBuy,formasPagamento:!!payments,zoom:!!imageContainer,barraMobile:!!floatingBar};
+    // Avoid automatic hiding/translation on the main product image (LCP).
+  }
+
   function mount() {
     if (!enabled || !doc.body) return;
     if (doc.documentElement.dataset.tb26Mount === '1') return;
     doc.documentElement.dataset.tb26Mount = '1';
     doc.body.classList.add('tb26-active');
-    configureBackgrounds();
-    try { mountHeader(); mountHome(); mountFooter(); }
+    if (isHome) configureBackgrounds();
+    try { mountHeader(); mountHome(); mountProductPage(); mountFooter(); }
     catch (err) { console.error('[TractorBel] Erro no layout, loja nativa preservada onde possível:', err); state.warnings.push(String(err.message)); }
     debug('Inicialização', state);
   }

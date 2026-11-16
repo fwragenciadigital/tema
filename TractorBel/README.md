@@ -96,3 +96,17 @@ O JS lê produtos já renderizados pela LI (`#corpo .listagem-item`) e miniatura
 
 ## Mapeamento de imagens da Loja Integrada
 O projeto usa o prefixo `https://cdn.awsli.com.br/901/901888/arquivos/`. Os nomes padrão foram deduzidos do ZIP original; a URL `vendedores.jpg` foi a única confirmada pelo cliente. Se o painel tiver renomeado um arquivo, corrija somente o valor correspondente de `ASSET_FILES` no JS. Para os três arquivos `Novo Projeto (...)`, o JS testa também os aliases normalizados.
+
+## PDP Premium — v1.8.0 (16/11/2026)
+
+Foi adicionado o módulo `mountProductPage()` no `tractorbel.js`, habilitado por `produto: { ativo: true, compraFixaMobile: true }` no objeto `defaults`. Ele funciona nas páginas com `body.pagina-produto` e somente quando a prévia/ativação geral autoriza, sem afetar a home.
+
+- Visual: duas colunas no desktop, imagem ampliada com zoom e miniaturas quando existirem, breadcrumbs no topo, H1/SKU, preço real, Pix, disponibilidade, CTA e área de descrição.
+- Funcionalidade: carrinho, preço, Pix, estoque, formas de pagamento, frete e variações permanecem nativos. A barra fixa de compra no celular aciona o mesmo botão da Loja Integrada; não há requisição ou checkout paralelo.
+- Performance: estilos escopados em `.tb26-with-pdp`, nenhum layout shift introduzido por blocos fabricados, nenhuma imagem externa inventada; fundos da home não são carregados em PDP.
+- Ao haver somente uma foto do produto, nenhum carrossel de miniaturas falso é criado.
+- Formas de pagamento dobráveis utilizam a lista original `.parcelas-produto > ul.accordion`; o CEP nativo permanece disponível.
+- Para desligar o módulo no código: `produto: { ativo: false }` ou sobrescrever `window.TractorBelSettings.produto.ativo = false` **antes** do script carregar.
+- **Não** foi configurado número de parcelas sem juros, pois a página consultada só apresenta valores por método de pagamento.
+
+Veja `QA-PDP-V18.md` e `tests/qa-pdp-v18.py`. Homologar com o carrinho e a validação real da Loja Integrada antes da liberação geral.
