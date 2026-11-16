@@ -6,7 +6,7 @@
 (function (win, doc) {
   'use strict';
   if (win.TractorBel2026) return;
-  var VERSION = '1.11.0';
+  var VERSION = '1.12.0';
   // Assets oficiais da TractorBel, ja hospedados na Loja Integrada.
   // Manter os nomes e extensoes ORIGINAIS, sem converter .jpg/.png para .webp.
   // O nome logico pode continuar .webp para compatibilidade com os componentes existentes.
@@ -1423,7 +1423,7 @@
     // Avoid automatic hiding/translation on the main product image (LCP).
   }
 
-  // v1.11 — estiliza SOMENTE a listagem nativa das categorias e busca.
+  // v1.12 — quatro cards por linha nas categorias e busca, sem duplicar dados nativos.
   // Nao clona precos, produtos, paginacao, filtros ou controle de compra.
   function mountCatalog() {
     if (!cfg.catalogo || cfg.catalogo.ativo === false || !doc.body) return;
@@ -1462,7 +1462,7 @@
         if (cover && productLink) {
           cover.setAttribute('aria-label', 'Ver produto: ' + name.textContent.trim());
         }
-        if (idx > 3 && !photo.hasAttribute('loading')) photo.loading = 'lazy';
+        if (idx >= 4 && !photo.hasAttribute('loading')) photo.loading = 'lazy';
         photo.decoding = 'async';
         // Mantem o link original do tema e o destino real do produto.
         var button = card.querySelector('.acoes-produto a.botao-comprar[href]');
@@ -1483,9 +1483,9 @@
           button.classList.add('tb26-catalog__cta');
         }
         // A plataforma fornece os precos, Pix, descontos e disponibilidade.
-        if (observer && idx >= 5 && card.getBoundingClientRect().top > win.innerHeight) {
+        if (observer && idx >= 4 && card.getBoundingClientRect().top > win.innerHeight) {
           card.classList.add('tb26-catalog-card--pending');
-          card.style.setProperty('--tb26-catalog-delay', ((idx % 5) * 55) + 'ms');
+          card.style.setProperty('--tb26-catalog-delay', ((idx % 4) * 55) + 'ms');
           observer.observe(card);
         } else card.classList.add('tb26-catalog-card--ready');
       });

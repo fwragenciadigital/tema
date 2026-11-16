@@ -1,6 +1,6 @@
 # TractorBel 2026 · FWR Agência Digital
 
-**Plataforma:** Loja Integrada. **Projeto:** `TractorBel` na Vercel/GitHub. **Versão:** 1.9.0.
+**Plataforma:** Loja Integrada. **Projeto:** `TractorBel` na Vercel/GitHub. **Versão:** 1.12.0.
 
 ## Estrutura
 - `tractorbel.js`: adaptação DOM-first da LI (topo, home, rodapé, vitrines com produtos reais, menu e carrinho lateral).
@@ -150,3 +150,13 @@ Veja `QA-PDP-V18.md` e `tests/qa-pdp-v18.py`. Homologar com o carrinho e a valid
 - Configuração opcional no JS: `catalogo: { ativo: true, animacao: true }`.
 - Código publicado **nos mesmos endereços** `tractorbel.js` e `tractorbel.css`; cache gerenciado pelo servidor. Ativação geral da loja permanece sob `geral.publicarNaLoja`.
 - QA com Chromium: páginas `pagina-categoria` e `pagina-busca`, larguras 320, 375, 390, 768, 900, 1024, 1200, 1440 e 1920 px; preços/PIX/links, paginação, atualizações dinâmicas e ausência de overflow.
+
+
+## Atualização v1.12.0 — Categoria e busca: 4 cards por linha (16/11/2026)
+
+- **Correção estrutural:** substituição da regra que forçava cinco colunas no catálogo. Agora são quatro por linha a partir de 1200 px de viewport (com a coluna de categorias/filtros preservada), três entre 900 e 1199 px, duas entre 360 e 899 px e uma abaixo de 360 px.
+- **Correção dos preços cortados:** removido o `white-space:nowrap` forçado; fontes redimensionadas e preservados os valores nativos de preço, desconto e Pix. Nenhum cálculo ou preço é criado no JS.
+- **Visual revisado:** imagem `object-fit:contain`, área de imagem ligeiramente mais horizontal, títulos limitados a duas linhas, espaçamento e alinhamento de preços, CTA amarelo com corte diagonal e cartões com altura consistente.
+- **Comportamento nativo preservado:** ordenação, categorias, filtros, paginação, URL original do produto e carregamento dinâmico. CSS estritamente escopado a `.tb26-with-catalog #listagemProdutos.tb26-catalog`, sem alterar a home/PDP.
+- **Links fixos com revalidação:** JS e CSS na Vercel continuam nos mesmos URLs; `Cache-Control: public,max-age=0,must-revalidate` evita retenção prolongada de versões antigas. Imagens usam cache imutável.
+- **QA:** teste automatizado em páginas de categoria e busca, incluindo resoluções 320, 375, 390, 768, 900, 1024, 1200, 1440, 1920 px. Teste local com DOM simulado da LI, homologação visual na loja real ainda recomendada.
