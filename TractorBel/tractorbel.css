@@ -1,4 +1,4 @@
-/* TractorBel 2026 - FWR Agencia Digital v1.8.0 - CSS escopado */
+/* TractorBel 2026 - FWR Agencia Digital v1.9.0 - CSS escopado */
 :root{--tb26-yellow:#ffbc00;--tb26-yellow-strong:#ffc400;--tb26-dark:#191919;--tb26-ink:#252525;--tb26-muted:#929292;--tb26-width:1660px;--tb26-gutter:clamp(16px,4vw,70px)}
 .tb26-active{overflow-x:clip}
 .tb26-active .tb26-home,.tb26-active .tb26-header,.tb26-active .tb26-footer{box-sizing:border-box;font-family:'Century Gothic','Eurostile',Montserrat,Arial,sans-serif}
@@ -514,3 +514,126 @@ body.tb26-with-header #full-page-loading{display:none!important}
 .tb26-with-pdp .tb26-pdp__description p,.tb26-with-pdp .tb26-pdp__description li{font-size:15px!important;line-height:1.7!important;color:#444}
 .tb26-with-pdp .tb26-pdp__description ul,.tb26-with-pdp .tb26-pdp__description ol{padding-left:23px!important;margin:10px 0 20px!important}
 .tb26-with-pdp .tb26-pdp__description h3,.tb26-with-pdp .tb26-pdp__description h4{font-size:18px!important;margin-top:24px!important;margin-bottom:12px!important}
+/* TractorBel PDP 1.9 — destaque verdadeiro do Pix e informacoes rapidas. */
+.tb26-with-pdp .tb26-pdp__pix-feature[hidden],
+.tb26-with-pdp .tb26-pdp__pix-saving[hidden]{display:none!important}
+.tb26-with-pdp .tb26-pdp__pix-feature{
+  display:flex;flex-direction:column;gap:5px;margin:2px 0 0;padding:23px 25px 21px;
+  border:1px solid #efdc9a;border-left:5px solid #ffbf00;border-radius:13px;
+  background:linear-gradient(117deg,#fff9e8 0%,#fffcf2 68%,#fff 100%);
+  color:#161616;box-shadow:0 4px 14px rgba(119,91,8,.05);box-sizing:border-box;
+}
+.tb26-with-pdp .tb26-pdp__pix-eyebrow{
+  font:800 11px/1.4 Arial,sans-serif;letter-spacing:.105em;color:#6f5700;text-transform:uppercase;
+}
+.tb26-with-pdp .tb26-pdp__pix-number{
+  display:block;font:850 clamp(37px,3.6vw,53px)/1.08 'Century Gothic',Arial,sans-serif;
+  letter-spacing:-.055em;color:#151515!important;white-space:nowrap;font-variant-numeric:tabular-nums;
+}
+.tb26-with-pdp .tb26-pdp__pix-caption{font:500 12px/1.45 Arial,sans-serif;color:#665b3c}
+.tb26-with-pdp .tb26-pdp__pix-saving{align-self:flex-start;margin-top:6px;padding:5px 9px;
+  background:#f5e7b6;border-radius:6px;color:#4d3d00;font:700 11px/1.3 Arial,sans-serif;
+}
+/* O preco anterior e o valor normal continuam presentes, mas secundarios ao Pix. */
+.tb26-with-pdp .tb26-pdp--pix-active .tb26-pdp__price{
+  padding:9px 0 14px!important;margin:0 0 8px!important;
+  border-top:0!important;border-bottom:1px solid #eee9dd!important;
+}
+.tb26-with-pdp .tb26-pdp--pix-active .tb26-pdp__price > div{
+  display:flex!important;flex-wrap:wrap;align-items:baseline;gap:6px 13px!important;
+}
+.tb26-with-pdp .tb26-pdp--pix-active .tb26-pdp__price strong.preco-promocional{
+  display:inline-flex!important;align-items:baseline;gap:6px;
+  font:700 19px/1.4 Arial,sans-serif!important;letter-spacing:-.01em!important;color:#404040!important;
+}
+.tb26-with-pdp .tb26-pdp--pix-active .tb26-pdp__price strong.preco-promocional::before{
+  content:'ou';font:500 13px/1.4 Arial,sans-serif;color:#757575;
+}
+.tb26-with-pdp .tb26-pdp--pix-active .tb26-pdp__price s.preco-venda{
+  display:inline!important;font:400 12px/1.35 Arial,sans-serif!important;color:#999!important;order:2;
+}
+.tb26-with-pdp .tb26-pdp--pix-active .tb26-pdp__price .desconto-a-vista{display:none!important}
+.tb26-with-pdp .tb26-pdp__details .comprar{margin-top:8px!important}
+.tb26-with-pdp .tb26-pdp__after-buy{margin:19px 0 0;padding:0;border:0;min-width:0}
+.tb26-with-pdp .tb26-pdp__quick-title{
+  margin:0 0 10px!important;padding:0!important;
+  font:750 13px/1.35 Arial,sans-serif!important;color:#202020!important;
+}
+.tb26-with-pdp .tb26-pdp__quick-grid{
+  display:grid;grid-template-columns:repeat(1,minmax(0,1fr));gap:0;
+  padding:3px 13px;border:1px solid #eae9e5;border-radius:12px;background:#fafaf8;
+}
+.tb26-with-pdp .tb26-pdp__quick-item{
+  display:flex;align-items:center;gap:12px;min-width:0;padding:10px 0;
+}
+.tb26-with-pdp .tb26-pdp__quick-item+.tb26-pdp__quick-item{border-top:1px solid #eeece7}
+.tb26-with-pdp .tb26-pdp__icon{
+  width:35px;height:35px;flex:0 0 35px;display:grid;place-items:center;
+  border-radius:9px;color:#3a300e;background:#fff0c4;
+}
+.tb26-with-pdp .tb26-pdp__icon svg{width:19px;height:19px;display:block}
+.tb26-with-pdp .tb26-pdp__quick-item-text{display:flex;flex-direction:column;gap:2px;min-width:0}
+.tb26-with-pdp .tb26-pdp__quick-item-text strong{font:700 12px/1.35 Arial,sans-serif;color:#292929!important}
+.tb26-with-pdp .tb26-pdp__quick-item-text span{font:400 11.5px/1.4 Arial,sans-serif;color:#777}
+.tb26-with-pdp .tb26-pdp__disclosures{margin-top:16px;border-top:1px solid #eae8e2}
+.tb26-with-pdp .tb26-pdp__disclosure{border-bottom:1px solid #eae8e2;padding:0!important;margin:0!important;background:none!important}
+.tb26-with-pdp .tb26-pdp__disclosure>summary{
+  position:relative;display:flex;align-items:center;justify-content:space-between;gap:12px;
+  min-height:47px;box-sizing:border-box;padding:13px 28px 13px 0;
+  font:700 12.5px/1.35 Arial,sans-serif!important;color:#303030!important;
+  cursor:pointer;list-style:none;
+}
+.tb26-with-pdp .tb26-pdp__disclosure>summary::-webkit-details-marker{display:none}
+.tb26-with-pdp .tb26-pdp__disclosure>summary::after{
+  content:'+';position:absolute;right:3px;top:50%;transform:translateY(-50%);
+  font:400 23px/1 Arial,sans-serif;color:#927200;
+}
+.tb26-with-pdp .tb26-pdp__disclosure[open]>summary::after{content:'−'}
+.tb26-with-pdp .tb26-pdp__disclosure-body{
+  padding:0 3px 17px 0;color:#606060;font:400 12.5px/1.63 Arial,sans-serif;
+  overflow-wrap:anywhere;
+}
+.tb26-with-pdp .tb26-pdp__disclosure-body p{margin:0 0 10px!important;font:inherit!important;color:inherit!important}
+.tb26-with-pdp .tb26-pdp__feature-list{list-style:none;margin:10px 0 12px!important;padding:0!important}
+.tb26-with-pdp .tb26-pdp__feature-list li{position:relative;padding:4px 0 4px 18px;color:#4f4f4f}
+.tb26-with-pdp .tb26-pdp__feature-list li::before{content:'✓';position:absolute;left:0;color:#987300;font-weight:800}
+.tb26-with-pdp .tb26-pdp__small-link,
+.tb26-with-pdp .tb26-pdp__text-action{
+  display:inline-flex;align-items:center;gap:4px;border:0;padding:0;
+  background:transparent;text-decoration:underline;text-underline-offset:3px;
+  color:#6f5500!important;font:750 12px/1.5 Arial,sans-serif!important;
+  cursor:pointer;
+}
+.tb26-with-pdp .tb26-pdp__small-link:hover,.tb26-with-pdp .tb26-pdp__text-action:hover{color:#141414!important}
+.tb26-with-pdp #descricao{scroll-margin-top:150px}
+.tb26-with-pdp .tb26-pdp__payments{margin-top:17px!important}
+.tb26-with-pdp .tb26-pdp__details :is(.tb26-pdp__disclosure>summary,.tb26-pdp__text-action,.tb26-pdp__small-link):focus-visible{
+  outline:3px solid #ffbf00!important;outline-offset:3px;border-radius:2px;
+}
+@media (min-width:1250px){
+  .tb26-with-pdp .tb26-pdp__quick-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:0;padding:9px 8px}
+  .tb26-with-pdp .tb26-pdp__quick-item{display:flex;align-items:flex-start;flex-direction:column;gap:6px;padding:5px 10px}
+  .tb26-with-pdp .tb26-pdp__quick-item+.tb26-pdp__quick-item{border-top:0;border-left:1px solid #eeece7}
+  .tb26-with-pdp .tb26-pdp__quick-item-text strong{font-size:11px}
+  .tb26-with-pdp .tb26-pdp__quick-item-text span{font-size:10.5px}
+}
+@media(max-width:767px){
+  .tb26-with-pdp .tb26-pdp__pix-feature{padding:19px 19px 17px}
+  .tb26-with-pdp .tb26-pdp__pix-number{font-size:clamp(34px,9vw,45px)!important}
+  .tb26-with-pdp .tb26-pdp__quick-grid{padding:0 11px}
+  .tb26-with-pdp .tb26-pdp__quick-item{padding:9px 0}
+  .tb26-with-pdp .tb26-pdp__after-buy{margin-top:16px}
+  .tb26-with-pdp .tb26-pdp__quick-title{font-size:13px!important}
+  .tb26-with-pdp .tb26-pdp__disclosures{margin-top:13px}
+  .tb26-with-pdp .tb26-pdp__disclosure>summary{min-height:47px}
+  .tb26-with-pdp .tb26-pdp__mobile-info small{color:#78600b}
+  .tb26-with-pdp .tb26-pdp__mobile-cta{background:#ffbf00}
+}
+@media(max-width:360px){
+  .tb26-with-pdp .tb26-pdp__pix-number{font-size:34px!important;letter-spacing:-.04em}
+  .tb26-with-pdp .tb26-pdp__pix-feature{padding:16px}
+}
+@media(prefers-reduced-motion:reduce){
+  .tb26-with-pdp .tb26-pdp__pix-feature,
+  .tb26-with-pdp .tb26-pdp__disclosure{transition:none!important}
+}

@@ -1,6 +1,6 @@
 # TractorBel 2026 · FWR Agência Digital
 
-**Plataforma:** Loja Integrada. **Projeto:** `TractorBel` na Vercel/GitHub. **Versão:** 1.7.0.
+**Plataforma:** Loja Integrada. **Projeto:** `TractorBel` na Vercel/GitHub. **Versão:** 1.9.0.
 
 ## Estrutura
 - `tractorbel.js`: adaptação DOM-first da LI (topo, home, rodapé, vitrines com produtos reais, menu e carrinho lateral).
@@ -16,6 +16,26 @@
 4. No DevTools, confira `TractorBel2026.diagnostico()` e eventuais avisos.
 5. Após homologação, altere `geral.publicarNaLoja: true`. Essa decisão pode ser revertida em segundos.
 6. Para desabilitar: `geral.ativo: false` ou remover as duas tags `<link>` e `<script>`.
+
+## Atualizações PDP v1.9.0 — Pix prioritário e informação em contexto (16/11/2026)
+
+A página de produto replica a **hierarquia visual** da referência aprovada pelo cliente, com regras comerciais estritamente dependentes do DOM nativo da Loja Integrada.
+
+- **Galeria esquerda:** foto principal real em área grande, zoom acessível, miniaturas apenas se a LI tiver mais de uma imagem.
+- **Compra direita:** breadcrumb, H1 e SKU nativos; bloco de **Pix como preço principal** (lido de `.preco-produto .desconto-a-vista strong` somente quando a mensagem menciona Pix); preço usual/antigo subordinados. Não existe desconto fabricado. A economia só é mostrada quando a subtração entre o preço normal e o Pix lidos do DOM é válida e positiva.
+- **Interações de preço:** o JS acompanha mudanças no preço/variações nativas; quando não há Pix real, deixa a precificação original normal visível. A barra fixa mobile lê Pix real, se disponível.
+- **Compra nativa:** único botão original da plataforma preservado; o atalho mobile busca o botão atual para preservar atualizações de variação. Nenhum fluxo paralelo de estoque, parcelamento, frete ou checkout.
+- **Informações rápidas abaixo de Comprar:** envio nacional com cálculo pelo CEP, ambiente de compra seguro e orientação especializada, seguidos por acordeões nativos `<details>` de descrição/especificações, envio, condições de pagamento e contato. O resumo e as características são extraídos **da descrição realmente cadastrada**, não de conteúdo gerado ou texto sem origem.
+- **Entrega e frete:** atalho desloca para o formulário oficial `#formCalcularCep`, mantendo os eventos e cálculo real da Loja Integrada. Sem previsão fixa de entrega, frete grátis ou prazo inventado.
+- **Pagamento:** atalho expande a relação de meios de pagamento já cadastrada no HTML, preservando o `id` original do acordeão nativo. Não são inventadas parcelas sem juros.
+- **Suporte:** contato no WhatsApp da TractorBel publicado no próprio site.
+- **Mobile:** galeria em coluna, depois bloco Pix/compra, informações compactas, descrição completa abaixo e botão fixo no rodapé somente quando comprar saiu da área visível.
+- **Configuração:** `produto: { ativo:true, compraFixaMobile:true, pixEmDestaque:true, resumoRapido:true }` diretamente no `tractorbel.js` (pode ser sobrescrita por `window.TractorBelSettings`).
+- **Fallback:** se o tema mudar e a grade principal não corresponder aos seletores testados, não modifica o layout nativo.
+
+**Qualidade:** testes locais com Chromium em 320, 375, 390, 430, 768, 900, 1024, 1440 e 1920 px; assertivas sobre preços, economia no Pix, tabs, frete, pagamentos, checkout nativo, no-Pix, atualização de preço e ausência de overflow. Ver `QA-PDP-V19.md`. Validação visual de produção deve ser realizada na própria loja com `?tractorbel_preview=1`.
+
+---
 
 ## Atualizações v1.7 — Sequência visual aprovada (16/11/2026)
 - **Removido `tb26-hero` da home**: a seção e a imagem do banner de 50.000 itens não são mais montadas; o arquivo `fullbanner.jpg` permanece mapeado no CDN para eventual uso futuro, sem carregamento desnecessário.

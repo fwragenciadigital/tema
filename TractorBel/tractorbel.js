@@ -1,12 +1,12 @@
 /*
- * TractorBel 2026 - FWR Agencia Digital - v1.8.0
+ * TractorBel 2026 - FWR Agencia Digital - v1.9.0
  * Camada visual da Loja Integrada. Sem checkout ou precificacao paralela.
  * Editavel por window.TractorBelSettings no HTML da LI.
  */
 (function (win, doc) {
   'use strict';
   if (win.TractorBel2026) return;
-  var VERSION = '1.8.0';
+  var VERSION = '1.9.0';
   // Assets oficiais da TractorBel, ja hospedados na Loja Integrada.
   // Manter os nomes e extensoes ORIGINAIS, sem converter .jpg/.png para .webp.
   // O nome logico pode continuar .webp para compatibilidade com os componentes existentes.
@@ -72,7 +72,7 @@
       textoDepois: ' é referência no segmento de peças novas, seminovas e insumos mecânicos para tratores, escavadeiras e máquinas pesadas.'
     },
     home: { ativo: true },
-    produto: { ativo: true, compraFixaMobile: true },
+    produto: { ativo: true, compraFixaMobile: true, pixEmDestaque: true, resumoRapido: true },
     rodape: { ativo: true },
     vitrines: { ativo: true, destaques: 10, miniaturas: 8, maisVendidos: 10 },
     carrinho: { ativo: true, parcelamento: { maximo: null, semJuros: null, minimoParcela: null } },
@@ -1149,7 +1149,7 @@
         doc.removeEventListener('keydown', zoomKeys);
         if (zoomReturn && zoomReturn.isConnected) zoomReturn.focus();
       }
-      function zoomKeys(ev) { if (ev.key === 'Escape') closeZoom(); else if (ev.key === 'Tab' && zoomLayer) { ev.preventDefault(); var b=zoomLayer.querySelector('button'); if(b)b.focus(); } }
+      function zoomKeys(ev) { if (ev.key === 'Escape') closeZoom(); }
       function openZoom() {
         if (zoomLayer) return;
         var source = mainImage.currentSrc || mainImage.src;
@@ -1200,36 +1200,194 @@
     if (tabs) tabs.classList.add('tb26-pdp__tabs');
     var described=root.querySelector('#descricao');
     if (described) described.classList.add('tb26-pdp__description');
-    // Additional information is subordinate to native availability/payment widgets.
-    if (nativeBuy) {
-      var tips=e('div','tb26-pdp__assurance');
-      append(tips,e('span','','✓ Atendimento especializado'),e('span','','✓ Compra pelo ambiente oficial da loja'));
+    // PIX FIRST: price labels are always derived from the live LI price nodes.
+    // Nothing is hardcoded and discounts/instalments are never invented.
+    var pixHighlight=null, pixValue=null, pixSaving=null;
+    function readMoney(value) {
+      var hit=String(value || '').match(/R\$\s*[\d.]+,\d{2}/);
+      return hit ? hit[0].replace(/\s+/g,' ').trim() : '';
+    }
+    function moneyNumber(value) {
+      var number=readMoney(value).replace(/[R$\s.]/g,'').replace(',','.');
+      return number ? Number(number) : NaN;
+    }
+    function nativePixSource() {
+      var source=details.querySelector('.acoes-produto .preco-produto .desconto-a-vista');
+      return source && /pix/i.test(source.textContent || '') ? source : null;
+    }
+    if (purchase && cfg.produto.pixEmDestaque !== false) {
+      pixHighlight=e('section','tb26-pdp__pix-feature');
+      pixHighlight.setAttribute('aria-label','Preço à vista no Pix');
+      var pixEyebrow=e('span','tb26-pdp__pix-eyebrow','PREÇO ESPECIAL NO PIX');
+      pixValue=e('strong','tb26-pdp__pix-number');
+      var pixCaption=e('span','tb26-pdp__pix-caption','Pagamento à vista via Pix');
+      pixSaving=e('span','tb26-pdp__pix-saving');
+      append(pixHighlight,pixEyebrow,pixValue,pixCaption,pixSaving);
+      var purchaseActions=purchase.querySelector('.acoes-produto');
+      if (purchaseActions) purchase.insertBefore(pixHighlight,purchaseActions);
+    }
+    function syncPix() {
+      var currentPrice=details.querySelector('.acoes-produto .preco-produto');
+      if (currentPrice && !currentPrice.classList.contains('tb26-pdp__price')) currentPrice.classList.add('tb26-pdp__price');
+      var source=nativePixSource();
+      var nativeValue=source && (source.querySelector('strong') || source);
+      var pixText=readMoney(nativeValue && nativeValue.textContent);
+      var visible=!!(pixHighlight && pixText);
+      if (pixHighlight) pixHighlight.hidden=!visible;
+      root.classList.toggle('tb26-pdp--pix-active',visible);
+      if (visible && pixValue.textContent !== pixText) pixValue.textContent=pixText;
+      var regular=details.querySelector('.acoes-produto .preco-promocional') || details.querySelector('.acoes-produto .preco-produto .preco-venda');
+      var saving=regular && moneyNumber(regular.textContent)-moneyNumber(pixText);
+      var savingText=visible && Number.isFinite(saving) && saving>0.005 ?
+        'Economize '+new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(saving)+' no Pix' : '';
+      if (pixSaving && pixSaving.textContent !== savingText) pixSaving.textContent=savingText;
+      if (pixSaving) pixSaving.hidden=!savingText;
+      return visible ? pixText : '';
+    }
+    syncPix();
+    if (purchase && 'MutationObserver' in win && pixHighlight) {
+      var pixUpdateScheduled=false;
+      var pixObserver=new MutationObserver(function(changes){
+        // Ignore our own price-display mutations, to avoid an update cycle.
+        if(changes.every(function(change){return pixHighlight.contains(change.target);})) return;
+        if(pixUpdateScheduled)return;
+        pixUpdateScheduled=true;
+        win.requestAnimationFrame(function(){pixUpdateScheduled=false;syncPix();});
+      });
+      pixObserver.observe(purchase,{subtree:true,childList:true,characterData:true});
+    }
+
+    // Rapid product overview: extract actual text from the native description only.
+    function cleanLine(text) { return (text || '').replace(/\s+/g,' ').trim(); }
+    function productSummary() {
+      if (!described) return '';
+      var rows=[].slice.call(described.querySelectorAll('p,li'));
+      var pieces=rows.map(function(n){return cleanLine(n.textContent);}).filter(function(t){return t.length>65 && t.length<1800;});
+      var candidate=pieces[0] || cleanLine(described.textContent);
+      if (!candidate) return '';
+      if (candidate.length<=258) return candidate;
+      var part=candidate.slice(0,255),breakAt=part.lastIndexOf(' ');
+      return (breakAt>165?part.slice(0,breakAt):part).trim()+'…';
+    }
+    function summaryFeatures() {
+      if (!described) return [];
+      return [].slice.call(described.querySelectorAll('li')).map(function(el){return cleanLine(el.textContent);})
+        .filter(function(text){return text.length>=12 && text.length<135;}).slice(0,3);
+    }
+    function pdpIcon(key) {
+      var paths={
+        truck:'<path d="M3 6h11v11H3z M14 10h4l3 3v4h-7 M5 17a2 2 0 1 0 4 0 M16 17a2 2 0 1 0 4 0"/>',
+        shield:'<path d="m12 2 8 4v6c0 5-3.2 8.5-8 10-4.8-1.5-8-5-8-10V6z M9 12l2 2 4-4"/>',
+        message:'<path d="M21 11.5a8.3 8.3 0 0 1-12.3 7.2L3 20l1.4-5.1A8.3 8.3 0 1 1 21 11.5z"/>',
+        card:'<rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20 M6 15h4"/>'
+      };
+      var wrapper=e('span','tb26-pdp__icon');
+      // Trusted, local SVG markup only; never interpolate store HTML here.
+      wrapper.innerHTML='<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+(paths[key]||paths.shield)+'</svg>';
+      return wrapper;
+    }
+    function infoRow(icon,title,detail) {
+      var item=e('div','tb26-pdp__quick-item');
+      var content=e('div','tb26-pdp__quick-item-text');
+      append(content,e('strong','',title),e('span','',detail));
+      append(item,pdpIcon(icon),content);
+      return item;
+    }
+    function detailRow(title,content,open) {
+      var item=e('details','tb26-pdp__disclosure');
+      if(open)item.open=true;
+      append(item,e('summary','',title),content);
+      return item;
+    }
+    if (nativeBuy && cfg.produto.resumoRapido !== false) {
+      var helpUrl='https://wa.me/'+String(cfg.conteudo.whatsapp || '5531996573930').replace(/\D/g,'');
+      var infoStack=e('section','tb26-pdp__after-buy');
+      infoStack.setAttribute('aria-label','Informações rápidas sobre o produto e a compra');
+      var quick=e('div','tb26-pdp__quick-grid');
+      append(quick,
+        infoRow('truck','Enviamos para todo o Brasil','Consulte o prazo pelo CEP'),
+        infoRow('shield','Compra em ambiente seguro','Pagamento pela própria loja'),
+        infoRow('message','Atendimento especializado','Orientação antes de comprar')
+      );
+      var quickLabel=e('h2','tb26-pdp__quick-title','Informações importantes');
+      append(infoStack,quickLabel,quick);
+      var disclosures=e('div','tb26-pdp__disclosures');
+      var overview=e('div','tb26-pdp__disclosure-body');
+      var brief=productSummary();
+      append(overview,e('p','',brief || 'Veja as informações completas e especificações cadastradas para esta peça.'));
+      var features=summaryFeatures();
+      if (features.length) {
+        var bullets=e('ul','tb26-pdp__feature-list');
+        features.forEach(function(text){append(bullets,e('li','',text));});
+        append(overview,bullets);
+      }
+      if (described) append(overview,link('#descricao','tb26-pdp__small-link','Ver descrição completa ↓'));
+      append(disclosures,detailRow('Descrição e especificações',overview,true));
+      var delivery=e('div','tb26-pdp__disclosure-body');
+      append(delivery,e('p','','Calcule o frete e o prazo de entrega pelo CEP. O resultado considera as condições de envio disponíveis para o seu endereço.'));
+      var freightForm=details.querySelector('#formCalcularCep');
+      if (freightForm) {
+        var goFreight=e('button','tb26-pdp__text-action','Calcular frete e prazo');goFreight.type='button';
+        goFreight.addEventListener('click',function(){
+          freightForm.scrollIntoView({behavior:win.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'center'});
+          var field=freightForm.querySelector('input:not([type=hidden])');if(field)field.focus({preventScroll:true});
+        });
+        append(delivery,goFreight);
+      }
+      append(disclosures,detailRow('Envio e entrega',delivery,false));
+      var payment=e('div','tb26-pdp__disclosure-body');
+      append(payment,e('p','','Confira abaixo as formas de pagamento e os valores informados pela Loja Integrada. O destaque no Pix é exibido somente quando disponível para o produto.'));
+      var payBtn=e('button','tb26-pdp__text-action','Ver opções de pagamento');payBtn.type='button';
+      payBtn.addEventListener('click',function(){
+        var toggle=details.querySelector('.tb26-pdp__payment-toggle');
+        if(toggle && toggle.getAttribute('aria-expanded')!=='true') toggle.click();
+        if(toggle)toggle.scrollIntoView({behavior:win.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'center'});
+      });
+      if (details.querySelector('.tb26-pdp__payment-toggle')) append(payment,payBtn);
+      append(disclosures,detailRow('Pagamento e condições',payment,false));
+      var assistance=e('div','tb26-pdp__disclosure-body');
+      append(assistance,e('p','','Precisa confirmar a compatibilidade da peça ou tirar dúvidas antes da compra? Fale com a equipe TractorBel.'));
+      var support=link(helpUrl,'tb26-pdp__text-action','Conversar com um especialista');
+      support.target='_blank';support.rel='noopener noreferrer';append(assistance,support);
+      append(disclosures,detailRow('Dúvidas e atendimento',assistance,false));
+      append(infoStack,disclosures);
       var block=nativeBuy.closest('.comprar');
-      if (block) block.insertAdjacentElement('afterend',tips);
+      if(block)block.insertAdjacentElement('afterend',infoStack);
     }
     var floatingBar=null;
     if (nativeBuy && cfg.produto.compraFixaMobile !== false) {
       floatingBar=e('div','tb26-pdp__mobile-bar');
       var barInfo=e('div','tb26-pdp__mobile-info');
-      var barLabel=e('small','','Preço do produto');
+      var barLabel=e('small','','Total do produto');
       var barPrice=e('strong','tb26-pdp__mobile-price');
       append(barInfo,barLabel,barPrice);
       var barButton=e('button','tb26-pdp__mobile-cta','COMPRAR');barButton.type='button';
       barButton.setAttribute('aria-label','Comprar este produto');
-      barButton.addEventListener('click',function(){if(nativeBuy && nativeBuy.isConnected && !nativeBuy.classList.contains('desativado')) nativeBuy.click();});
-      append(floatingBar,barInfo,barButton);doc.body.appendChild(floatingBar);doc.body.classList.add('tb26-pdp-mobile-fixed');
+      barButton.addEventListener('click',function(){
+        var currentBuy=details.querySelector('.acoes-produto .comprar .botao-comprar');
+        if (currentBuy && !currentBuy.classList.contains('desativado') && currentBuy.getAttribute('aria-disabled')!=='true') currentBuy.click();
+      });
+      append(floatingBar,barInfo,barButton);doc.body.appendChild(floatingBar);
       function syncPrice() {
+        var pix=syncPix();
         var node=details.querySelector('.acoes-produto .preco-promocional') || details.querySelector('.acoes-produto .preco-venda');
         var price=node && (node.textContent || '').replace(/\s+/g,' ').trim();
-        barPrice.textContent=price || 'Consulte o preço';
+        barLabel.textContent=pix ? 'Valor no Pix' : 'Preço do produto';
+        barPrice.textContent=pix || price || 'Consulte o preço';
         var unavailable=!!details.querySelector('.acoes-produto.indisponivel, .acoes-produto.sem-estoque');
-        barButton.disabled=unavailable || !nativeBuy.isConnected;
+        var currentBuy=details.querySelector('.acoes-produto .comprar .botao-comprar');
+        barButton.disabled=unavailable || !currentBuy || currentBuy.classList.contains('desativado') || currentBuy.getAttribute('aria-disabled')==='true';
       }
       syncPrice();
-      var priceSource=details.querySelector('.acoes-produto');
-      if (priceSource && 'MutationObserver' in win) {
-        var priceObserver=new MutationObserver(function(){syncPrice();});
-        priceObserver.observe(priceSource,{subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:['class']});
+      if (purchase && 'MutationObserver' in win) {
+        var mobileScheduled=false;
+        var priceObserver=new MutationObserver(function(changes){
+          if (pixHighlight && changes.every(function(change){return pixHighlight.contains(change.target);})) return;
+          if (mobileScheduled) return;
+          mobileScheduled=true;
+          win.requestAnimationFrame(function(){mobileScheduled=false;syncPrice();});
+        });
+        priceObserver.observe(purchase,{subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:['class']});
       }
       // Keep the bar out of view when the original purchase button is already visible.
       if ('IntersectionObserver' in win) {
