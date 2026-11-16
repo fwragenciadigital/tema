@@ -139,3 +139,14 @@ Veja `QA-PDP-V18.md` e `tests/qa-pdp-v18.py`. Homologar com o carrinho e a valid
 - Reposicionamento automático em mudanças de orientação ou redimensionamento usando `matchMedia`.
 - Sem mudanças no Pix, frete, parcelamento, checkout ou demais componentes da PDP.
 - JS/CSS continuam em `https://tractorbel-2026.vercel.app/tractorbel.js` e `.../tractorbel.css` (sem sufixos de versão nos links).
+
+## v1.11.0 — Cards de categoria e busca (16/11/2026)
+
+- O JavaScript monta somente um aprimoramento visual do `#listagemProdutos` nativo da Loja Integrada para `body.pagina-categoria`, `body.pagina-busca`, `body.pagina-marca` e `body.pagina-tag`. Não altera a página do produto, homepage ou checkout.
+- Mantém imagens, nomes, preço, Pix, link de produto, paginação, filtros e ordenação nativos. Quando a ação original abre o produto, o botão apresenta **VER PRODUTO**; se a ação original for compra direta, apresenta **COMPRAR**. Não são criados descontos nem valores fictícios.
+- Cards brancos, imagem proporcional, título com duas linhas, preços alinhados, tarja amarela com corte diagonal, borda diagonal inferior e animações leves com preferência de movimento reduzido respeitada.
+- Grade responsiva: 5 por linha (>= 1700 px), 4 (1200–1699), 3 (900–1199), 2 (360–899) e 1 (< 360 px). Limite de colunas determinado pelo CSS, sem substituição do HTML gerado pela plataforma.
+- Renderização dinâmica observada via `MutationObserver` somente dentro da vitrine nativa; novos cards obtêm automaticamente o tratamento visual.
+- Configuração opcional no JS: `catalogo: { ativo: true, animacao: true }`.
+- Código publicado **nos mesmos endereços** `tractorbel.js` e `tractorbel.css`; cache gerenciado pelo servidor. Ativação geral da loja permanece sob `geral.publicarNaLoja`.
+- QA com Chromium: páginas `pagina-categoria` e `pagina-busca`, larguras 320, 375, 390, 768, 900, 1024, 1200, 1440 e 1920 px; preços/PIX/links, paginação, atualizações dinâmicas e ausência de overflow.

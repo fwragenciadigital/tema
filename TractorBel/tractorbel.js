@@ -1,12 +1,12 @@
 /*
- * TractorBel 2026 - FWR Agencia Digital - v1.10.0
+ * TractorBel 2026 - FWR Agencia Digital - v1.11.0
  * Camada visual da Loja Integrada. Sem checkout ou precificacao paralela.
  * Editavel por window.TractorBelSettings no HTML da LI.
  */
 (function (win, doc) {
   'use strict';
   if (win.TractorBel2026) return;
-  var VERSION = '1.10.0';
+  var VERSION = '1.11.0';
   // Assets oficiais da TractorBel, ja hospedados na Loja Integrada.
   // Manter os nomes e extensoes ORIGINAIS, sem converter .jpg/.png para .webp.
   // O nome logico pode continuar .webp para compatibilidade com os componentes existentes.
@@ -73,6 +73,7 @@
     },
     home: { ativo: true },
     produto: { ativo: true, compraFixaMobile: true, pixEmDestaque: true, resumoRapido: true },
+    catalogo: { ativo: true, animacao: true },
     rodape: { ativo: true },
     vitrines: { ativo: true, destaques: 10, miniaturas: 8, maisVendidos: 10 },
     carrinho: { ativo: true, parcelamento: { maximo: null, semJuros: null, minimoParcela: null } },
@@ -1422,13 +1423,94 @@
     // Avoid automatic hiding/translation on the main product image (LCP).
   }
 
+  // v1.11 — estiliza SOMENTE a listagem nativa das categorias e busca.
+  // Nao clona precos, produtos, paginacao, filtros ou controle de compra.
+  function mountCatalog() {
+    if (!cfg.catalogo || cfg.catalogo.ativo === false || !doc.body) return;
+    var body = doc.body;
+    if (!/(?:^|\s)pagina-(?:categoria|busca|marca|tag)(?:\s|$)/.test(body.className)) return;
+    var listing = doc.querySelector('#corpo #listagemProdutos');
+    if (!listing) listing = doc.querySelector('#corpo .listagem');
+    if (!listing || !listing.querySelector('.listagem-item')) return;
+    listing.classList.add('tb26-catalog');
+    body.classList.add('tb26-with-catalog');
+    var observer = null;
+    var reduceMotion = Boolean(win.matchMedia && win.matchMedia('(prefers-reduced-motion: reduce)').matches);
+    if (cfg.catalogo.animacao !== false && !reduceMotion && 'IntersectionObserver' in win) {
+      observer = new IntersectionObserver(function(entries) {
+        entries.forEach(function(entry) {
+          if (entry.isIntersecting) {
+            entry.target.classList.remove('tb26-catalog-card--pending');
+            entry.target.classList.add('tb26-catalog-card--ready');
+            observer.unobserve(entry.target);
+          }
+        });
+      }, {rootMargin: '80px 0px', threshold: 0.05});
+    }
+    var seen = new WeakSet();
+    function enhance() {
+      var cards = [].slice.call(listing.querySelectorAll('.listagem-item'));
+      cards.forEach(function(card, idx) {
+        if (seen.has(card)) return;
+        var photo = card.querySelector('.imagem-produto img');
+        var name = card.querySelector('a.nome-produto[href]');
+        if (!photo || !name) return;
+        seen.add(card);
+        card.classList.add('tb26-catalog-card');
+        var productLink = safeUrl(name.getAttribute('href'));
+        var cover = card.querySelector('a.produto-sobrepor');
+        if (cover && productLink) {
+          cover.setAttribute('aria-label', 'Ver produto: ' + name.textContent.trim());
+        }
+        if (idx > 3 && !photo.hasAttribute('loading')) photo.loading = 'lazy';
+        photo.decoding = 'async';
+        // Mantem o link original do tema e o destino real do produto.
+        var button = card.querySelector('.acoes-produto a.botao-comprar[href]');
+        if (!button && productLink) {
+          var slot = card.querySelector('.acoes-produto');
+          if (!slot) {
+            slot = e('div', 'acoes-produto tb26-catalog__actions');
+            card.appendChild(slot);
+          }
+          button = link(productLink, 'botao botao-comprar principal', 'VER PRODUTO');
+          slot.appendChild(button);
+        }
+        if (button) {
+          var target = safeUrl(button.getAttribute('href'));
+          var directPurchase = /\/carrinho\/(?:produto\/\d+\/adicionar|adicionar)/i.test(target);
+          button.textContent = directPurchase ? 'COMPRAR' : 'VER PRODUTO';
+          button.setAttribute('aria-label', (directPurchase ? 'Comprar ' : 'Ver detalhes de ') + name.textContent.trim());
+          button.classList.add('tb26-catalog__cta');
+        }
+        // A plataforma fornece os precos, Pix, descontos e disponibilidade.
+        if (observer && idx >= 5 && card.getBoundingClientRect().top > win.innerHeight) {
+          card.classList.add('tb26-catalog-card--pending');
+          card.style.setProperty('--tb26-catalog-delay', ((idx % 5) * 55) + 'ms');
+          observer.observe(card);
+        } else card.classList.add('tb26-catalog-card--ready');
+      });
+      state.catalogo = {ativo: true, produtos: cards.filter(function(card){return seen.has(card);}).length,
+        origem: 'listagem nativa da Loja Integrada', pagina: body.classList.contains('pagina-busca') ? 'busca' : 'categoria'};
+    }
+    enhance();
+    if ('MutationObserver' in win) {
+      var queued = false;
+      var watcher = new MutationObserver(function(changes) {
+        if (queued || !changes.some(function(change){return change.addedNodes.length;})) return;
+        queued = true;
+        win.requestAnimationFrame(function(){queued=false; enhance();});
+      });
+      watcher.observe(listing, {childList:true, subtree:true});
+    }
+  }
+
   function mount() {
     if (!enabled || !doc.body) return;
     if (doc.documentElement.dataset.tb26Mount === '1') return;
     doc.documentElement.dataset.tb26Mount = '1';
     doc.body.classList.add('tb26-active');
     if (isHome) configureBackgrounds();
-    try { mountHeader(); mountHome(); mountProductPage(); mountFooter(); }
+    try { mountHeader(); mountHome(); mountCatalog(); mountProductPage(); mountFooter(); }
     catch (err) { console.error('[TractorBel] Erro no layout, loja nativa preservada onde possível:', err); state.warnings.push(String(err.message)); }
     debug('Inicialização', state);
   }
