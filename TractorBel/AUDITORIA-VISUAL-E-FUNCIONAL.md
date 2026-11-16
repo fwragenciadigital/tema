@@ -43,3 +43,12 @@ O endereço aprovado entrega um HTML simples contendo uma única imagem comprida
 - Verificar console para `TractorBel2026.diagnostico()` e métricas Core Web Vitals na página hospedada.
 
 **Importante:** arquivo aprovado é **arte gráfica estática**. O objetivo desta versão é fidelidade de identidade + funcionalidade e dados reais da Loja Integrada, não reproduzir números ou ofertas fictícios que constem no mockup.
+
+
+## Atualização v1.6 (16/11/2026)
+- [x] Tarja antiga `#bar-top`, `.barra-inicial` e placeholder ocultados somente em prévia/layout personalizado.
+- [x] Logo obtido do painel da Loja Integrada: `#cabecalho .logo img`.
+- [x] Faixa de 8 marcas substituída por 8 PNGs individuais com carrossel.
+- [x] Mobile: 3 marcas por tela e 3 a cada clique, 320/390/767 px testados com Playwright.
+- [x] Desktop 6 marcas e tablet 5, com swipe e setas.
+- [ ] Validar visualmente em navegador autenticado no ambiente real de prévia antes de ativar para todos.

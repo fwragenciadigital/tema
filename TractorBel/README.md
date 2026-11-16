@@ -1,11 +1,11 @@
 # TractorBel 2026 · FWR Agência Digital
 
-**Plataforma:** Loja Integrada. **Projeto:** `TractorBel` na Vercel/GitHub. **Versão:** 1.4.0.
+**Plataforma:** Loja Integrada. **Projeto:** `TractorBel` na Vercel/GitHub. **Versão:** 1.6.0.
 
 ## Estrutura
 - `tractorbel.js`: adaptação DOM-first da LI (topo, home, rodapé, vitrines com produtos reais, menu e carrinho lateral).
 - `tractorbel.css`: identidade visual preto/amarelo, mobile-first em pontos críticos, layout fluido.
-- Imagens: carregadas diretamente de `https://cdn.awsli.com.br/901/901888/arquivos/`, com nomes e extensões do ZIP original. Não dependem mais da Vercel.
+- Imagens do layout: mantidas no CDN `https://cdn.awsli.com.br/901/901888/arquivos/`, com nomes e extensões do ZIP original. Os **8 recortes novos das marcas** ficam temporariamente em `/assets/marcas/*.png` na Vercel até serem enviados ao CDN da Loja Integrada.
 - `INTEGRACAO-LOJA-INTEGRADA.html`: settings editáveis e carregamento externo (HTML personalizado).
 - `index.html`: página informativa de distribuição, não é uma loja paralela.
 
@@ -16,6 +16,15 @@
 4. No DevTools, confira `TractorBel2026.diagnostico()` e eventuais avisos.
 5. Após homologação, altere `geral.publicarNaLoja: true`. Essa decisão pode ser revertida em segundos.
 6. Para desabilitar: `geral.ativo: false` ou remover as duas tags `<link>` e `<script>`.
+
+## Atualizações v1.6 — Marcas individuais + topo limpo (16/11/2026)
+- O header customizado utiliza `#cabecalho .logo img` diretamente do painel Loja Integrada, com link e texto alternativo do logo original; se a imagem falhar, exibe texto em vez de uma figura quebrada.
+- Ao ativar o header customizado, oculta **somente** a antiga faixa `#bar-top`, a barra `.barra-inicial`, o placeholder de carregamento `#full-page-loading` e o cabeçalho nativo. Com `geral.publicarNaLoja=false` a loja pública permanece intocada.
+- No lugar da imagem horizontal de marcas foram inseridos **8 PNGs transparentes individuais**, recortados sem alterar os logos CAT, SANY, XCMG, Komatsu, Volvo, CASE, Randon e John Deere.
+- Carousel responsivo: 6 marcas visíveis no desktop, 5 no tablet, 3 no mobile. As setas movem conjuntos de três no mobile; a rolagem touch usa `scroll-snap` de três em três. `prefers-reduced-motion` é respeitado.
+- No momento, os recortes novos estão hospedados em `https://tractorbel-2026.vercel.app/assets/marcas/`. Para migrá-los à Loja Integrada, envie os 8 PNGs para o CDN e atualize **somente** `defaults.marcas.imagensBase` em `tractorbel.js`; não será necessário criar outra estrutura de carrossel.
+- Exibe nomes das marcas como texto de segurança se uma imagem não carregar; não inventa links de categorias de marca inexistentes no painel.
+- `tractorbel.js` e `tractorbel.css` permanecem com os mesmos endereços fixos da Vercel. O HTML de integração não precisa ser editado para aplicar a versão.
 
 ## Movimentos e transições (v1.2)
 - Fade-in progressivo ao rolar a home: títulos, cards, banners internos, vitrines e rodapé.

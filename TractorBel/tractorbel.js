@@ -1,12 +1,12 @@
 /*
- * TractorBel 2026 - FWR Agencia Digital - v1.4.0
+ * TractorBel 2026 - FWR Agencia Digital - v1.6.0
  * Camada visual da Loja Integrada. Sem checkout ou precificacao paralela.
  * Editavel por window.TractorBelSettings no HTML da LI.
  */
 (function (win, doc) {
   'use strict';
   if (win.TractorBel2026) return;
-  var VERSION = '1.4.0';
+  var VERSION = '1.6.0';
   // Assets oficiais da TractorBel, ja hospedados na Loja Integrada.
   // Manter os nomes e extensoes ORIGINAIS, sem converter .jpg/.png para .webp.
   // O nome logico pode continuar .webp para compatibilidade com os componentes existentes.
@@ -43,6 +43,7 @@
     geral: { ativo: true, publicarNaLoja: false, debug: false },
     imagensBase: ASSET_CDN_BASE,
     topo: { ativo: true, menu: true },
+    marcas: { ativo: true, porRolagemMobile: 3, imagensBase: 'https://tractorbel-2026.vercel.app/assets/marcas/' },
     home: { ativo: true },
     rodape: { ativo: true },
     vitrines: { ativo: true, destaques: 10, miniaturas: 8, maisVendidos: 10 },
@@ -176,13 +177,58 @@
       ['FERRAMENTAS DE PENETRAÇÃO DE SOLO','/fps'],['LUBRIFICANTES','/lubrificantes'],['MINIATURAS','/miniaturas'],
       ['EQUIPAMENTOS','/equipamentos-novos']].map(function(x){return {title:x[0],href:x[1],children:[]};});
   }
+  // A imagem da marca pertence ao painel da Loja Integrada, não ao pacote fatiado.
+  // O cabeçalho nativo é lido antes de ser ocultado; assim, trocar a logo no painel
+  // atualiza a versão personalizada sem modificar o JS/CSS.
+  function nativeStoreLogo(native) {
+    var logo = firstElement(native, [
+      'h1.logo a img', '.logo a img', 'h1.logo img', '.logo img',
+      '.logo picture img', 'a.logo img'
+    ]);
+    if (!logo) return null;
+    var src = logo.getAttribute('src') || logo.getAttribute('data-src') ||
+              logo.getAttribute('data-original') || logo.currentSrc;
+    var url = safeUrl(src);
+    if (!url) return null;
+    var anchor = logo.closest('a[href]');
+    return {
+      src: url,
+      href: anchor && safeUrl(anchor.getAttribute('href')) || '/',
+      alt: logo.getAttribute('alt') || 'TractorBel Tratores e Peças',
+      width: Number(logo.getAttribute('width')) || 400,
+      height: Number(logo.getAttribute('height')) || 96
+    };
+  }
   function mountHeader() {
     if (!cfg.topo.ativo || doc.getElementById('tb26-header')) return;
     var native = doc.querySelector('#cabecalho') || doc.querySelector('header');
     if (!native) { warn('Cabeçalho nativo não identificado, mantido sem alterações.'); return; }
     var header = e('header', 'tb26-header'); header.id = 'tb26-header';
     var top = e('div', 'tb26-header__wrap tb26-container');
-    var brand = link('/', 'tb26-logo'); append(brand, image('logo-top.webp', 'TractorBel Tratores e Peças - Desde 1983', 741, 176, true));
+    var panelLogo = nativeStoreLogo(native);
+    var brand = link(panelLogo ? panelLogo.href : '/', 'tb26-logo');
+    function showBrandText() {
+      brand.replaceChildren(e('span', 'tb26-logo__fallback', 'TRACTORBEL'));
+    }
+    if (panelLogo) {
+      var brandImage = e('img');
+      brandImage.src = panelLogo.src;
+      brandImage.alt = panelLogo.alt;
+      brandImage.width = panelLogo.width;
+      brandImage.height = panelLogo.height;
+      brandImage.loading = 'eager';
+      brandImage.decoding = 'async';
+      brandImage.addEventListener('error', function () {
+        warn('Não foi possível carregar a logo definida no painel da LI.');
+        showBrandText();
+      }, {once:true});
+      brand.appendChild(brandImage);
+      state.logo = {origem:'painel Loja Integrada',src:panelLogo.src};
+    } else {
+      showBrandText();
+      warn('A logo nativa não foi localizada em #cabecalho .logo; exibindo nome da marca.');
+      state.logo = {origem:'fallback-texto'};
+    }
     var nav = e('nav', 'tb26-nav'); nav.id = 'tb26-menu'; nav.setAttribute('aria-label','Categorias principais');
     function createSubmenu(items, depth) {
       var ul = e('ul', depth === 2 ? 'tb26-nav__submenu' : 'tb26-nav__sublist');
@@ -240,7 +286,11 @@
     function setStickyState(){ scheduled=false;header.classList.toggle('is-scrolled',(win.scrollY||doc.documentElement.scrollTop||0)>18); }
     win.addEventListener('scroll',function(){if(!scheduled){scheduled=true;win.requestAnimationFrame(setStickyState);}}, {passive:true});
     append(action, searchOpen, account, cart, menuBtn); append(top, brand, nav, action); append(header, top, search);
-    native.parentNode.insertBefore(header, native);
+    // Montar fora do .conteiner-principal elimina o espaço residual do tema
+    // e mantém o sticky independente de wrappers com overflow/transform.
+    var principal = native.closest('.conteiner-principal');
+    if (principal && principal.parentNode === doc.body) doc.body.insertBefore(header, principal);
+    else native.parentNode.insertBefore(header, native);
     native.classList.add('tb26-native-header');
     doc.body.classList.add('tb26-with-header'); state.header = true;
     setStickyState();
@@ -662,11 +712,105 @@
     prev.addEventListener('click', function () { step(-1); }); next.addEventListener('click', function () { step(1); });
     append(ctrl, prev, next); append(container, heading, view, ctrl); append(sec, container); return sec;
   }
+  // Carrossel real de marcas: oito logos PNG separados a partir da arte aprovada.
+  // Nunca usar a imagem horizontal "Novo Projeto (11).png" como uma unica marca.
   function brands() {
-    var section = e('section', 'tb26-brands'); var container = e('div', 'tb26-container');
-    var h = e('h2', 'tb26-brands__title', cfg.conteudo.fraseMarcas); append(container, h);
-    var img = image('novo-projeto-11.webp', 'Marcas CAT, SANY, XCMG, Komatsu, Volvo, CASE, Randon e John Deere', 1762, 178, true);
-    img.className = 'tb26-brands__logos'; append(container, img); append(section, container); return section;
+    var section = e('section', 'tb26-brands');
+    section.dataset.tb26Section = 'marcas';
+    section.setAttribute('aria-label', 'Marcas atendidas pela TractorBel');
+    var container = e('div', 'tb26-container');
+    var title = e('h2', 'tb26-brands__title', cfg.conteudo.fraseMarcas);
+    append(container, title);
+    if (!cfg.marcas.ativo) { append(section, container); return section; }
+
+    var frame = e('div', 'tb26-brands__frame');
+    var track = e('div', 'tb26-brands__track');
+    track.id = 'tb26-brands-track';
+    track.setAttribute('role', 'region');
+    track.setAttribute('aria-roledescription', 'carrossel');
+    track.setAttribute('aria-label', 'Marcas de máquinas e equipamentos');
+    track.tabIndex = 0;
+
+    var brandsList = [
+      ['cat.png', 'CAT'], ['sany.png', 'SANY'], ['xcmg.png', 'XCMG'],
+      ['komatsu.png', 'Komatsu'], ['volvo.png', 'Volvo'], ['case.png', 'CASE'],
+      ['randon.png', 'Randon'], ['john-deere.png', 'John Deere']
+    ];
+    var base = String(cfg.marcas.imagensBase || 'https://tractorbel-2026.vercel.app/assets/marcas/');
+    if (!/\/$/.test(base)) base += '/';
+    // O dominio de desenvolvimento pode ser trocado pelo CDN da LI apos upload dos recortes.
+    var baseUrl = safeUrl(base) || 'https://tractorbel-2026.vercel.app/assets/marcas/';
+    brandsList.forEach(function (entry, i) {
+      var item = e('div', 'tb26-brands__item');
+      item.setAttribute('role', 'group');
+      item.setAttribute('aria-roledescription', 'marca');
+      item.setAttribute('aria-label', (i + 1) + ' de ' + brandsList.length + ': ' + entry[1]);
+      var img = e('img');
+      img.src = baseUrl + entry[0];
+      img.alt = 'Logo ' + entry[1];
+      img.width = 160;
+      img.height = 160;
+      img.loading = i < 3 ? 'eager' : 'lazy';
+      img.decoding = 'async';
+      img.addEventListener('error', function () {
+        // Degradacao elegante caso algum arquivo ainda nao esteja no CDN.
+        item.replaceChildren(e('span', 'tb26-brands__fallback', entry[1]));
+        warn('Marca sem arquivo: ' + entry[0]);
+      }, {once:true});
+      item.appendChild(img);
+      track.appendChild(item);
+    });
+    frame.appendChild(track);
+    var controls = e('div', 'tb26-brands__controls');
+    var previous = e('button', 'tb26-brands__arrow', '‹');
+    previous.type = 'button';
+    previous.setAttribute('aria-label', 'Marcas anteriores');
+    previous.setAttribute('aria-controls', track.id);
+    var next = e('button', 'tb26-brands__arrow', '›');
+    next.type = 'button';
+    next.setAttribute('aria-label', 'Próximas marcas');
+    next.setAttribute('aria-controls', track.id);
+    var status = e('span', 'tb26-brands__status');
+    status.setAttribute('aria-live', 'off');
+    function visibleCount() {
+      if (win.matchMedia('(max-width: 767px)').matches) return Math.max(1, Math.min(3, Number(cfg.marcas.porRolagemMobile) || 3));
+      if (win.matchMedia('(max-width: 1199px)').matches) return 5;
+      return 6;
+    }
+    function measureStep() {
+      var child = track.querySelector('.tb26-brands__item');
+      if (!child) return 0;
+      var style = getComputedStyle(track);
+      var gap = parseFloat(style.columnGap || style.gap) || 0;
+      return (child.getBoundingClientRect().width + gap) * visibleCount();
+    }
+    function refreshControls() {
+      var max = Math.max(0, track.scrollWidth - track.clientWidth);
+      previous.disabled = track.scrollLeft < 2;
+      next.disabled = track.scrollLeft >= max - 2;
+      var first = track.querySelector('.tb26-brands__item');
+      var unit = first ? first.getBoundingClientRect().width + (parseFloat(getComputedStyle(track).gap) || 0) : 1;
+      var start = Math.min(brandsList.length, Math.round(track.scrollLeft / Math.max(unit, 1)) + 1);
+      status.textContent = 'Exibindo marcas ' + start + ' a ' + Math.min(brandsList.length, start + visibleCount() - 1);
+    }
+    function move(direction) {
+      var amount = measureStep();
+      if (!amount) return;
+      var reduce = win.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      track.scrollBy({left: direction * amount, behavior: reduce ? 'auto' : 'smooth'});
+    }
+    previous.addEventListener('click', function () { move(-1); });
+    next.addEventListener('click', function () { move(1); });
+    track.addEventListener('scroll', refreshControls, {passive: true});
+    win.addEventListener('resize', refreshControls, {passive: true});
+    append(controls, previous, status, next);
+    append(frame, controls);
+    append(container, frame);
+    append(section, container);
+    // Chamado apos o layout concluir o calculo das larguras.
+    win.requestAnimationFrame(refreshControls);
+    state.marcas = {fonte:'logos individuais', quantidade:brandsList.length, mobilePorRolagem:3};
+    return section;
   }
   function hero() {
     var sec = e('section', 'tb26-hero'); var img = image('fullbanner.webp', 'Mais de 50.000 itens para manter sua operação em movimento - TractorBel', 2549, 986, true);
