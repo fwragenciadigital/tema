@@ -6,7 +6,7 @@
 (function (win, doc) {
   'use strict';
   if (win.TractorBel2026) return;
-  var VERSION = '1.13.0';
+  var VERSION = '1.14.0';
   // Assets oficiais da TractorBel, ja hospedados na Loja Integrada.
   // Manter os nomes e extensoes ORIGINAIS, sem converter .jpg/.png para .webp.
   // O nome logico pode continuar .webp para compatibilidade com os componentes existentes.
@@ -72,7 +72,7 @@
       textoDepois: ' é referência no segmento de peças novas, seminovas e insumos mecânicos para tratores, escavadeiras e máquinas pesadas.'
     },
     home: { ativo: true },
-    produto: { ativo: true, compraFixaMobile: true, pixEmDestaque: true, resumoRapido: true },
+    produto: { ativo: true, compraFixaMobile: true, pixEmDestaque: true, resumoRapido: true, resumoFixo: true },
     catalogo: { ativo: true, animacao: true },
     rodape: { ativo: true },
     vitrines: { ativo: true, destaques: 10, miniaturas: 8, maisVendidos: 10 },
@@ -1419,6 +1419,91 @@
       } else floatingBar.classList.add('tb26-pdp__mobile-bar--visible');
     }
     doc.body.classList.add('tb26-with-pdp');
+    // Reestiliza #resumo-produto criado pelo script FWR antigo sem substituir
+    // preco, estoque, variacoes nem o link/botao de compra da Loja Integrada.
+    if (nativeBuy && cfg.produto.resumoFixo !== false) {
+      (function enhanceNativeStickySummary() {
+        var rootObserved = doc.querySelector('#corpo') || doc.body;
+        var summaryObserver = null;
+        function applyEnhancement() {
+          var bar = doc.querySelector('#resumo-produto');
+          var floating = bar && bar.querySelector('.produto-flutuante');
+          if (!floating) return false;
+          if (bar.classList.contains('tb26-resumo-enhanced')) return true;
+          var actions = floating.querySelector('.acoes-produto');
+          if (!actions) return false;
+          var titleNode = details.querySelector('.info-principal-produto h1.nome-produto, .info-principal-produto .nome-produto');
+          var nameText = titleNode && (titleNode.textContent || '').replace(/\s+/g,' ').trim();
+          var existingPhoto = floating.querySelector(':scope > .image');
+          var existingName = floating.querySelector(':scope > .nome-produto');
+          var identity = e('div','tb26-resumo__identity');
+          var figure = e('div','tb26-resumo__thumb');
+          if (existingPhoto) figure.appendChild(existingPhoto);
+          else if (mainImage) {
+            var thumb = doc.createElement('img');
+            thumb.src = mainImage.currentSrc || mainImage.src;
+            thumb.alt = nameText || 'Foto do produto';
+            thumb.loading = 'eager';thumb.decoding = 'async';
+            figure.appendChild(thumb);
+            if ('MutationObserver' in win) {
+              var imageObserver = new MutationObserver(function(){
+                var next = mainImage.currentSrc || mainImage.src;
+                if (next && thumb.src !== next) thumb.src = next;
+              });
+              imageObserver.observe(mainImage,{attributes:true,attributeFilter:['src','srcset']});
+            }
+          }
+          var meta = e('div','tb26-resumo__meta');
+          var productName = e('strong','tb26-resumo__name',nameText || 'Produto TractorBel');
+          if (existingName) {productName.textContent = (existingName.textContent || '').trim() || productName.textContent;existingName.remove();}
+          var subline = e('span','tb26-resumo__brand','TRACTORBEL · TRATORES E PEÇAS');
+          append(meta,productName,subline);
+          if (figure.children.length) identity.appendChild(figure);
+          identity.appendChild(meta);
+          floating.insertBefore(identity,floating.firstChild);
+          actions.classList.add('tb26-resumo__actions');
+          var cart = actions.querySelector('.comprar .botao-comprar');
+          if (cart) {
+            cart.classList.add('tb26-resumo__buy');
+            cart.setAttribute('aria-label','Comprar '+productName.textContent);
+          }
+          var price = actions.querySelector('.preco-produto');
+          if (price) {
+            price.classList.add('tb26-resumo__prices');
+            var syncPixAvailability = function(){
+              bar.classList.toggle('tb26-resumo--no-pix',!price.querySelector('.desconto-a-vista strong'));
+            };
+            syncPixAvailability();
+            if ('MutationObserver' in win) {
+              var priceNativeObserver = new MutationObserver(syncPixAvailability);
+              priceNativeObserver.observe(price,{subtree:true,childList:true,characterData:true});
+            }
+          }
+          bar.classList.add('tb26-resumo-enhanced');
+          var scrolling = false;
+          function refreshStickyVisibility() {
+            scrolling = false;
+            bar.classList.toggle('tb26-resumo--visible',
+              (win.scrollY || doc.documentElement.scrollTop || 0) > 500 &&
+              !(doc.body.classList.contains('tb26-cart-open')));
+          }
+          win.addEventListener('scroll',function(){
+            if (scrolling) return;
+            scrolling = true;
+            win.requestAnimationFrame(refreshStickyVisibility);
+          },{passive:true});
+          refreshStickyVisibility();
+          state.resumoProduto={ativo:true,origem:'barra nativa #resumo-produto'};
+          return true;
+        }
+        if (!applyEnhancement() && 'MutationObserver' in win) {
+          summaryObserver = new MutationObserver(function(){
+            if (applyEnhancement()) summaryObserver.disconnect();
+          });
+          summaryObserver.observe(rootObserved,{subtree:true,childList:true});
+        }
+      })();
+    }
     state.produto={ativo:true,galeria:thumbLinks.length||1,compraNativa:!!nativeBuy,formasPagamento:!!payments,zoom:!!imageContainer,barraMobile:!!floatingBar};
     // Avoid automatic hiding/translation on the main product image (LCP).
   }

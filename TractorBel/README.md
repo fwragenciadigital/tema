@@ -1,6 +1,6 @@
 # TractorBel 2026 · FWR Agência Digital
 
-**Plataforma:** Loja Integrada. **Projeto:** `TractorBel` na Vercel/GitHub. **Versão:** 1.12.0.
+**Plataforma:** Loja Integrada. **Projeto:** `TractorBel` na Vercel/GitHub. **Versão:** 1.14.0.
 
 ## Estrutura
 - `tractorbel.js`: adaptação DOM-first da LI (topo, home, rodapé, vitrines com produtos reais, menu e carrinho lateral).
@@ -167,3 +167,13 @@ Veja `QA-PDP-V18.md` e `tests/qa-pdp-v18.py`. Homologar com o carrinho e a valid
 - Fundo da foto neutro, titulo limitado a duas linhas, preco e Pix alinhados e CTA amarelo com diagonal.
 - Os elementos de favorito, selo e botoes redundantes sao ocultados sem remover dados/funcionalidades do DOM da Loja Integrada.
 - JS e CSS continuam no mesmo endereco Vercel e o modo preview continua inalterado.
+
+
+## v1.14 — Barra `#resumo-produto` redesenhada
+
+- Reaproveita a barra nativa `#resumo-produto` criada pelo script antigo da loja (`fwrnewnovo1.min.js`). Não cria preço ou checkout paralelo.
+- Identidade premium preta/amarela: miniatura real, título do produto, Pix real mais evidente, preço normal subordinado e botão nativo COMPRAR.
+- Ativa apenas em páginas de produto com o preview TractorBel ou liberação geral; o JS aguarda a inserção tardia de `#resumo-produto` por `MutationObserver`.
+- O cabeçalho e o menu não são afetados; a barra aparece ao rolar mais de 500 px, sem ficar parcialmente visível quando escondida.
+- Mobile/tablet mantém o botão fixo próprio da PDP, agora com a mesma linguagem visual e preço Pix real.
+- A imagem da barra segue a imagem principal quando a variação troca de `src`/`srcset`. A compra é feita exclusivamente pelo link nativo já cadastrado.

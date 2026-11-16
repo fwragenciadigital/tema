@@ -871,3 +871,173 @@ body.tb26-with-header #full-page-loading{display:none!important}
   }
   .tb26-with-catalog #listagemProdutos.tb26-catalog .tb26-catalog-card .imagem-produto img{transition:none!important;transform:none!important}
 }
+
+
+/* TractorBel v1.14 — barra de resumo NATIVA #resumo-produto (apenas PDP em preview/ativa).
+   A LI fornece preço, Pix e CTA. O JS insere somente a identidade visual/miniatura. */
+.tb26-with-pdp #resumo-produto.tb26-resumo-enhanced{
+  position:fixed!important;left:0!important;right:0!important;bottom:0!important;
+  width:100%!important;margin:0!important;box-sizing:border-box!important;
+  z-index:850!important;background:linear-gradient(112deg,#252525 0%,#161616 100%)!important;
+  border:0!important;border-top:3px solid #ffbd00!important;
+  box-shadow:0 -18px 45px rgba(0,0,0,.23)!important;
+  opacity:0!important;visibility:hidden!important;pointer-events:none!important;
+  transform:translate3d(0,110%,0)!important;
+  transition:transform .32s cubic-bezier(.22,1,.36,1),opacity .24s ease,visibility .24s!important;
+}
+.tb26-with-pdp #resumo-produto.tb26-resumo-enhanced.tb26-resumo--visible{
+  opacity:1!important;visibility:visible!important;pointer-events:auto!important;
+  transform:translate3d(0,0,0)!important;
+}
+.tb26-with-pdp #resumo-produto.tb26-resumo-enhanced>.conteiner{
+  width:min(100%,1480px)!important;max-width:1480px!important;
+  margin-inline:auto!important;padding:0 clamp(18px,3.3vw,52px)!important;
+  box-sizing:border-box!important;
+}
+.tb26-with-pdp #resumo-produto.tb26-resumo-enhanced .produto-flutuante{
+  display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;
+  align-items:center!important;gap:clamp(18px,3vw,48px)!important;
+  width:100%!important;min-height:100px!important;box-sizing:border-box!important;
+  padding:12px 0!important;margin:0!important;background:transparent!important;
+}
+.tb26-with-pdp #resumo-produto .tb26-resumo__identity{
+  display:flex!important;align-items:center!important;gap:16px!important;
+  flex:1 1 auto!important;min-width:0!important;
+}
+.tb26-with-pdp #resumo-produto .tb26-resumo__thumb{
+  width:72px!important;height:72px!important;flex:0 0 72px!important;
+  display:grid!important;place-items:center!important;overflow:hidden!important;
+  padding:5px!important;box-sizing:border-box!important;
+  border-radius:9px!important;background:#fff!important;border:1px solid #ffffff35!important;
+}
+.tb26-with-pdp #resumo-produto .tb26-resumo__thumb img,
+.tb26-with-pdp #resumo-produto .tb26-resumo__thumb .image img{
+  width:100%!important;height:100%!important;max-height:100%!important;max-width:100%!important;
+  margin:0!important;object-fit:contain!important;display:block!important;
+}
+.tb26-with-pdp #resumo-produto .tb26-resumo__meta{
+  display:flex!important;flex-direction:column!important;justify-content:center!important;
+  gap:7px!important;min-width:0!important;line-height:1.3!important;
+}
+.tb26-with-pdp #resumo-produto .tb26-resumo__name{
+  display:-webkit-box!important;-webkit-box-orient:vertical!important;-webkit-line-clamp:2!important;
+  overflow:hidden!important;max-width:44ch!important;margin:0!important;
+  color:#fff!important;font:750 clamp(12px,.92vw,15px)/1.34 Arial,sans-serif!important;
+  text-transform:uppercase!important;letter-spacing:.012em!important;
+}
+.tb26-with-pdp #resumo-produto .tb26-resumo__brand{
+  color:#ffcf42!important;letter-spacing:.11em!important;
+  font:750 10px/1.25 Arial,sans-serif!important;
+}
+.tb26-with-pdp #resumo-produto .produto-flutuante .acoes-produto.tb26-resumo__actions{
+  float:none!important;position:static!important;display:flex!important;flex-flow:row nowrap!important;
+  align-items:center!important;justify-content:flex-end!important;
+  gap:clamp(15px,2vw,32px)!important;min-width:0!important;
+  padding:0!important;margin:0!important;width:auto!important;height:auto!important;
+  background:none!important;border:0!important;box-shadow:none!important;
+}
+.tb26-with-pdp #resumo-produto .produto-flutuante .abriga-precos{
+  float:none!important;flex:0 1 auto!important;min-width:0!important;
+  margin:0!important;padding:0!important;text-align:right!important;
+}
+.tb26-with-pdp #resumo-produto .produto-flutuante .preco-produto.tb26-resumo__prices{
+  display:flex!important;flex-direction:column-reverse!important;
+  justify-content:center!important;gap:5px!important;align-items:flex-end!important;
+  float:none!important;min-width:0!important;width:auto!important;margin:0!important;
+  background:transparent!important;padding:0!important;border:0!important;
+}
+.tb26-with-pdp #resumo-produto .produto-flutuante .preco-produto .desconto-a-vista{
+  display:flex!important;align-items:baseline!important;justify-content:flex-end!important;
+  flex-wrap:wrap!important;gap:6px!important;
+  margin:0!important;padding:0!important;
+  font-size:0!important;line-height:1.12!important;color:transparent!important;
+  background:transparent!important;white-space:normal!important;
+}
+.tb26-with-pdp #resumo-produto .preco-produto .desconto-a-vista::before{
+  content:'NO PIX';display:inline-block;align-self:center;
+  color:#ffcd36!important;background:#ffc3001c!important;border:1px solid #ffc30044!important;
+  padding:5px 7px;border-radius:4px;font:750 9px/1 Arial,sans-serif!important;letter-spacing:.055em;
+}
+.tb26-with-pdp #resumo-produto .preco-produto .desconto-a-vista strong{
+  display:inline!important;color:#ffca18!important;
+  font:900 clamp(21px,2.15vw,30px)/1.15 Arial,sans-serif!important;
+  font-variant-numeric:tabular-nums!important;letter-spacing:-.025em!important;
+  white-space:nowrap!important;
+}
+.tb26-with-pdp #resumo-produto .produto-flutuante .preco-produto>div{
+  display:flex!important;align-items:baseline!important;justify-content:flex-end!important;gap:7px!important;
+  margin:0!important;padding:0!important;white-space:nowrap!important;
+}
+.tb26-with-pdp #resumo-produto .produto-flutuante .preco-produto .preco-promocional{
+  font:600 clamp(12px,1.02vw,15px)/1.2 Arial,sans-serif!important;
+  color:#d3d3d3!important;margin:0!important;
+}
+.tb26-with-pdp #resumo-produto .produto-flutuante .preco-produto .preco-venda{
+  font:400 10px/1.25 Arial,sans-serif!important;color:#888!important;
+  margin:0!important;text-decoration:line-through!important;
+}
+.tb26-with-pdp #resumo-produto .produto-flutuante .comprar{
+  float:none!important;display:flex!important;align-items:center!important;justify-content:center!important;
+  min-width:0!important;width:auto!important;margin:0!important;padding:0!important;
+}
+.tb26-with-pdp #resumo-produto .produto-flutuante a.botao-comprar.tb26-resumo__buy{
+  display:flex!important;align-items:center!important;justify-content:center!important;gap:9px!important;
+  width:clamp(155px,12vw,200px)!important;min-width:0!important;height:56px!important;
+  box-sizing:border-box!important;padding:0 20px!important;margin:0!important;
+  border:0!important;border-radius:8px!important;background:#ffc000!important;
+  color:#181818!important;box-shadow:0 7px 18px #0005!important;
+  text-transform:uppercase!important;text-decoration:none!important;white-space:nowrap!important;
+  font:850 14px/1.1 Arial,sans-serif!important;
+  transition:background .2s ease,transform .2s ease!important;
+}
+.tb26-with-pdp #resumo-produto .produto-flutuante a.botao-comprar.tb26-resumo__buy:hover{
+  background:#ffd448!important;transform:translateY(-2px)!important;
+}
+.tb26-with-pdp #resumo-produto .produto-flutuante a.botao-comprar.tb26-resumo__buy i{
+  color:inherit!important;font-size:19px!important;margin:0!important;
+}
+.tb26-with-pdp #resumo-produto .produto-flutuante .comprar .disponibilidade-produto{display:none!important}
+.tb26-with-pdp #resumo-produto a:focus-visible{outline:3px solid #fff!important;outline-offset:3px!important}
+/* A barra nativa e intencionalmente apenas desktop. Mantem a barra mobile do TractorBel. */
+@media(max-width:767px){
+  .tb26-with-pdp #resumo-produto.tb26-resumo-enhanced{display:none!important}
+  .tb26-with-pdp .tb26-pdp__mobile-bar{
+    background:linear-gradient(115deg,#252525,#171717)!important;
+    border-top:3px solid #ffc000!important;box-shadow:0 -10px 35px #0004!important;
+    min-height:80px!important;padding:11px 16px calc(11px + env(safe-area-inset-bottom))!important;
+  }
+  .tb26-with-pdp .tb26-pdp__mobile-info small{color:#bcbcbc!important;font-size:10px!important;font-weight:650!important;text-transform:uppercase!important;letter-spacing:.035em!important}
+  .tb26-with-pdp .tb26-pdp__mobile-price{color:#ffca18!important;font-size:clamp(18px,4.7vw,23px)!important;font-variant-numeric:tabular-nums!important}
+  .tb26-with-pdp .tb26-pdp__mobile-cta{
+    background:#ffc000!important;color:#171717!important;border-radius:7px!important;
+    min-height:48px!important;font:850 13px/1.1 Arial,sans-serif!important;
+    box-shadow:0 4px 13px #0003!important;
+  }
+  .tb26-with-pdp.tb26-pdp-mobile-fixed #corpo{padding-bottom:105px!important}
+}
+@media(max-width:420px){
+  .tb26-with-pdp .tb26-pdp__mobile-bar{gap:10px!important;padding-inline:12px!important}
+  .tb26-with-pdp .tb26-pdp__mobile-cta{padding:13px 16px!important;min-width:112px!important}
+}
+@media(prefers-reduced-motion:reduce){
+  .tb26-with-pdp #resumo-produto.tb26-resumo-enhanced,
+  .tb26-with-pdp #resumo-produto .produto-flutuante a.botao-comprar.tb26-resumo__buy{transition:none!important}
+}
+
+/* Tablets 768–991px: mantém a barra nativa compacta, sem lacuna de CTA. */
+@media (min-width:768px) and (max-width:991px){
+  .tb26-with-pdp #resumo-produto.tb26-resumo-enhanced.hidden-tablet{display:block!important}
+  .tb26-with-pdp #resumo-produto.tb26-resumo-enhanced>.conteiner{padding:0 18px!important}
+  .tb26-with-pdp #resumo-produto .produto-flutuante{gap:12px!important}
+  .tb26-with-pdp #resumo-produto .tb26-resumo__thumb{width:56px!important;height:56px!important;flex-basis:56px!important}
+  .tb26-with-pdp #resumo-produto .tb26-resumo__identity{gap:10px!important}
+  .tb26-with-pdp #resumo-produto .tb26-resumo__name{font-size:11px!important;max-width:27ch!important}
+  .tb26-with-pdp #resumo-produto .tb26-resumo__brand{font-size:8px!important}
+  .tb26-with-pdp #resumo-produto .produto-flutuante .acoes-produto.tb26-resumo__actions{gap:12px!important}
+  .tb26-with-pdp #resumo-produto .preco-produto .desconto-a-vista strong{font-size:20px!important}
+  .tb26-with-pdp #resumo-produto .produto-flutuante a.botao-comprar.tb26-resumo__buy{width:132px!important;height:50px!important;font-size:12px!important}
+}
+/* Em peças sem desconto Pix, mantém o preço de venda como valor principal. */
+.tb26-with-pdp #resumo-produto.tb26-resumo--no-pix .preco-produto .preco-promocional{
+  color:#ffca18!important;font-size:clamp(21px,2.1vw,29px)!important;font-weight:850!important;
+}
