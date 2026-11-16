@@ -1,12 +1,12 @@
 /*
- * TractorBel 2026 - FWR Agencia Digital - v1.9.0
+ * TractorBel 2026 - FWR Agencia Digital - v1.10.0
  * Camada visual da Loja Integrada. Sem checkout ou precificacao paralela.
  * Editavel por window.TractorBelSettings no HTML da LI.
  */
 (function (win, doc) {
   'use strict';
   if (win.TractorBel2026) return;
-  var VERSION = '1.9.0';
+  var VERSION = '1.10.0';
   // Assets oficiais da TractorBel, ja hospedados na Loja Integrada.
   // Manter os nomes e extensoes ORIGINAIS, sem converter .jpg/.png para .webp.
   // O nome logico pode continuar .webp para compatibilidade com os componentes existentes.
@@ -1310,7 +1310,11 @@
         infoRow('message','Atendimento especializado','Orientação antes de comprar')
       );
       var quickLabel=e('h2','tb26-pdp__quick-title','Informações importantes');
-      append(infoStack,quickLabel,quick);
+      // Um unico bloco real: fica sob as miniaturas no desktop e retorna
+      // abaixo de Comprar no mobile, preservando os dados e eventos nativos.
+      var quickPanel=e('div','tb26-pdp__quick-panel');
+      append(quickPanel,quickLabel,quick);
+      append(infoStack,quickPanel);
       var disclosures=e('div','tb26-pdp__disclosures');
       var overview=e('div','tb26-pdp__disclosure-body');
       var brief=productSummary();
@@ -1352,7 +1356,25 @@
       append(disclosures,detailRow('Dúvidas e atendimento',assistance,false));
       append(infoStack,disclosures);
       var block=nativeBuy.closest('.comprar');
-      if(block)block.insertAdjacentElement('afterend',infoStack);
+      if (block) {
+        block.insertAdjacentElement('afterend',infoStack);
+        var desktopLayout=win.matchMedia('(min-width: 768px)');
+        function relocateImportantInfo() {
+          if (desktopLayout.matches) {
+            // A LI pode ocultar as miniaturas quando existe uma foto apenas.
+            // Neste caso, posicionar imediatamente apos a imagem principal.
+            var after=media.querySelector('.produto-thumbs') || imageContainer;
+            if (after && after.parentNode === media) after.insertAdjacentElement('afterend',quickPanel);
+            else media.appendChild(quickPanel);
+          } else if (quickPanel.parentNode !== infoStack) {
+            // Mesma posicao mobile original, antes dos accordions.
+            infoStack.insertBefore(quickPanel,disclosures);
+          }
+        }
+        relocateImportantInfo();
+        if (desktopLayout.addEventListener) desktopLayout.addEventListener('change',relocateImportantInfo);
+        else if (desktopLayout.addListener) desktopLayout.addListener(relocateImportantInfo);
+      }
     }
     var floatingBar=null;
     if (nativeBuy && cfg.produto.compraFixaMobile !== false) {

@@ -130,3 +130,12 @@ Foi adicionado o módulo `mountProductPage()` no `tractorbel.js`, habilitado por
 - **Não** foi configurado número de parcelas sem juros, pois a página consultada só apresenta valores por método de pagamento.
 
 Veja `QA-PDP-V18.md` e `tests/qa-pdp-v18.py`. Homologar com o carrinho e a validação real da Loja Integrada antes da liberação geral.
+
+
+## v1.10.0 — Informações importantes responsivas
+
+- Desktop/tablet (a partir de 768 px): o bloco **Informações importantes** aparece na coluna da galeria, imediatamente abaixo das miniaturas (ou da foto principal quando o produto tem uma imagem só).
+- Mobile (até 767 px): o **mesmo bloco**, sem duplicação, permanece abaixo do botão Comprar e antes dos acordéons de descrição/envio/pagamento/atendimento.
+- Reposicionamento automático em mudanças de orientação ou redimensionamento usando `matchMedia`.
+- Sem mudanças no Pix, frete, parcelamento, checkout ou demais componentes da PDP.
+- JS/CSS continuam em `https://tractorbel-2026.vercel.app/tractorbel.js` e `.../tractorbel.css` (sem sufixos de versão nos links).

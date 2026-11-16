@@ -514,7 +514,7 @@ body.tb26-with-header #full-page-loading{display:none!important}
 .tb26-with-pdp .tb26-pdp__description p,.tb26-with-pdp .tb26-pdp__description li{font-size:15px!important;line-height:1.7!important;color:#444}
 .tb26-with-pdp .tb26-pdp__description ul,.tb26-with-pdp .tb26-pdp__description ol{padding-left:23px!important;margin:10px 0 20px!important}
 .tb26-with-pdp .tb26-pdp__description h3,.tb26-with-pdp .tb26-pdp__description h4{font-size:18px!important;margin-top:24px!important;margin-bottom:12px!important}
-/* TractorBel PDP 1.9 — destaque verdadeiro do Pix e informacoes rapidas. */
+/* TractorBel PDP 1.10 (base v1.9) — destaque verdadeiro do Pix e informacoes rapidas. */
 .tb26-with-pdp .tb26-pdp__pix-feature[hidden],
 .tb26-with-pdp .tb26-pdp__pix-saving[hidden]{display:none!important}
 .tb26-with-pdp .tb26-pdp__pix-feature{
@@ -636,4 +636,20 @@ body.tb26-with-header #full-page-loading{display:none!important}
 @media(prefers-reduced-motion:reduce){
   .tb26-with-pdp .tb26-pdp__pix-feature,
   .tb26-with-pdp .tb26-pdp__disclosure{transition:none!important}
+}
+
+/* TractorBel PDP v1.10: informacoes importantes sob a galeria no desktop.
+   No mobile, o proprio JS devolve o unico bloco para depois do CTA. */
+.tb26-with-pdp .tb26-pdp__quick-panel{min-width:0;box-sizing:border-box;max-width:100%}
+@media(min-width:768px){
+  .tb26-with-pdp .tb26-pdp__media > .tb26-pdp__quick-panel{
+    margin:20px 0 0;padding:17px 18px 18px;background:#fff;
+    border:1px solid #eceae5;border-radius:14px;
+  }
+  .tb26-with-pdp .tb26-pdp__media > .tb26-pdp__quick-panel .tb26-pdp__quick-title{margin-bottom:12px!important}
+}
+@media(max-width:767px){
+  .tb26-with-pdp .tb26-pdp__after-buy > .tb26-pdp__quick-panel{
+    margin:0;padding:0;background:transparent;border:0;border-radius:0;
+  }
 }
