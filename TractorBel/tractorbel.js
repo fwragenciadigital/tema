@@ -1,12 +1,12 @@
 /*
- * TractorBel 2026 - FWR Agencia Digital - v1.6.0
+ * TractorBel 2026 - FWR Agencia Digital - v1.7.0
  * Camada visual da Loja Integrada. Sem checkout ou precificacao paralela.
  * Editavel por window.TractorBelSettings no HTML da LI.
  */
 (function (win, doc) {
   'use strict';
   if (win.TractorBel2026) return;
-  var VERSION = '1.6.0';
+  var VERSION = '1.7.0';
   // Assets oficiais da TractorBel, ja hospedados na Loja Integrada.
   // Manter os nomes e extensoes ORIGINAIS, sem converter .jpg/.png para .webp.
   // O nome logico pode continuar .webp para compatibilidade com os componentes existentes.
@@ -43,7 +43,34 @@
     geral: { ativo: true, publicarNaLoja: false, debug: false },
     imagensBase: ASSET_CDN_BASE,
     topo: { ativo: true, menu: true },
-    marcas: { ativo: true, porRolagemMobile: 3, imagensBase: 'https://tractorbel-2026.vercel.app/assets/marcas/' },
+    marcas: {
+      ativo: true, porRolagemMobile: 3, imagensBase: 'https://tractorbel-2026.vercel.app/assets/marcas/',
+      itens: [
+        { imagem: 'cat.png', nome: 'CAT', ativo: true },
+        { imagem: 'sany.png', nome: 'SANY', ativo: true },
+        { imagem: 'xcmg.png', nome: 'XCMG', ativo: true },
+        { imagem: 'komatsu.png', nome: 'Komatsu', ativo: true },
+        { imagem: 'volvo.png', nome: 'Volvo', ativo: true },
+        { imagem: 'case.png', nome: 'CASE', ativo: true },
+        { imagem: 'randon.png', nome: 'Randon', ativo: true },
+        { imagem: 'john-deere.png', nome: 'John Deere', ativo: true }
+      ]
+    },
+    beneficios: {
+      ativo: true, itens: [
+        { ativo: true, texto: 'ENVIAMOS PARA TODO O BRASIL' },
+        { ativo: true, texto: 'PARCELE NO CARTÃO DE CRÉDITO' },
+        { ativo: true, texto: 'PAGUE À VISTA E GANHE DESCONTO' },
+        { ativo: true, texto: 'AMBIENTE DE COMPRA 100% SEGURO' }
+      ]
+    },
+    institucional: {
+      ativo: true,
+      titulo: 'NO BRASIL, somos uma das maiores vendedoras de peças, equipamentos e serviços.',
+      textoAntes: 'A ',
+      destaque: 'mais de 40 anos, a Tractorbel',
+      textoDepois: ' é referência no segmento de peças novas, seminovas e insumos mecânicos para tratores, escavadeiras e máquinas pesadas.'
+    },
     home: { ativo: true },
     rodape: { ativo: true },
     vitrines: { ativo: true, destaques: 10, miniaturas: 8, maisVendidos: 10 },
@@ -731,11 +758,10 @@
     track.setAttribute('aria-label', 'Marcas de máquinas e equipamentos');
     track.tabIndex = 0;
 
-    var brandsList = [
-      ['cat.png', 'CAT'], ['sany.png', 'SANY'], ['xcmg.png', 'XCMG'],
-      ['komatsu.png', 'Komatsu'], ['volvo.png', 'Volvo'], ['case.png', 'CASE'],
-      ['randon.png', 'Randon'], ['john-deere.png', 'John Deere']
-    ];
+    var brandsList = (Array.isArray(cfg.marcas.itens) ? cfg.marcas.itens : [])
+      .filter(function (entry) { return entry && entry.ativo !== false && entry.imagem && entry.nome; })
+      .map(function (entry) { return [String(entry.imagem), String(entry.nome)]; });
+    if (!brandsList.length) { section.appendChild(container); return section; }
     var base = String(cfg.marcas.imagensBase || 'https://tractorbel-2026.vercel.app/assets/marcas/');
     if (!/\/$/.test(base)) base += '/';
     // O dominio de desenvolvimento pode ser trocado pelo CDN da LI apos upload dos recortes.
@@ -775,7 +801,7 @@
     function visibleCount() {
       if (win.matchMedia('(max-width: 767px)').matches) return Math.max(1, Math.min(3, Number(cfg.marcas.porRolagemMobile) || 3));
       if (win.matchMedia('(max-width: 1199px)').matches) return 5;
-      return 6;
+      return 8;
     }
     function measureStep() {
       var child = track.querySelector('.tb26-brands__item');
@@ -786,6 +812,7 @@
     }
     function refreshControls() {
       var max = Math.max(0, track.scrollWidth - track.clientWidth);
+      controls.hidden = max <= 2;
       previous.disabled = track.scrollLeft < 2;
       next.disabled = track.scrollLeft >= max - 2;
       var first = track.querySelector('.tb26-brands__item');
@@ -812,22 +839,63 @@
     state.marcas = {fonte:'logos individuais', quantidade:brandsList.length, mobilePorRolagem:3};
     return section;
   }
-  function hero() {
-    var sec = e('section', 'tb26-hero'); var img = image('fullbanner.webp', 'Mais de 50.000 itens para manter sua operação em movimento - TractorBel', 2549, 986, true);
-    append(sec, link('/pecas-novas', 'tb26-hero__link')); sec.querySelector('a').appendChild(img); return sec;
-  }
+  // Componentes independentes para espelhar o layout aprovado.
+  // Cada item de beneficio tem seu proprio controle ativo/texto em defaults.beneficios.itens.
   function benefits() {
-    var bar = e('div', 'tb26-benefits'); var inner = e('div', 'tb26-container tb26-benefits__grid');
-    [
-      ['<path d="m12 2 9 5v10l-9 5-9-5V7l9-5Z"/><path d="m3 7 9 5 9-5M12 12v10"/>','ENVIAMOS PARA TODO O BRASIL'],
-      ['<rect x="2" y="4" width="20" height="16" rx="2"/><path d="M2 9h20M6 16h5"/>','PARCELE NO CARTÃO DE CRÉDITO'],
-      ['<path d="M19 5 5 19"/><circle cx="6.5" cy="6.5" r="2"/><circle cx="17.5" cy="17.5" r="2"/>','PAGUE À VISTA E GANHE DESCONTO'],
-      ['<rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/>','AMBIENTE DE COMPRA 100% SEGURO']
-    ].forEach(function (v) { var cell = e('div', 'tb26-benefits__item'); var icon=e('span','tb26-benefits__icon'); icon.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+v[0]+'</svg>'; append(cell, icon, e('span', '', v[1])); inner.appendChild(cell); }); append(bar, inner); return bar;
+    var bar = e('section', 'tb26-benefits');
+    bar.dataset.tb26Section = 'beneficios';
+    bar.setAttribute('aria-label', 'Vantagens de comprar na TractorBel');
+    var inner = e('div', 'tb26-container tb26-benefits__grid');
+    var icons = [
+      '<path d="m12 2 9 5v10l-9 5-9-5V7l9-5Z"/><path d="m3 7 9 5 9-5M12 12v10"/>',
+      '<rect x="2" y="4" width="20" height="16" rx="2"/><path d="M2 9h20M6 16h5"/>',
+      '<path d="M19 5 5 19"/><circle cx="6.5" cy="6.5" r="2"/><circle cx="17.5" cy="17.5" r="2"/>',
+      '<rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/>'
+    ];
+    (Array.isArray(cfg.beneficios.itens) ? cfg.beneficios.itens : []).forEach(function (item, index) {
+      if (!item || item.ativo === false || !item.texto) return;
+      var cell = e('div', 'tb26-benefits__item');
+      var icon = e('span', 'tb26-benefits__icon');
+      icon.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + (icons[index] || icons[0]) + '</svg>';
+      append(cell, icon, e('span', 'tb26-benefits__text', String(item.texto)));
+      inner.appendChild(cell);
+    });
+    if (!inner.children.length) return null;
+    bar.appendChild(inner);
+    state.beneficios = {quantidade:inner.children.length};
+    return bar;
   }
+  // Imagem aprovada e uma arte SEM o texto; insere o conteudo em HTML editavel e acessivel.
   function institutionalBanner() {
+    var cfgBanner = cfg.institucional;
     var sec = e('section', 'tb26-institutional-banner tb26-container');
-    sec.appendChild(image('vendedores.webp', 'A TractorBel é referência em peças, equipamentos e serviços no Brasil há mais de 40 anos', 1719, 402)); return sec;
+    sec.dataset.tb26Section = 'institucional';
+    var art = e('div', 'tb26-institutional-banner__art');
+    var photo = image('vendedores.webp', '', 1719, 402);
+    photo.setAttribute('aria-hidden', 'true');
+    var copy = e('div', 'tb26-institutional-banner__copy');
+    var title = e('h2', 'tb26-institutional-banner__title', String(cfgBanner.titulo || ''));
+    var description = e('p', 'tb26-institutional-banner__description');
+    description.appendChild(doc.createTextNode(String(cfgBanner.textoAntes || '')));
+    var emphasis = e('strong', '', String(cfgBanner.destaque || ''));
+    description.appendChild(emphasis);
+    description.appendChild(doc.createTextNode(String(cfgBanner.textoDepois || '')));
+    append(copy, title, description);
+    append(art, photo, copy);
+    sec.appendChild(art);
+    state.institucional = {textoAtivo:true, imagem:asset('vendedores.webp')};
+    return sec;
+  }
+  function introSection() {
+    var wrap = e('div', 'tb26-intro');
+    wrap.dataset.tb26Section = 'introducao';
+    if (cfg.marcas && cfg.marcas.ativo) wrap.appendChild(brands());
+    if (cfg.beneficios && cfg.beneficios.ativo) {
+      var bar = benefits();
+      if (bar) wrap.appendChild(bar);
+    }
+    if (cfg.institucional && cfg.institucional.ativo) wrap.appendChild(institutionalBanner());
+    return wrap.childElementCount ? wrap : null;
   }
   function categories() {
     var sec = e('section', 'tb26-categories'); setBackground(sec, 'bg-pecas.webp', 'linear-gradient(#201811b8,#201811b8)');
@@ -861,7 +929,7 @@
     a.appendChild(image('insta.webp', 'Publicações da TractorBel sobre máquinas, peças e ofertas', 1720, 522)); append(inner, a); append(sec, inner); return sec;
   }
   // Animacao uma unica vez ao entrar no viewport. Transform/opacity nao provocam CLS.
-  // Nao aplicar na hero, para preservar LCP. Nem no conteudo nativo da plataforma.
+  // Nao aplicar fade ao topo inteiro (LCP); elementos institucionais abaixo sao elegiveis.
   function setupMotion(root) {
     if (!root || !cfg.movimento || cfg.movimento.ativo === false) return;
     var motion = cfg.movimento;
@@ -891,7 +959,7 @@
       }, { root: null, rootMargin: '0px 0px -32px 0px', threshold: 0.08 });
     }
     var selectors = [
-      '.tb26-benefits__item', '.tb26-institutional-banner img', '.tb26-title',
+      '.tb26-benefits__item', '.tb26-institutional-banner__art', '.tb26-title',
       '.tb26-product', '.tb26-categories__card', '.tb26-miniatures__art',
       '.tb26-solutions__card', '.tb26-company__info', '.tb26-company__contact',
       '.tb26-instagram__feed', '.tb26-footer__col', '.tb26-footer__bottom'
@@ -926,7 +994,8 @@
     var native = doc.querySelector('#corpo');
     if (!native) { warn('Elemento #corpo não identificado; home nativa preservada.'); return; }
     var root = e('main', 'tb26-home'); root.id = 'tb26-home';
-    append(root, brands(), hero(), benefits(), institutionalBanner());
+    var intro = introSection();
+    if (intro) root.appendChild(intro);
     var homeProducts = getProducts(findNativeShelf('Destaques') || native, Math.max(10, cfg.vitrines.destaques));
     var latest = getProducts(findNativeShelf('Lançamentos') || native, Math.max(10, cfg.vitrines.maisVendidos));
     var bestNative = findNativeShelf('Mais vendidos');

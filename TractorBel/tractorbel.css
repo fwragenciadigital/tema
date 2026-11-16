@@ -1,4 +1,4 @@
-/* TractorBel 2026 - FWR Agencia Digital v1.6.0 - CSS escopado */
+/* TractorBel 2026 - FWR Agencia Digital v1.7.0 - CSS escopado */
 :root{--tb26-yellow:#ffbc00;--tb26-yellow-strong:#ffc400;--tb26-dark:#191919;--tb26-ink:#252525;--tb26-muted:#929292;--tb26-width:1660px;--tb26-gutter:clamp(16px,4vw,70px)}
 .tb26-active{overflow-x:clip}
 .tb26-active .tb26-home,.tb26-active .tb26-header,.tb26-active .tb26-footer{box-sizing:border-box;font-family:'Century Gothic','Eurostile',Montserrat,Arial,sans-serif}
@@ -28,9 +28,6 @@
 .tb26-home{background:#fff;color:var(--tb26-ink);min-height:600px;overflow:hidden}
 .tb26-brands{background:linear-gradient(180deg,#202020 0%,#292929 62%,#676767 100%);color:#fff;padding:20px 0 36px}
 .tb26-brands__title{font-size:clamp(19px,2vw,38px);font-weight:400;text-align:center;letter-spacing:.01em;margin:0 0 21px;line-height:1.25;color:#fff}
-.tb26-hero{background:#1e1e1e}
-.tb26-hero__link,.tb26-hero__link img{display:block;width:100%}
-.tb26-hero img{height:auto;aspect-ratio:2549/986;object-fit:cover}
 .tb26-benefits{background:linear-gradient(#545454,#ededed);padding:27px 0 38px}
 .tb26-benefits__grid{display:grid;grid-template-columns:repeat(4,1fr);gap:24px}
 .tb26-benefits__item{display:flex;align-items:center;gap:9px;color:#e3e3e3;font:600 clamp(11px,.9vw,16px)/1.25 Arial,sans-serif;text-transform:uppercase}
@@ -112,7 +109,7 @@
 .tb26-footer__bottom span{white-space:nowrap;color:#fff;font-weight:700}
 @media(max-width:1450px){.tb26-header__wrap{gap:16px}.tb26-logo{flex-basis:210px}.tb26-nav{gap:9px}.tb26-nav__link{font-size:10px}.tb26-product{flex-basis:calc((100% - 36px)/4)}}
 @media(max-width:1100px){.tb26-header,.tb26-header__wrap{min-height:85px}.tb26-header__wrap{height:85px}.tb26-logo{flex-basis:195px}.tb26-nav{position:absolute;top:100%;left:0;right:0;display:none;flex-direction:column;align-items:stretch;background:#191919;padding:18px var(--tb26-gutter) 25px;box-shadow:0 15px 20px #0005}.tb26-menu-open .tb26-nav{display:flex}.tb26-nav__link{font-size:14px;padding:14px 5px;border-bottom:1px solid #444}.tb26-actions{margin-left:auto}.tb26-mobile-toggle{display:grid;font-size:27px}.tb26-benefits__grid{grid-template-columns:repeat(2,1fr)}.tb26-product{flex-basis:calc((100% - 24px)/3)}.tb26-footer__right{padding:55px 30px}.tb26-footer__grid{gap:20px}.tb26-footer__col:not(:first-child){padding-left:18px}}
-@media(max-width:767px){:root{--tb26-gutter:16px}.tb26-header,.tb26-header__wrap{min-height:72px}.tb26-header__wrap{height:72px;gap:8px}.tb26-logo{flex-basis:clamp(160px,47vw,205px)}.tb26-icon{width:30px;height:34px;font-size:29px}.tb26-account{display:none}.tb26-header__wrap{gap:5px}.tb26-icon svg{width:25px;height:25px}.tb26-brands{padding:25px 0 18px}.tb26-brands__title{font-size:clamp(18px,5vw,24px);margin-bottom:20px}.tb26-hero img{height:auto;aspect-ratio:2549/986;min-height:0;object-position:center}.tb26-benefits{padding:18px 0;background:#454545}.tb26-benefits__grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.tb26-benefits__item{font-size:10px;gap:5px}.tb26-benefits__item b{font-size:23px}.tb26-institutional-banner{padding-top:25px;padding-bottom:24px}.tb26-institutional-banner img{aspect-ratio:1719/402;min-height:130px;object-position:center}.tb26-section{padding-block:42px}.tb26-title{font-size:20px;margin-bottom:28px}.tb26-title:after{height:4px;margin-top:10px}.tb26-product{flex-basis:clamp(180px,68vw,250px)}.tb26-product__title{font-size:12px!important}.tb26-product__details{min-height:120px}.tb26-product__price{font-size:22px}.tb26-product__cta{font-size:14px}.tb26-categories{padding:48px 0}.tb26-categories__grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}.tb26-categories__card img{width:100%}.tb26-miniatures{padding:45px 0}.tb26-miniatures__layout{grid-template-columns:1fr;gap:20px;min-height:0}.tb26-miniatures__art{min-height:220px;background-position:left center;background-size:cover}.tb26-miniatures__products .tb26-product{flex-basis:clamp(170px,65vw,255px)}.tb26-solutions{padding:50px 0}.tb26-solutions__grid{display:grid;grid-auto-flow:column;grid-auto-columns:clamp(180px,62vw,270px);grid-template-columns:none;overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:12px;gap:18px}.tb26-solutions__card{scroll-snap-align:start}.tb26-company{padding:30px 0 45px}.tb26-company__grid{grid-template-columns:1fr;gap:20px}.tb26-company__info{min-height:330px;padding:32px 24px}.tb26-company__info img{margin-bottom:25px}.tb26-company__contact{max-width:440px;min-height:550px}.tb26-instagram{padding:40px 0 65px}.tb26-instagram__feed{width:100%;overflow:hidden}.tb26-instagram__feed img{width:200%;max-width:none!important;aspect-ratio:1720/522}.tb26-footer{grid-template-columns:1fr}.tb26-footer__art{min-height:220px;background-position:center 35%;background-size:cover}.tb26-footer__social{padding:22px}.tb26-footer__right{padding:42px 23px 28px}.tb26-footer__grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:30px 20px}.tb26-footer__col:not(:first-child){border-left:0;padding-left:0}.tb26-footer__secure{grid-column:1/-1}.tb26-footer__col{gap:15px}.tb26-footer__bottom{align-items:flex-start;flex-direction:column;margin-top:38px;gap:12px}}
+@media(max-width:767px){:root{--tb26-gutter:16px}.tb26-header,.tb26-header__wrap{min-height:72px}.tb26-header__wrap{height:72px;gap:8px}.tb26-logo{flex-basis:clamp(160px,47vw,205px)}.tb26-icon{width:30px;height:34px;font-size:29px}.tb26-account{display:none}.tb26-header__wrap{gap:5px}.tb26-icon svg{width:25px;height:25px}.tb26-brands{padding:25px 0 18px}.tb26-brands__title{font-size:clamp(18px,5vw,24px);margin-bottom:20px}.tb26-benefits{padding:18px 0;background:#454545}.tb26-benefits__grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.tb26-benefits__item{font-size:10px;gap:5px}.tb26-benefits__item b{font-size:23px}.tb26-institutional-banner{padding-top:25px;padding-bottom:24px}.tb26-institutional-banner img{aspect-ratio:1719/402;min-height:130px;object-position:center}.tb26-section{padding-block:42px}.tb26-title{font-size:20px;margin-bottom:28px}.tb26-title:after{height:4px;margin-top:10px}.tb26-product{flex-basis:clamp(180px,68vw,250px)}.tb26-product__title{font-size:12px!important}.tb26-product__details{min-height:120px}.tb26-product__price{font-size:22px}.tb26-product__cta{font-size:14px}.tb26-categories{padding:48px 0}.tb26-categories__grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}.tb26-categories__card img{width:100%}.tb26-miniatures{padding:45px 0}.tb26-miniatures__layout{grid-template-columns:1fr;gap:20px;min-height:0}.tb26-miniatures__art{min-height:220px;background-position:left center;background-size:cover}.tb26-miniatures__products .tb26-product{flex-basis:clamp(170px,65vw,255px)}.tb26-solutions{padding:50px 0}.tb26-solutions__grid{display:grid;grid-auto-flow:column;grid-auto-columns:clamp(180px,62vw,270px);grid-template-columns:none;overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:12px;gap:18px}.tb26-solutions__card{scroll-snap-align:start}.tb26-company{padding:30px 0 45px}.tb26-company__grid{grid-template-columns:1fr;gap:20px}.tb26-company__info{min-height:330px;padding:32px 24px}.tb26-company__info img{margin-bottom:25px}.tb26-company__contact{max-width:440px;min-height:550px}.tb26-instagram{padding:40px 0 65px}.tb26-instagram__feed{width:100%;overflow:hidden}.tb26-instagram__feed img{width:200%;max-width:none!important;aspect-ratio:1720/522}.tb26-footer{grid-template-columns:1fr}.tb26-footer__art{min-height:220px;background-position:center 35%;background-size:cover}.tb26-footer__social{padding:22px}.tb26-footer__right{padding:42px 23px 28px}.tb26-footer__grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:30px 20px}.tb26-footer__col:not(:first-child){border-left:0;padding-left:0}.tb26-footer__secure{grid-column:1/-1}.tb26-footer__col{gap:15px}.tb26-footer__bottom{align-items:flex-start;flex-direction:column;margin-top:38px;gap:12px}}
 @media(max-width:390px){.tb26-logo{flex-basis:151px}.tb26-header__wrap{padding-inline:12px}.tb26-actions{gap:1px}.tb26-benefits__item{font-size:9px}.tb26-brands__title{font-size:17px}}
 @media(prefers-reduced-motion:reduce){.tb26-active .tb26-home *,.tb26-active .tb26-header *{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
 
@@ -298,7 +295,7 @@ body.tb26-with-header #full-page-loading{display:none!important}
 }
 .tb26-brands__track::-webkit-scrollbar{display:none}
 .tb26-brands__item{
-  flex:0 0 calc((100% - 5 * var(--tb26-brand-gap)) / 6);
+  flex:0 0 calc((100% - 7 * var(--tb26-brand-gap)) / 8);
   min-width:0;scroll-snap-align:start;aspect-ratio:1/1;
   display:grid;place-items:center;overflow:hidden;
 }
@@ -323,3 +320,76 @@ body.tb26-with-header #full-page-loading{display:none!important}
  .tb26-brands__controls{margin-top:10px}
 }
 @media(prefers-reduced-motion:reduce){.tb26-brands__track{scroll-behavior:auto}.tb26-brands__item img{transition:none!important;transform:none!important}}
+
+/* === TractorBel 1.7 | Sequencia aprovada: marcas, beneficios, institucional === */
+.tb26-intro{
+  background:linear-gradient(to bottom,
+    #242424 0%,#292929 19%,#626262 31%,#9a9a9a 49%,
+    #dfdfdf 74%,#2b2b2b 74%,#292929 100%);
+  isolation:isolate;padding-bottom:clamp(22px,3.8vw,64px);
+}
+.tb26-intro>.tb26-brands{background:transparent;padding-top:clamp(22px,2.2vw,36px);padding-bottom:clamp(24px,3.3vw,52px)}
+.tb26-intro>.tb26-benefits{background:transparent;padding:clamp(5px,1.1vw,14px) 0 clamp(38px,4.5vw,80px)}
+.tb26-intro .tb26-benefits__grid{gap:clamp(14px,2vw,30px)}
+.tb26-intro .tb26-benefits__item{color:#e3e3e3;font-weight:500;line-height:1.32}
+.tb26-intro .tb26-benefits__icon{color:#eee}
+.tb26-institutional-banner{padding-top:0;padding-bottom:0;position:relative;z-index:1}
+.tb26-institutional-banner__art{position:relative;isolation:isolate;aspect-ratio:1719/402;min-height:270px;overflow:hidden;background:#241c12}
+.tb26-institutional-banner__art>img{
+  display:block;width:100%;height:100%;position:absolute;inset:0;
+  object-fit:cover;object-position:center;aspect-ratio:auto;
+}
+.tb26-institutional-banner__copy{
+  position:absolute;z-index:1;top:50%;left:clamp(20px,9%,165px);
+  transform:translateY(-50%);width:min(40%,510px);color:#f8f8f8;
+  text-shadow:0 1px 2px #1118;
+}
+.tb26-institutional-banner__title{
+  font:400 clamp(19px,1.72vw,31px)/1.33 'Century Gothic','Eurostile',Montserrat,Arial,sans-serif;
+  letter-spacing:.005em;color:var(--tb26-yellow-strong);margin:0 0 clamp(14px,1.5vw,26px);
+}
+.tb26-institutional-banner__description{
+  font:400 clamp(12px,.98vw,17px)/1.5 Arial,sans-serif;
+  color:#e7e5e3;margin:0;letter-spacing:.006em;
+}
+.tb26-institutional-banner__description strong{color:#fff;font-weight:700}
+@media(max-width:1100px){
+ .tb26-intro .tb26-benefits__grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .tb26-institutional-banner__copy{left:5%;width:min(45%,460px)}
+}
+@media(max-width:767px){
+ .tb26-intro{
+   background:linear-gradient(to bottom,#262626 0%,#343434 24%,#777 44%,#a4a4a4 63%,#292929 73%,#232323 100%);
+   padding-bottom:22px;
+ }
+ .tb26-intro>.tb26-brands{padding:24px 0 20px}
+ .tb26-intro>.tb26-benefits{padding:14px 0 32px}
+ .tb26-intro .tb26-benefits__grid{gap:14px 8px;grid-template-columns:repeat(2,minmax(0,1fr))}
+ .tb26-intro .tb26-benefits__item{font-size:clamp(9px,2.6vw,12px);gap:7px}
+ .tb26-intro .tb26-benefits__icon{width:23px;height:23px}
+ .tb26-institutional-banner{padding:0 12px}
+ .tb26-institutional-banner__art{aspect-ratio:auto;min-height:390px}
+ .tb26-institutional-banner__art>img{object-position:64% center;filter:brightness(.8)}
+ .tb26-institutional-banner__art::after{
+   content:"";position:absolute;z-index:0;inset:0;
+   background:linear-gradient(90deg,#100b09e8 0%,#100b09cc 44%,#100b0999 72%,#100b0926 100%);
+ }
+ .tb26-institutional-banner__copy{left:clamp(17px,5vw,35px);right:clamp(15px,5vw,35px);width:auto;top:50%}
+ .tb26-institutional-banner__title{font-size:clamp(20px,5vw,27px);line-height:1.26;margin-bottom:18px}
+ .tb26-institutional-banner__description{font-size:clamp(12px,3.2vw,15px);line-height:1.55}
+}
+@media(max-width:370px){
+ .tb26-institutional-banner__art{min-height:430px}
+ .tb26-intro .tb26-benefits__grid{gap:13px 5px}
+}
+@media(prefers-reduced-motion:reduce){.tb26-institutional-banner__art,.tb26-institutional-banner__copy{transition:none!important}}
+
+/* Tablet: nao permitir que o aspect-ratio do banner ultrapasse a largura disponivel. */
+@media (min-width:768px) and (max-width:1199px){
+ .tb26-institutional-banner__art{width:100%;min-width:0;aspect-ratio:auto;min-height:clamp(290px,35vw,390px)}
+ .tb26-institutional-banner__copy{width:min(48%,460px)}
+}
+.tb26-brands__controls[hidden]{display:none!important}
+/* Altura previsivel em larguras intermediarias: a proporcao fotografica nao define largura minima. */
+.tb26-institutional-banner__art{width:100%;min-width:0;aspect-ratio:auto;height:clamp(270px,22.5vw,390px)}
+@media(max-width:767px){.tb26-institutional-banner__art{height:auto}}

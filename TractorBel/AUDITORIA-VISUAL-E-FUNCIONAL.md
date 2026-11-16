@@ -52,3 +52,10 @@ O endereço aprovado entrega um HTML simples contendo uma única imagem comprida
 - [x] Mobile: 3 marcas por tela e 3 a cada clique, 320/390/767 px testados com Playwright.
 - [x] Desktop 6 marcas e tablet 5, com swipe e setas.
 - [ ] Validar visualmente em navegador autenticado no ambiente real de prévia antes de ativar para todos.
+
+## Ajustes realizados em v1.7 (16/11/2026)
+- Removida a seção `tb26-hero` entre marcas e benefícios.
+- Introduzida a composição `.tb26-intro` com gradient contínuo para três módulos independentes (marcas, benefícios e institucional), conforme referência fornecida pelo cliente.
+- Corrigido o institucional: o JPEG `vendedores.jpg` não traz texto; a cópia foi adicionada em HTML, inclusive título amarelo e parágrafo com ênfase, preservando imagem e leitura por leitores de tela.
+- Testes locais em Chromium: 320, 390, 768, 1440, 1920 px; sem overflow do institucional, sem `tb26-hero`, oito marcas no desktop, três no mobile, quatro benefícios e texto visível.
+- Publicação visual de produção no domínio oficial ainda exige homologação manual após alteração do flag `publicarNaLoja`. Não presumir que a prévia foi publicada apenas pelo deploy Vercel.

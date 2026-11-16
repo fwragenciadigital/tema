@@ -1,6 +1,6 @@
 # TractorBel 2026 · FWR Agência Digital
 
-**Plataforma:** Loja Integrada. **Projeto:** `TractorBel` na Vercel/GitHub. **Versão:** 1.6.0.
+**Plataforma:** Loja Integrada. **Projeto:** `TractorBel` na Vercel/GitHub. **Versão:** 1.7.0.
 
 ## Estrutura
 - `tractorbel.js`: adaptação DOM-first da LI (topo, home, rodapé, vitrines com produtos reais, menu e carrinho lateral).
@@ -16,6 +16,15 @@
 4. No DevTools, confira `TractorBel2026.diagnostico()` e eventuais avisos.
 5. Após homologação, altere `geral.publicarNaLoja: true`. Essa decisão pode ser revertida em segundos.
 6. Para desabilitar: `geral.ativo: false` ou remover as duas tags `<link>` e `<script>`.
+
+## Atualizações v1.7 — Sequência visual aprovada (16/11/2026)
+- **Removido `tb26-hero` da home**: a seção e a imagem do banner de 50.000 itens não são mais montadas; o arquivo `fullbanner.jpg` permanece mapeado no CDN para eventual uso futuro, sem carregamento desnecessário.
+- **Três componentes independentes:** `.tb26-brands`, `.tb26-benefits` e `.tb26-institutional-banner` são agrupados numa moldura visual `.tb26-intro` com gradiente cinza/preto contínuo; não são fundidos em uma imagem única. Cada componente pode ser ativado/desativado em `defaults.marcas.ativo`, `defaults.beneficios.ativo` e `defaults.institucional.ativo` dentro do `tractorbel.js`.
+- **Marcas individuais:** 8 logos visíveis no desktop ≥1200 px (como no layout aprovado), 5 no tablet, **3 por visão e por rolagem no mobile**. Os botões são ocultos automaticamente quando não há mais conteúdo a rolar. Cada marca tem `ativo`, `imagem`, `nome` em `defaults.marcas.itens`.
+- **Benefícios individuais:** quatro entradas com ícone vetorial e texto, cada uma com `ativo` e `texto` em `defaults.beneficios.itens` (sem criar blocos vazios quando ocultos).
+- **Card institucional:** `vendedores.jpg` é uma imagem de fundo SEM texto; o conteúdo agora é HTML real e acessível sobreposto, com título amarelo e parágrafo branco, conforme arte aprovada. Personalize em `defaults.institucional` os campos `titulo`, `textoAntes`, `destaque` e `textoDepois`. Nenhuma edição da imagem é necessária.
+- **Responsividade:** banner institucional mantém texto e foto legíveis em 320/390 px, com sobreposição escura mobile; correção específica de aspect-ratio no tablet para evitar overflow horizontal. Mantém o fade-in e o respeito a movimento reduzido.
+- **Mesmo JS/CSS:** a Vercel continua servindo `tractorbel.js` e `tractorbel.css` nas URLs anteriores. Testar em `?tractorbel_preview=1`; produção só com `geral.publicarNaLoja=true`.
 
 ## Atualizações v1.6 — Marcas individuais + topo limpo (16/11/2026)
 - O header customizado utiliza `#cabecalho .logo img` diretamente do painel Loja Integrada, com link e texto alternativo do logo original; se a imagem falhar, exibe texto em vez de uma figura quebrada.
