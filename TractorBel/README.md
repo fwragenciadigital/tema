@@ -160,3 +160,10 @@ Veja `QA-PDP-V18.md` e `tests/qa-pdp-v18.py`. Homologar com o carrinho e a valid
 - **Comportamento nativo preservado:** ordenação, categorias, filtros, paginação, URL original do produto e carregamento dinâmico. CSS estritamente escopado a `.tb26-with-catalog #listagemProdutos.tb26-catalog`, sem alterar a home/PDP.
 - **Links fixos com revalidação:** JS e CSS na Vercel continuam nos mesmos URLs; `Cache-Control: public,max-age=0,must-revalidate` evita retenção prolongada de versões antigas. Imagens usam cache imutável.
 - **QA:** teste automatizado em páginas de categoria e busca, incluindo resoluções 320, 375, 390, 768, 900, 1024, 1200, 1440, 1920 px. Teste local com DOM simulado da LI, homologação visual na loja real ainda recomendada.
+
+
+## Versao 1.13 — Cards iguais a vitrine
+- Grid de quatro cards no desktop com barra lateral; 3 tablet, 2 mobile e 1 ate 359px.
+- Fundo da foto neutro, titulo limitado a duas linhas, preco e Pix alinhados e CTA amarelo com diagonal.
+- Os elementos de favorito, selo e botoes redundantes sao ocultados sem remover dados/funcionalidades do DOM da Loja Integrada.
+- JS e CSS continuam no mesmo endereco Vercel e o modo preview continua inalterado.

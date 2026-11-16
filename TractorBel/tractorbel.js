@@ -6,7 +6,7 @@
 (function (win, doc) {
   'use strict';
   if (win.TractorBel2026) return;
-  var VERSION = '1.12.0';
+  var VERSION = '1.13.0';
   // Assets oficiais da TractorBel, ja hospedados na Loja Integrada.
   // Manter os nomes e extensoes ORIGINAIS, sem converter .jpg/.png para .webp.
   // O nome logico pode continuar .webp para compatibilidade com os componentes existentes.
@@ -1448,15 +1448,41 @@
       }, {rootMargin: '80px 0px', threshold: 0.05});
     }
     var seen = new WeakSet();
+    // A LI e apps de terceiros podem injetar favoritos, selos e botoes
+    // independentes sobre o produto. Preserva os elementos para as rotinas
+    // nativas, mas retira-os da composicao visual personalizada.
+    var nativeExtras = [
+      '.bandeiras-produto', '.produto-selo', '.selos', '.tag-promocao',
+      '.botao-favorito', '.botao-comparar', '.lista-favoritos',
+      '.favoritos', '.quick-view', '.acoes-produto-responsiva'
+    ].join(',');
+    function neutralizeNativeExtras(card) {
+      [].forEach.call(card.querySelectorAll(nativeExtras), function(node) {
+        node.classList.add('tb26-catalog__native-hidden');
+        node.setAttribute('aria-hidden', 'true');
+        // Os elementos nativos nao sao removidos: integrações da LI podem
+        // conservar referencias e listeners neles.
+      });
+      // Botao nativo nao selecionado pelo adaptador: oculta aparencia
+      // flutuante, mantendo a acao real no botao principal.
+      [].forEach.call(card.querySelectorAll('.acoes-produto a.botao:not(.tb26-catalog__cta), .acoes-produto a.botao-comprar:not(.tb26-catalog__cta)'), function(node) {
+        if (node.classList.contains('tb26-catalog__cta')) return;
+        node.classList.add('tb26-catalog__native-hidden');
+        node.setAttribute('aria-hidden', 'true');
+      });
+    }
     function enhance() {
       var cards = [].slice.call(listing.querySelectorAll('.listagem-item'));
       cards.forEach(function(card, idx) {
-        if (seen.has(card)) return;
+        // Repete a limpeza mesmo em cards ja melhorados: alguns temas
+        // incluem selos/favoritos depois do carregamento.
+        if (seen.has(card)) { neutralizeNativeExtras(card); return; }
         var photo = card.querySelector('.imagem-produto img');
         var name = card.querySelector('a.nome-produto[href]');
         if (!photo || !name) return;
         seen.add(card);
         card.classList.add('tb26-catalog-card');
+        neutralizeNativeExtras(card);
         var productLink = safeUrl(name.getAttribute('href'));
         var cover = card.querySelector('a.produto-sobrepor');
         if (cover && productLink) {
@@ -1481,6 +1507,9 @@
           button.textContent = directPurchase ? 'COMPRAR' : 'VER PRODUTO';
           button.setAttribute('aria-label', (directPurchase ? 'Comprar ' : 'Ver detalhes de ') + name.textContent.trim());
           button.classList.add('tb26-catalog__cta');
+          button.classList.remove('tb26-catalog__native-hidden');
+          button.removeAttribute('aria-hidden');
+          neutralizeNativeExtras(card);
         }
         // A plataforma fornece os precos, Pix, descontos e disponibilidade.
         if (observer && idx >= 4 && card.getBoundingClientRect().top > win.innerHeight) {
