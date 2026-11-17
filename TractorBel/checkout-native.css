@@ -1,0 +1,26 @@
+/* TractorBel | Checkout - CSS de escopo conservador.
+ * PENDENTE DE HOMOLOGACAO: nao instalado na loja; DOM do checkout nao acessivel.
+ * Somente usar se o painel oficial permitir CSS especificamente no checkout.
+ * Confirmar classe body.pagina-checkout antes de aplicar. Nunca injetar JS no checkout.
+ * Nao esconde blocos, nao manipula valores, frete, precos ou forma de pagamento.
+ */
+body.pagina-checkout{--tb-checkout-yellow:#ffc400;--tb-checkout-line:#e5e5e5;color:#191919;background:#fff;}
+body.pagina-checkout :is(input:not([type="checkbox"]):not([type="radio"]),select,textarea){
+ box-sizing:border-box;max-width:100%;border-radius:9px;border-color:var(--tb-checkout-line);box-shadow:none;
+}
+body.pagina-checkout :is(input:not([type="checkbox"]):not([type="radio"]),select,textarea):focus-visible{
+ outline:2px solid #a77e00;outline-offset:2px;
+}
+body.pagina-checkout :is(button,input[type="submit"],a).botao.principal,
+body.pagina-checkout :is(button,input[type="submit"],a).btn-primary{
+ background:var(--tb-checkout-yellow);color:#191919;border:1px solid #d9a700;
+ border-radius:9px;box-shadow:none;font-weight:800;
+}
+body.pagina-checkout :is(button,input[type="submit"],a).botao.principal:focus-visible,
+body.pagina-checkout :is(button,input[type="submit"],a).btn-primary:focus-visible{
+ outline:3px solid #191919;outline-offset:3px;
+}
+@media(max-width:767px){
+ body.pagina-checkout :is(input:not([type="checkbox"]):not([type="radio"]),select,textarea){font-size:16px;}
+ body.pagina-checkout :is(.conteiner,.container){max-width:100%;}
+}
