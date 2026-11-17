@@ -43,8 +43,8 @@
 .cc26-active #corpo .cc26-enhanced-shelf{max-width:1724px;margin:48px auto 58px;padding:0 32px;background:transparent}
 .cc26-active #corpo .cc26-enhanced-shelf h4,
 .cc26-active #corpo .cc26-enhanced-shelf .titulo{color:var(--cc26-blue);font-weight:800;text-transform:uppercase;border-bottom:2px solid var(--cc26-blue)}
-.cc26-active #corpo .cc26-enhanced-shelf .listagem-linha>ul{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:16px;align-items:stretch;margin:0}
-.cc26-active #corpo .cc26-enhanced-shelf .listagem-linha>ul>li{width:auto!important;float:none!important;min-width:0;margin:0!important;padding:0!important}
+.cc26-active #corpo .cc26-enhanced-shelf.cc26-grid-safe .listagem-linha>ul{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:16px;align-items:stretch;margin:0}
+.cc26-active #corpo .cc26-enhanced-shelf.cc26-grid-safe .listagem-linha>ul>li{width:auto!important;float:none!important;min-width:0;margin:0!important;padding:0!important}
 .cc26-active #corpo .cc26-enhanced-shelf .listagem-item{height:100%;background:#fff;border:1px solid #e3e6ee;box-shadow:0 5px 16px #00000013;transition:transform .2s ease,box-shadow .2s ease;padding:14px!important}
 .cc26-active #corpo .cc26-enhanced-shelf .listagem-item:hover{transform:translateY(-4px);box-shadow:0 10px 25px #0000001d}
 .cc26-active #corpo .cc26-enhanced-shelf .imagem-produto{background:#fff;display:flex;align-items:center;justify-content:center}
@@ -104,7 +104,7 @@
   .cc26-category-grid__cards{grid-template-columns:repeat(3,minmax(0,1fr))}
   .cc26-category-grid__intro{min-height:0}
   .cc26-benefits__grid{grid-template-columns:repeat(2,minmax(0,1fr))}
-  .cc26-active #corpo .cc26-enhanced-shelf .listagem-linha>ul{grid-template-columns:repeat(4,minmax(0,1fr))}
+  .cc26-active #corpo .cc26-enhanced-shelf.cc26-grid-safe .listagem-linha>ul{grid-template-columns:repeat(4,minmax(0,1fr))}
 }
 @media(max-width:767px){
   .cc26-container{padding-inline:16px}
@@ -123,7 +123,7 @@
   .cc26-presentation__copy h2{font-size:38px}
   .cc26-presentation__copy p{font-size:13px;line-height:1.65}
   .cc26-active #corpo .cc26-enhanced-shelf{margin:28px auto;padding:0 16px}
-  .cc26-active #corpo .cc26-enhanced-shelf .listagem-linha>ul{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+  .cc26-active #corpo .cc26-enhanced-shelf.cc26-grid-safe .listagem-linha>ul{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
   .cc26-active #corpo .cc26-enhanced-shelf .listagem-item{padding:8px!important}
   .cc26-active #corpo .cc26-enhanced-shelf .nome-produto{font-size:11px;line-height:1.4}
   .cc26-title{font-size:20px}
