@@ -1,0 +1,149 @@
+/* Cabcom 2026 | FWR Agencia Digital | CSS isolado e responsivo */
+.cc26-active{--cc26-blue:#0868f8;--cc26-blue-dark:#073e99;--cc26-green:#00c99b;--cc26-navy:#001b35;--cc26-mist:#f4f6f9;--cc26-ink:#18243a;--cc26-max:1660px;color:var(--cc26-ink);overflow-x:clip}
+.cc26-active .cc26-section,.cc26-active .cc26-section *{box-sizing:border-box}
+.cc26-active .cc26-section{font-family:Arial,Helvetica,sans-serif}
+.cc26-active .cc26-section img{max-width:100%;height:auto;display:block}
+.cc26-container{max-width:calc(var(--cc26-max) + 64px);padding:0 32px;margin:0 auto}
+.cc26-active .cc26-section a:focus-visible,.cc26-active #cabecalho a:focus-visible{outline:3px solid var(--cc26-green);outline-offset:3px}
+.cc26-image-unavailable{visibility:hidden!important}
+/* Cabecalho nativo da Loja Integrada: manter form, menu, conta, orcamento e carrinho. */
+.cc26-active #cabecalho.cc26-native-header{position:relative;z-index:30;background:linear-gradient(104deg,#fdfefe 0%,#fdfefe 17%,#087af1 18%,#03bbd0 53%,#00c895 100%);box-shadow:0 4px 16px #001b3520;border:0}
+.cc26-active #cabecalho.cc26-native-header .conteiner{max-width:1710px;background:transparent;box-shadow:none}
+.cc26-active #cabecalho.cc26-native-header .conteudo-topo{align-items:center}
+.cc26-active #cabecalho.cc26-native-header .logo img{max-height:86px;object-fit:contain}
+.cc26-active #cabecalho.cc26-native-header .menu.superior{background:transparent!important;box-shadow:none}
+.cc26-active #cabecalho.cc26-native-header .menu.superior .nivel-um>li>a{color:#fff!important;font-weight:700;text-transform:uppercase;letter-spacing:.015em;font-size:13px}
+.cc26-active #cabecalho.cc26-native-header .menu.superior .nivel-um>li:hover>a{color:#00244b!important}
+.cc26-active #cabecalho.cc26-native-header .busca input,
+.cc26-active #cabecalho.cc26-native-header .cc26-native-search input[type="search"],
+.cc26-active #cabecalho.cc26-native-header .cc26-native-search input[type="text"]{border:2px solid #dffcf3;border-radius:30px;background:#ffffff14;color:#fff;min-height:42px;box-shadow:none}
+.cc26-active #cabecalho.cc26-native-header .busca input::placeholder{color:#fff}
+.cc26-active #cabecalho.cc26-native-header .busca button{background:transparent;color:#fff;border-radius:40px}
+.cc26-active #cabecalho.cc26-native-header .carrinho>a,.cc26-active #cabecalho.cc26-native-header .minha-conta>a{color:#fff}
+/* Faixa/hero: preferencia ao banner realmente administravel da LI */
+.cc26-active #corpo .cc26-native-hero,.cc26-active #corpo .cc26-native-hero img{max-width:none;width:100%;display:block}
+.cc26-hero{padding:0!important;background:var(--cc26-navy)}
+.cc26-hero__link{display:block;position:relative}
+.cc26-hero__link img{width:100%;max-height:780px;object-fit:cover;object-position:center}
+.cc26-benefits{padding:26px 0 30px;background:linear-gradient(180deg,#00ac91 0%,#006f79 56%,#00223d 100%);color:white}
+.cc26-benefits__grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:24px;align-items:center}
+.cc26-benefit{display:flex;align-items:center;gap:12px;min-width:0}
+.cc26-benefit__icon{flex:none;width:62px;height:62px;display:grid;place-items:center;background:#008c83;color:white;border-radius:50%;font-size:28px}
+.cc26-benefit strong{display:block;color:#fff;font-size:18px;line-height:1.18}
+.cc26-benefit small{display:block;color:#ddfff3;font-size:12px;line-height:1.4;margin-top:3px}
+.cc26-presentation{background:#000a17;padding:0;min-height:540px;color:white}
+.cc26-presentation__layout{display:grid;grid-template-columns:52% 48%;min-height:540px;align-items:center;gap:0;max-width:none;padding:0}
+.cc26-presentation__image{width:100%;height:100%!important;min-height:540px;object-fit:cover}
+.cc26-presentation__copy{padding:clamp(28px,5vw,90px);margin:0 auto;max-width:800px}
+.cc26-presentation__copy h2{margin:0 0 20px;line-height:1;font-size:clamp(36px,4vw,67px);letter-spacing:-.04em}
+.cc26-presentation__copy h2 strong{display:block;color:#0868f8;font-weight:900}
+.cc26-presentation__copy h2 span{display:block;color:#00c99b;font-size:.54em;font-weight:600;letter-spacing:-.025em}
+.cc26-presentation__copy p{font-size:clamp(14px,1vw,17px);line-height:1.85;color:#e2e8f0}
+.cc26-active #corpo.cc26-native-home{background:#eee}
+.cc26-active #corpo .cc26-enhanced-shelf{max-width:1724px;margin:48px auto 58px;padding:0 32px;background:transparent}
+.cc26-active #corpo .cc26-enhanced-shelf h4,
+.cc26-active #corpo .cc26-enhanced-shelf .titulo{color:var(--cc26-blue);font-weight:800;text-transform:uppercase;border-bottom:2px solid var(--cc26-blue)}
+.cc26-active #corpo .cc26-enhanced-shelf .listagem-linha>ul{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:16px;align-items:stretch;margin:0}
+.cc26-active #corpo .cc26-enhanced-shelf .listagem-linha>ul>li{width:auto!important;float:none!important;min-width:0;margin:0!important;padding:0!important}
+.cc26-active #corpo .cc26-enhanced-shelf .listagem-item{height:100%;background:#fff;border:1px solid #e3e6ee;box-shadow:0 5px 16px #00000013;transition:transform .2s ease,box-shadow .2s ease;padding:14px!important}
+.cc26-active #corpo .cc26-enhanced-shelf .listagem-item:hover{transform:translateY(-4px);box-shadow:0 10px 25px #0000001d}
+.cc26-active #corpo .cc26-enhanced-shelf .imagem-produto{background:#fff;display:flex;align-items:center;justify-content:center}
+.cc26-active #corpo .cc26-enhanced-shelf .imagem-produto img{max-width:100%;object-fit:contain}
+.cc26-active #corpo .cc26-enhanced-shelf .nome-produto{font-size:13px;line-height:1.5;font-weight:700;color:#242c3b;min-height:3.6em}
+.cc26-active #corpo .cc26-enhanced-shelf .acoes-produto a,
+.cc26-active #corpo .cc26-enhanced-shelf .botao.principal{border-radius:26px!important;background:var(--cc26-blue)!important;color:white!important;font-weight:700;border:0}
+.cc26-active #corpo .cc26-enhanced-shelf [href*="wa.me"],.cc26-active #corpo .cc26-enhanced-shelf [href*="whatsapp"]{background:var(--cc26-green)!important;color:white!important}
+.cc26-title{display:flex;align-items:center;gap:12px;font-size:clamp(20px,1.7vw,27px);line-height:1.2;font-weight:900;text-transform:uppercase;color:var(--cc26-blue);margin:0 0 35px}
+.cc26-title:after{content:'';flex:1;height:2px;background:var(--cc26-blue)}
+.cc26-title__logo{width:36px;max-height:51px;object-fit:contain}
+.cc26-category-grid{padding:55px 0 70px;background:#eee}
+.cc26-category-grid__inner{display:grid;grid-template-columns:minmax(190px,1fr) minmax(0,4fr);gap:14px}
+.cc26-category-grid__intro{position:relative;min-height:620px;overflow:hidden;background:#002743}
+.cc26-category-grid__intro img{width:100%;height:100%!important;object-fit:cover;position:absolute;inset:0}
+.cc26-category-grid__intro h2{position:relative;z-index:1;color:#00c99b;font-size:clamp(24px,2.5vw,42px);line-height:1.04;max-width:260px;margin:65px 15px 0 48px;text-shadow:0 2px 10px #00192e;font-weight:800}
+.cc26-category-grid__cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+.cc26-category-card{position:relative;display:grid;align-items:end;overflow:hidden;aspect-ratio:1/1;background:#075cf8;color:white!important;text-decoration:none!important;transition:transform .2s,box-shadow .2s}
+.cc26-category-card:hover{transform:translateY(-3px);box-shadow:0 10px 20px #001e4433}
+.cc26-category-card img{position:absolute;inset:0;width:100%;height:100%!important;object-fit:cover}
+.cc26-category-card:after{content:'';position:absolute;inset:44% 0 0;background:linear-gradient(0deg,#001c46cf,transparent)}
+.cc26-category-card strong{position:relative;z-index:1;text-align:center;padding:15px;font-size:clamp(14px,1.35vw,23px);line-height:1.16;color:white}
+.cc26-shortcuts{padding:48px 0 55px;background:#fff}
+.cc26-shortcuts__grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:20px}
+.cc26-shortcut{display:flex;flex-direction:column;align-items:center;text-align:center;gap:14px;text-decoration:none!important;color:#16bda0!important}
+.cc26-shortcut__symbol{width:min(100%,155px);aspect-ratio:1;border-radius:50%;display:grid;place-items:center;font-size:64px;color:#0e85fa;background:radial-gradient(circle at 30% 22%,#fff,#dbe2ed);box-shadow:inset 0 0 0 1px #e6eff9}
+.cc26-shortcut strong{font-size:18px}
+.cc26-brands{padding:68px 0;background:white}
+.cc26-brands__grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:12px;align-items:center}
+.cc26-brands__brand{min-height:90px;display:grid;place-items:center;background:#f9fbff;color:#0d3991!important;font-weight:900;font-size:clamp(14px,1.4vw,25px);text-decoration:none!important;letter-spacing:-.04em;padding:12px;text-align:center;border-radius:10px}
+.cc26-brands__brand:hover{background:#eaf3ff}
+.cc26-institutional{padding:80px 0;background:#001b35 url('https://cdn.awsli.com.br/80/80577/arquivos/bg-empresa.jpg') center/cover no-repeat;color:#fff}
+.cc26-institutional__panel{max-width:780px;padding:35px 0}
+.cc26-institutional__eyebrow{font-size:12px;letter-spacing:.2em;font-weight:700;color:#00ceab;margin-bottom:22px}
+.cc26-institutional h2{font-size:clamp(30px,3.2vw,52px);line-height:1.1;color:#fff;margin:0 0 20px}
+.cc26-institutional p{color:#e2e8f1;font-size:16px;line-height:1.9;margin:0 0 25px}
+.cc26-institutional__cta{display:inline-block;border-radius:30px;padding:13px 26px;background:#00c99b;color:#001d34!important;text-decoration:none!important;font-weight:800}
+.cc26-instagram{background:#f0f0f0;padding:65px 0 90px}
+.cc26-instagram__title{text-align:center;margin-bottom:30px}
+.cc26-instagram__title span{display:block;color:#66717d;font-size:16px}
+.cc26-instagram__title strong{display:block;color:#00be9b;font-size:clamp(24px,2.5vw,40px)}
+.cc26-instagram__link{display:block}
+.cc26-instagram__link img{width:100%;height:auto;object-fit:contain}
+.cc26-active #rodape.cc26-native-footer{background:#fff;color:#252d36;padding-top:35px}
+.cc26-active #rodape.cc26-native-footer .institucional,.cc26-active #rodape.cc26-native-footer .pagamento-selos{max-width:1660px;margin:auto}
+.cc26-active #rodape.cc26-native-footer .titulo{color:#0868f8;font-weight:800}
+.cc26-active #rodape.cc26-native-footer a:hover{color:#00b997}
+.cc26-active .pagina-categoria .listagem-item,.cc26-active .pagina-busca .listagem-item{border-radius:10px;border:1px solid #e6edf8;box-shadow:0 2px 12px #001a3320}
+.cc26-active.cc26-page-product #corpo .produto .nome-produto,.cc26-active.cc26-page-product #corpo h1{color:#003b81}
+.cc26-active.cc26-page-product .acoes-produto .botao.principal{background:#00b995;border:0;border-radius:32px}
+.cc26-active.cc26-page-product .principal .preco-produto{color:#0566e8}
+.cc26-active.cc26-page-cart #corpo .tabela-carrinho{border-radius:12px;overflow:hidden}
+.cc26-active.cc26-page-cart #corpo .botao.principal{border-radius:28px;background:#0868f8;border:0}
+@media(max-width:1199px){
+  .cc26-container{padding-inline:24px}
+  .cc26-category-grid__inner{grid-template-columns:minmax(160px,1fr) minmax(0,3fr)}
+  .cc26-category-grid__cards{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .cc26-category-grid__intro{min-height:0}
+  .cc26-benefits__grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .cc26-active #corpo .cc26-enhanced-shelf .listagem-linha>ul{grid-template-columns:repeat(4,minmax(0,1fr))}
+}
+@media(max-width:767px){
+  .cc26-container{padding-inline:16px}
+  .cc26-active #cabecalho.cc26-native-header{background:linear-gradient(120deg,#037eee,#00c99b)}
+  .cc26-active #cabecalho.cc26-native-header .logo img{max-height:55px}
+  .cc26-hero__link img{min-height:190px;object-fit:cover;object-position:center}
+  .cc26-benefits{padding:20px 0}
+  .cc26-benefits__grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+  .cc26-benefit{gap:8px}
+  .cc26-benefit__icon{width:39px;height:39px;font-size:19px}
+  .cc26-benefit strong{font-size:13px}
+  .cc26-benefit small{font-size:11px}
+  .cc26-presentation__layout{grid-template-columns:1fr;min-height:0}
+  .cc26-presentation__image{min-height:230px;height:230px!important}
+  .cc26-presentation__copy{padding:25px 18px 35px}
+  .cc26-presentation__copy h2{font-size:38px}
+  .cc26-presentation__copy p{font-size:13px;line-height:1.65}
+  .cc26-active #corpo .cc26-enhanced-shelf{margin:28px auto;padding:0 16px}
+  .cc26-active #corpo .cc26-enhanced-shelf .listagem-linha>ul{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+  .cc26-active #corpo .cc26-enhanced-shelf .listagem-item{padding:8px!important}
+  .cc26-active #corpo .cc26-enhanced-shelf .nome-produto{font-size:11px;line-height:1.4}
+  .cc26-title{font-size:20px}
+  .cc26-category-grid{padding:30px 0}
+  .cc26-category-grid__inner{grid-template-columns:1fr}
+  .cc26-category-grid__intro{min-height:130px}
+  .cc26-category-grid__intro img{object-fit:cover}
+  .cc26-category-grid__intro h2{font-size:28px;margin:28px;max-width:none}
+  .cc26-category-grid__cards{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+  .cc26-category-card strong{font-size:14px;padding:8px}
+  .cc26-shortcuts__grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+  .cc26-shortcut__symbol{max-width:90px;font-size:40px}
+  .cc26-shortcut strong{font-size:12px}
+  .cc26-brands{padding:40px 0}
+  .cc26-brands__grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .cc26-brands__brand{min-height:65px}
+  .cc26-institutional{padding:35px 0;background-position:58% center}
+  .cc26-institutional__panel{padding:18px;background:#001b35c7;border-radius:12px}
+  .cc26-institutional p{font-size:13px}
+  .cc26-instagram{padding:40px 0}
+}
+@media(max-width:370px){.cc26-benefits__grid{grid-template-columns:1fr}.cc26-shortcuts__grid{grid-template-columns:repeat(2,1fr)}}
+@media(prefers-reduced-motion:reduce){.cc26-active .cc26-section *, .cc26-active #corpo .cc26-enhanced-shelf .listagem-item{scroll-behavior:auto!important;animation:none!important;transition:none!important}}

@@ -1,0 +1,32 @@
+{
+  "project": "Cabcom 2026",
+  "sourceArchive": "Fatiado.rar",
+  "sourceOfTruth": "Loja Integrada CDN",
+  "base": "https://cdn.awsli.com.br/80/80577/arquivos/",
+  "images": [
+    "fullbanner.jpg",
+    "bg-topo.png",
+    "logo.png",
+    "cabos.jpg",
+    "bg-empresa.jpg",
+    "insta.png",
+    "cabos-bg.jpg",
+    "redes-bg.jpg",
+    "cabos_01.png",
+    "cabos_03.png",
+    "cabos_05.png",
+    "cabos_07.png",
+    "cabos_12.png",
+    "cabos_13.png",
+    "cabos_14.png",
+    "cabos_15.png",
+    "conect1.png",
+    "conect2.png",
+    "conect3.png",
+    "conect4.png",
+    "conect5.png",
+    "conect6.png",
+    "conect7.png",
+    "conect8.png"
+  ]
+}
