@@ -1,12 +1,12 @@
 /*
- * TractorBel 2026 - FWR Agencia Digital - v1.11.0
+ * TractorBel 2026 - FWR Agencia Digital - v1.16.0
  * Camada visual da Loja Integrada. Sem checkout ou precificacao paralela.
  * Editavel por window.TractorBelSettings no HTML da LI.
  */
 (function (win, doc) {
   'use strict';
   if (win.TractorBel2026) return;
-  var VERSION = '1.15.0';
+  var VERSION = '1.16.0';
   // Assets oficiais da TractorBel, ja hospedados na Loja Integrada.
   // Manter os nomes e extensoes ORIGINAIS, sem converter .jpg/.png para .webp.
   // O nome logico pode continuar .webp para compatibilidade com os componentes existentes.
@@ -34,6 +34,13 @@
     'peca2.webp': 'peca2.png'
   });
   // A LI pode normalizar os nomes com espacos. Se o original falhar, tenta o alias.
+  // Homologacao real 17/11/2026: os dois arquivos abaixo NAO estao no CDN da LI
+  // com os nomes informados. Preserva a arte aprovada usando seus arquivos do
+  // proprio projeto Vercel, ate o cliente disponibilizar os nomes corretos na LI.
+  var VERIFIED_ASSET_FALLBACKS = Object.freeze({
+    'novo-projeto-5.webp': 'https://tractorbel-2026.vercel.app/assets/novo-projeto-5.webp',
+    'novo-projeto-6.webp': 'https://tractorbel-2026.vercel.app/assets/novo-projeto-6.webp'
+  });
   var ASSET_ALIASES = Object.freeze({
     'novo-projeto-5.webp': ['novo-projeto-5.jpg', 'novo-projeto-(5).jpg'],
     'novo-projeto-6.webp': ['novo-projeto-6.jpg', 'novo-projeto-(6).jpg'],
@@ -103,7 +110,16 @@
 
   var isHome = /^\/?(?:index\.html)?\/?$/.test(location.pathname);
   var isStore = /(?:^|\.)lojatractorbel\.com\.br$/i.test(location.hostname);
-  var preview = /(?:^|[?&])tractorbel_preview=1(?:&|$)/.test(location.search);
+  // O checkout e a busca da LI retiram o parametro de preview ao navegar.
+  // Manter somente nesta aba; ?tractorbel_preview=0 desativa imediatamente.
+  var previewParam = new URLSearchParams(location.search).get('tractorbel_preview');
+  var previewStored = false;
+  try {
+    if (previewParam === '1') win.sessionStorage.setItem('tb26-preview-enabled', '1');
+    if (previewParam === '0') win.sessionStorage.removeItem('tb26-preview-enabled');
+    previewStored = win.sessionStorage.getItem('tb26-preview-enabled') === '1';
+  } catch (_previewErr) { /* sessionStorage indisponivel: permanece preview por URL */ }
+  var preview = previewParam === '1' || (previewParam !== '0' && previewStored);
   var enabled = cfg.geral.ativo && (!isStore || cfg.geral.publicarNaLoja || preview);
   var state = { header: false, home: false, footer: false, products: {}, motion: { ativo: false, observados: 0, revelados: 0 }, warnings: [] };
   var motionObserver = null;
@@ -114,6 +130,7 @@
   function append(parent) { for (var i = 1; i < arguments.length; i++) if (arguments[i]) parent.appendChild(arguments[i]); return parent; }
   function link(href, cls, text) { var x = e('a', cls, text); x.href = href; return x; }
   function asset(name, attempt) {
+    if (VERIFIED_ASSET_FALLBACKS[name]) return VERIFIED_ASSET_FALLBACKS[name];
     var filename = (attempt > 0 && ASSET_ALIASES[name] && ASSET_ALIASES[name][attempt - 1]) || ASSET_FILES[name] || name;
     return ASSET_CDN_BASE + encodeURIComponent(filename);
   }
@@ -927,8 +944,10 @@
   function instagram() {
     var sec = e('section', 'tb26-instagram'); var inner = e('div', 'tb26-container');
     inner.appendChild(e('h2', 'tb26-title tb26-title--dark tb26-title--left', 'ÚLTIMAS POSTAGENS'));
-    var a = cfg.conteudo.instagram ? link(cfg.conteudo.instagram, 'tb26-instagram__feed') : e('div','tb26-instagram__feed');
-    if(cfg.conteudo.instagram){ a.target = '_blank'; a.rel = 'noopener noreferrer'; a.setAttribute('aria-label', 'Acompanhe a TractorBel nas redes sociais'); }
+    var originalInsta = doc.querySelector('#rodape a[href*="instagram.com/"]');
+    var instaUrl = safeUrl(cfg.conteudo.instagram || (originalInsta && originalInsta.getAttribute('href')) || '');
+    var a = instaUrl ? link(instaUrl, 'tb26-instagram__feed') : e('div','tb26-instagram__feed');
+    if(instaUrl){ a.target = '_blank'; a.rel = 'noopener noreferrer'; a.setAttribute('aria-label', 'Acompanhe a TractorBel nas redes sociais'); }
     a.appendChild(image('insta.webp', 'Publicações da TractorBel sobre máquinas, peças e ofertas', 1720, 522)); append(inner, a); append(sec, inner); return sec;
   }
   // Animacao uma unica vez ao entrar no viewport. Transform/opacity nao provocam CLS.
@@ -1061,9 +1080,26 @@
     left.appendChild(social);
     var right = e('div', 'tb26-footer__right'); var grid = e('div', 'tb26-footer__grid');
     function column(title, items) { var c = e('div', 'tb26-footer__col'); c.appendChild(e('h3', '', title)); items.forEach(function (item) { c.appendChild(link(item[1], '', item[0])); }); return c; }
+    // As antigas URLs de frete/trocas/privacidade retornam HTTP 404.
+    // Nunca publicar links ficticios: disponibiliza apenas paginas cadastradas
+    // e presentes no rodape nativo (passa a crescer quando a LI receber as politicas).
+    var institutionalLinks = [];
+    [
+      ['Sobre Nós', /sobre\s*n[oó]s/i],
+      ['Frete & Entrega', /frete\s*(?:&|e)\s*entrega/i],
+      ['Trocas & Devoluções', /trocas?\s*(?:&|e)\s*devolu[cç][oõ]es/i],
+      ['Política de Privacidade', /pol[ií]tica\s+de\s+privacidade/i]
+    ].forEach(function(entry) {
+      var original = [].find.call(native.querySelectorAll('a[href]'), function(a) {
+        return entry[1].test((a.textContent || '').replace(/\s+/g,' ').trim());
+      });
+      var url = original ? safeUrl(original.getAttribute('href')) : '';
+      if (url && new URL(url).origin === location.origin && !new URL(url).hash) institutionalLinks.push([entry[0],url]);
+    });
+    institutionalLinks.push(['Atendimento e dúvidas', 'https://wa.me/' + String(cfg.conteudo.whatsapp).replace(/\D/g,'')]);
     append(grid,
-      column('ÁREA DO CLIENTE', [['Minha Conta', '/conta/index'], ['Meus Pedidos', '/conta/pedido/listar'], ['Cadastre-se', '/conta/criar'], ['Fale Conosco', '/contato']]),
-      column('INSTITUCIONAL', [['Sobre Nós', '/pagina/sobre-nos.html'], ['Frete & Entrega', '/pagina/frete-e-entrega.html'], ['Trocas & Devoluções', '/pagina/trocas-e-devolucoes.html'], ['Política de Privacidade', '/pagina/politica-de-privacidade.html']])
+      column('ÁREA DO CLIENTE', [['Minha Conta', '/conta/index'], ['Meus Pedidos', '/conta/pedido/listar'], ['Cadastre-se', '/conta/criar'], ['Fale Conosco (WhatsApp)', 'https://wa.me/' + String(cfg.conteudo.whatsapp).replace(/\D/g,'')]]),
+      column('INSTITUCIONAL', institutionalLinks)
     );
     var secure = e('div', 'tb26-footer__col tb26-footer__secure'); secure.appendChild(e('h3', '', 'COMPRA SEGURA'));
     function copyLogos(selectors, parent, limit) {
