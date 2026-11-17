@@ -1,3 +1,11 @@
+## Revisão final 1.16.0 — 17/11/2026
+
+- Auditoria desktop/mobile: `RELATORIO-HOMOLOGACAO-V116.md`.
+- Fallback validado para cinco imagens do layout indisponíveis no CDN da Loja Integrada.
+- Links institucionais inválidos deixam de ser gerados; cadastrar páginas legais no painel antes da publicação geral.
+- Sem alteração de URLs JS/CSS, checkout ou operações nativas de compra.
+- Homologação comercial final segue pendente (cupom/frete/pagamento real e dispositivos físicos).
+
 # TractorBel 2026 · FWR Agência Digital
 
 **Plataforma:** Loja Integrada. **Projeto:** `TractorBel` na Vercel/GitHub. **Versão:** 1.14.0.
