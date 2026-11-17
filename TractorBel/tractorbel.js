@@ -6,7 +6,7 @@
 (function (win, doc) {
   'use strict';
   if (win.TractorBel2026) return;
-  var VERSION = '1.14.0';
+  var VERSION = '1.15.0';
   // Assets oficiais da TractorBel, ja hospedados na Loja Integrada.
   // Manter os nomes e extensoes ORIGINAIS, sem converter .jpg/.png para .webp.
   // O nome logico pode continuar .webp para compatibilidade com os componentes existentes.
@@ -74,6 +74,7 @@
     home: { ativo: true },
     produto: { ativo: true, compraFixaMobile: true, pixEmDestaque: true, resumoRapido: true, resumoFixo: true },
     catalogo: { ativo: true, animacao: true },
+    paginaCarrinho: { ativo: true },
     rodape: { ativo: true },
     vitrines: { ativo: true, destaques: 10, miniaturas: 8, maisVendidos: 10 },
     carrinho: { ativo: true, parcelamento: { maximo: null, semJuros: null, minimoParcela: null } },
@@ -1618,13 +1619,173 @@
     }
   }
 
+
+  // v1.15 | Carrinho: progressive enhancement sobre o formulario e tabela da Loja Integrada.
+  // NUNCA altera eventos, URLs, formas de pagamento, campos ou calculos nativos.
+  function mountCartPage() {
+    if (!doc.body || !doc.body.classList.contains('pagina-carrinho') ||
+        !cfg.paginaCarrinho || cfg.paginaCarrinho.ativo === false ||
+        doc.body.classList.contains('tb26-with-cart')) return;
+
+    var page = doc.querySelector('#corpo .secao-principal');
+    if (!page) return;
+    var cart = page.querySelector('.finalizar-compra');
+    var empty = page.querySelector('.caixa-destaque');
+    if (!cart && !empty) return;
+    doc.body.classList.add('tb26-with-cart');
+    page.classList.add('tb26-cart-page');
+    if (empty && !cart) {
+      empty.classList.add('tb26-cart-empty');
+      var title = empty.querySelector('h1');
+      if (title) {
+        title.classList.add('tb26-cart-empty__title');
+        var icon = e('span', 'tb26-cart-empty__icon');
+        icon.setAttribute('aria-hidden','true');
+        icon.textContent='▧';
+        title.parentNode.insertBefore(icon, title);
+        var description=e('p','tb26-cart-empty__desc','Escolha as peças e equipamentos que você precisa. Seus produtos aparecerão aqui antes de finalizar o pedido.');
+        title.insertAdjacentElement('afterend',description);
+      }
+      var back = empty.querySelector('a[href]');
+      if (back) back.classList.add('tb26-cart-empty__button');
+      state.cartPage={active:true, empty:true};
+      return;
+    }
+
+    var table = cart.querySelector('table.tabela-carrinho');
+    var checkout = [].slice.call(cart.querySelectorAll('form[action]')).find(function(form){
+      return /\/checkout\/redirect\/?(?:\?|$)/i.test(form.getAttribute('action') || '');
+    });
+    if (!table || !checkout) {
+      warn('Carrinho: estrutura nativa nao reconhecida, sem alteracoes na tabela e checkout.');
+      return;
+    }
+    cart.classList.add('tb26-cart');
+    table.classList.add('tb26-cart__table');
+    var headline = cart.querySelector('.cabecalho-interno');
+    if (headline) {
+      headline.classList.add('tb26-cart__headline');
+      var heading = headline.querySelector('h1');
+      if (heading) {
+        var info = e('span', 'tb26-cart__heading-eyebrow', 'SEU PEDIDO');
+        heading.parentNode.insertBefore(info,heading);
+      }
+    }
+    var mainBox = cart.querySelector('.caixa-sombreada');
+    if (mainBox) mainBox.classList.add('tb26-cart__main');
+    checkout.classList.add('tb26-cart__checkout');
+
+    function classRows() {
+      [].slice.call(table.querySelectorAll('tr')).forEach(function(row){
+        if (row.hasAttribute('data-produto-id')) {
+          row.classList.add('tb26-cart__item');
+          var productName = row.querySelector('.produto-info > a[href]');
+          var label = productName ? (productName.textContent || '').replace(/\s+/g, ' ').trim() : 'produto';
+          var minus=row.querySelector('.quantidade a.icon-minus');
+          var plus=row.querySelector('.quantidade a.icon-plus');
+          var remove=row.querySelector('.excluir a');
+          if (minus) minus.setAttribute('aria-label','Diminuir quantidade de '+label);
+          if (plus) plus.setAttribute('aria-label','Aumentar quantidade de '+label);
+          if (remove) {remove.setAttribute('aria-label','Remover '+label+' do carrinho');remove.setAttribute('title','Remover produto');}
+          var quantity=row.querySelector('.quantidade input[name="quantidade"]');
+          if(quantity) {
+            quantity.setAttribute('aria-label','Quantidade de '+label);
+            var update=row.querySelector('.quantidade button.atualizar-quantidade');
+            var quantityBox=row.querySelector('.quantidade');
+            var initial=row.querySelector('input[name="quantidade_atual"]');
+            if (update && quantityBox && !update.dataset.tb26QuantityInit) {
+              update.dataset.tb26QuantityInit='1';
+              function showUpdate() {
+                var changed=String(quantity.value).trim() !== String(initial ? initial.value : row.getAttribute('data-produto-quantidade')).trim();
+                update.classList.toggle('tb26-cart__update-visible',changed);
+                quantityBox.classList.toggle('tb26-cart__quantity-changed',changed);
+              }
+              quantity.addEventListener('input',showUpdate);
+              quantity.addEventListener('change',showUpdate);
+              showUpdate();
+            }
+          }
+        } else if(row.querySelector('#formCalcularFrete')) row.classList.add('tb26-cart__shipping-row');
+        else if(row.querySelector('#usarCupom')) row.classList.add('tb26-cart__coupon-row');
+        else if(row.querySelector('.valor-total')) row.classList.add('tb26-cart__total-row');
+        else if(row.querySelector('.valor-subtotal')) row.classList.add('tb26-cart__subtotal-row');
+      });
+    }
+    classRows();
+
+    // Checkout original (submit da Loja Integrada) permanece exatamente no mesmo FORM.
+    var summary=e('section','tb26-cart__summary');
+    summary.setAttribute('aria-label','Resumo do pedido');
+    var kicker=e('span','tb26-cart__summary-kicker','FINALIZAÇÃO');
+    var title=e('h2','tb26-cart__summary-title','Resumo do pedido');
+    var subtotalRow=e('div','tb26-cart__summary-line');
+    var subtotalLabel=e('span','','Subtotal dos produtos');
+    var subtotalValue=e('strong','tb26-cart__summary-subtotal','—');
+    append(subtotalRow,subtotalLabel,subtotalValue);
+    var totalRow=e('div','tb26-cart__summary-total');
+    var totalLabel=e('span','','Total do pedido');
+    var totalValue=e('strong','tb26-cart__summary-total-value','—');
+    append(totalRow,totalLabel,totalValue);
+    var pix=e('div','tb26-cart__summary-pix');
+    var pixLabel=e('div','tb26-cart__summary-pix-label','PREÇO ESPECIAL NO PIX');
+    var pixValue=e('strong','tb26-cart__summary-pix-value');
+    var pixDetail=e('small','tb26-cart__summary-pix-detail','Valor informado pela loja');
+    append(pix,pixLabel,pixValue,pixDetail);
+    var tip=e('p','tb26-cart__summary-note','Frete, cupons e condições finais são calculados pela Loja Integrada.');
+    append(summary,kicker,title,subtotalRow,totalRow,pix,tip);
+    checkout.insertBefore(summary, checkout.firstChild);
+
+    var action=checkout.querySelector('.acao-editar');
+    if (action) action.classList.add('tb26-cart__actions');
+    var finish=checkout.querySelector('button.botao.principal');
+    if (finish) {
+      finish.classList.add('tb26-cart__finish');
+      finish.setAttribute('aria-label','Finalizar compra com segurança');
+    }
+    var keep=checkout.querySelector('.acao-editar a.botao[href]');
+    if (keep) keep.classList.add('tb26-cart__continue');
+
+    function validCurrency(node) {
+      if (!node) return '';
+      var txt=(node.textContent||'').replace(/\s+/g,' ').trim();
+      return /R\$\s*\d/.test(txt) ? txt : '';
+    }
+    function updateSummary() {
+      // Apenas copiar exibicao da LI. Nao recalcular impostos, Pix, cupom ou frete.
+      var sourceSubtotal=table.querySelector('.valor-subtotal');
+      var sourceTotal=table.querySelector('.valor-total');
+      var sourcePix=table.querySelector('.valores-descontos .descontos.avista strong, .valores-descontos .descontos.avista .titulo');
+      var currentSubtotal=validCurrency(sourceSubtotal);
+      var currentTotal=validCurrency(sourceTotal);
+      var currentPix=validCurrency(sourcePix);
+      subtotalValue.textContent=currentSubtotal || currentTotal || 'A calcular';
+      totalValue.textContent=currentTotal || 'A calcular';
+      pix.hidden=!currentPix;
+      if(currentPix) pixValue.textContent=currentPix;
+      var count=[].reduce.call(table.querySelectorAll('tr[data-produto-id]'),function(n,row){
+        return n+(Math.max(0,parseInt(row.getAttribute('data-produto-quantidade'),10))||0);
+      },0);
+      state.cartPage={active:true,empty:false,items:count,pix:!!currentPix,source:'Loja Integrada'};
+    }
+    updateSummary();
+    if ('MutationObserver' in win) {
+      var pending=false;
+      var watcher=new MutationObserver(function(){
+        if(pending) return;
+        pending=true;
+        win.requestAnimationFrame(function(){pending=false;classRows();updateSummary();});
+      });
+      watcher.observe(table,{childList:true,subtree:true,characterData:true,attributes:true,attributeFilter:['data-produto-quantidade','data-total-valor','data-subtotal-valor']});
+    }
+  }
+
   function mount() {
     if (!enabled || !doc.body) return;
     if (doc.documentElement.dataset.tb26Mount === '1') return;
     doc.documentElement.dataset.tb26Mount = '1';
     doc.body.classList.add('tb26-active');
     if (isHome) configureBackgrounds();
-    try { mountHeader(); mountHome(); mountCatalog(); mountProductPage(); mountFooter(); }
+    try { mountHeader(); mountHome(); mountCatalog(); mountProductPage(); mountCartPage(); mountFooter(); }
     catch (err) { console.error('[TractorBel] Erro no layout, loja nativa preservada onde possível:', err); state.warnings.push(String(err.message)); }
     debug('Inicialização', state);
   }

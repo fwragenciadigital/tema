@@ -177,3 +177,7 @@ Veja `QA-PDP-V18.md` e `tests/qa-pdp-v18.py`. Homologar com o carrinho e a valid
 - O cabeçalho e o menu não são afetados; a barra aparece ao rolar mais de 500 px, sem ficar parcialmente visível quando escondida.
 - Mobile/tablet mantém o botão fixo próprio da PDP, agora com a mesma linguagem visual e preço Pix real.
 - A imagem da barra segue a imagem principal quando a variação troca de `src`/`srcset`. A compra é feita exclusivamente pelo link nativo já cadastrado.
+
+## v1.15 — Carrinho responsivo da Loja Integrada
+
+Nova camada visual exclusiva para `.pagina-carrinho` baseada na estrutura nativa da loja. Preserva formulário de checkout, quantidades, remoção de itens, frete, cupons, preços, desconto Pix e avisos comerciais. O bloco lateral exibe valores **copiados** do DOM da Loja Integrada. Estilos em `tractorbel.css`; inicialização em `mountCartPage()` no `tractorbel.js`. Configuração: `paginaCarrinho: { ativo: true }`. Sem mudanças nos links da Vercel. QA: `QA-CARRINHO-V115.md`.
