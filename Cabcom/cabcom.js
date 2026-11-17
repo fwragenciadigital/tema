@@ -280,6 +280,8 @@
       var items=sh.querySelectorAll('.listagem-item, .produto, li.listagem-item');
       if(!items.length)return false;
       sh.classList.add('cc26-enhanced-shelf');
+      // Nao aplicar display:grid sobre sliders nativos (Slick, Owl, Swiper).
+      if (!sh.querySelector('.owl-carousel, .slick-slider, .slick-initialized, .swiper, .flexslider') && !/owl|slick|swiper|flexslider/i.test(sh.className)) sh.classList.add('cc26-grid-safe');
       return true;
     });
   }
