@@ -1,12 +1,12 @@
 /*
- * TractorBel 2026 - FWR Agencia Digital - v1.16.1
+ * TractorBel 2026 - FWR Agencia Digital - v1.16.2
  * Camada visual da Loja Integrada. Sem checkout ou precificacao paralela.
  * Editavel por window.TractorBelSettings no HTML da LI.
  */
 (function (win, doc) {
   'use strict';
   if (win.TractorBel2026) return;
-  var VERSION = '1.16.1';
+  var VERSION = '1.16.2';
   // Assets oficiais da TractorBel, ja hospedados na Loja Integrada.
   // Manter os nomes e extensoes ORIGINAIS, sem converter .jpg/.png para .webp.
   // O nome logico pode continuar .webp para compatibilidade com os componentes existentes.
@@ -1788,6 +1788,21 @@
     }
     var keep=checkout.querySelector('.acao-editar a.botao[href]');
     if (keep) keep.classList.add('tb26-cart__continue');
+
+    // O selo original da LI nao pode ficar dentro da area dos botoes: alguns
+    // temas posicionam .selo-ssl em absoluto sobre o CTA de finalizar.
+    // Movemos o MESMO elemento para apos a area de acoes, dentro do form
+    // oficial de checkout. Sem clone, sem trocar handlers ou endpoint.
+    var nativeSeal = action && action.querySelector('.selo-ssl');
+    if (nativeSeal) {
+      var sealHolder = e('div', 'tb26-cart__seal-holder');
+      sealHolder.setAttribute('aria-label', 'Seguranca da compra');
+      nativeSeal.classList.remove('hidden-phone');
+      nativeSeal.classList.add('tb26-cart__seal-native');
+      sealHolder.appendChild(nativeSeal);
+      action.insertAdjacentElement('afterend', sealHolder);
+      checkout.classList.add('tb26-cart__checkout--with-seal');
+    }
 
     function validCurrency(node) {
       if (!node) return '';

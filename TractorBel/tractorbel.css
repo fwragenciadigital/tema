@@ -1142,8 +1142,32 @@ body.tb26-with-cart #corpo .tb26-cart__actions .botao {display:flex!important;al
 body.tb26-with-cart #corpo .tb26-cart__actions .tb26-cart__finish {background:#ffc400!important;color:#1a1a1a!important;border:1px solid #e9ae00!important;box-shadow:none!important;order:2;}
 body.tb26-with-cart #corpo .tb26-cart__actions .tb26-cart__finish:hover {background:#ffd54e!important;}
 body.tb26-with-cart #corpo .tb26-cart__actions .tb26-cart__continue {background:#fff!important;color:#404040!important;border:1px solid #dddddd!important;order:1;}
-body.tb26-with-cart #corpo .tb26-cart__actions .selo-ssl {float:none!important;display:flex!important;justify-content:center!important;margin:10px 0 0!important;padding:0!important;width:100%!important;}
-body.tb26-with-cart #corpo .tb26-cart__actions .selo-ssl img {max-width:140px!important;height:auto!important;}
+/* v1.16.2: selo nativo em area propria, SEM cobrir Finalizar compra. */
+body.tb26-with-cart #corpo .tb26-cart__checkout--with-seal .tb26-cart__actions {padding-bottom:0!important;}
+body.tb26-with-cart #corpo .tb26-cart__seal-holder {
+  display:flex!important;align-items:center!important;justify-content:center!important;
+  flex-direction:column!important;position:relative!important;inset:auto!important;
+  width:auto!important;max-width:100%!important;min-height:0!important;
+  margin:13px 25px 24px!important;padding:0!important;float:none!important;
+  clear:both!important;transform:none!important;box-sizing:border-box!important;
+}
+body.tb26-with-cart #corpo .tb26-cart__seal-holder .selo-ssl,
+body.tb26-with-cart #corpo .tb26-cart__actions .selo-ssl {
+  position:static!important;inset:auto!important;top:auto!important;right:auto!important;
+  bottom:auto!important;left:auto!important;z-index:auto!important;float:none!important;
+  display:flex!important;align-items:center!important;justify-content:center!important;
+  width:auto!important;max-width:100%!important;min-height:0!important;height:auto!important;
+  margin:0!important;padding:0!important;transform:none!important;text-align:center!important;
+}
+body.tb26-with-cart #corpo .tb26-cart__seal-holder .selo-ssl img,
+body.tb26-with-cart #corpo .tb26-cart__actions .selo-ssl img {
+  position:static!important;inset:auto!important;transform:none!important;
+  display:block!important;max-width:min(100%,170px)!important;height:auto!important;
+  margin:0 auto!important;float:none!important;
+}
+@media(max-width:660px){
+  body.tb26-with-cart #corpo .tb26-cart__seal-holder {margin:12px 17px 20px!important;}
+}
 /* Carrinho vazio */
 body.tb26-with-cart #corpo .tb26-cart-empty {display:flex!important;flex-direction:column;align-items:center;justify-content:center;gap:8px;background:#fff!important;max-width:760px;margin:26px auto 0!important;padding:clamp(34px,6vw,75px) 24px!important;border-radius:22px;border:1px solid #e8e8e5;box-shadow:0 16px 45px rgba(0,0,0,.05);text-align:center!important;box-sizing:border-box!important;}
 body.tb26-with-cart #corpo .tb26-cart-empty__icon {width:74px;height:74px;border-radius:22px;background:#fff1c3;color:#b78900;display:flex;align-items:center;justify-content:center;font:800 39px/1 Arial,sans-serif;margin-bottom:15px;}

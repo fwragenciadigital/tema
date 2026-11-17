@@ -23,6 +23,19 @@ with sync_playwright() as p:
   assert vals['doc'] <= width+1,(width,vals)
   assert vals['items']==1 and vals['total']=='R$ 6.000,00' and vals['pix']=='R$ 5.820,00', (width,vals)
   assert not errors,(width,errors)
+  seal=page.locator('.tb26-cart__seal-holder .selo-ssl')
+  assert seal.count()==1,(width,'Selo nativo ausente no fluxo do checkout')
+  assert page.evaluate("""() => {
+    const seal=document.querySelector('.tb26-cart__seal-holder .selo-ssl');
+    const finish=document.querySelector('.tb26-cart__finish');
+    const keep=document.querySelector('.tb26-cart__continue');
+    const checkout=document.querySelector('.tb26-cart__checkout');
+    if (!seal || !finish || !keep || !checkout || !checkout.contains(seal)) return false;
+    const rect=seal.getBoundingClientRect();
+    return !seal.closest('.tb26-cart__actions') &&
+      getComputedStyle(seal).position === 'static' &&
+      rect.top >= Math.max(finish.getBoundingClientRect().bottom,keep.getBoundingClientRect().bottom)-1;
+  }"""),(width,'Selo sobreposto aos botoes')
   if width in (320,390,768,1440): page.screenshot(path=str(base/f'cart-v115-{width}.png'),full_page=True)
   if width==390:
    page.locator('.tb26-cart__finish').click();assert page.evaluate('window.__lastForm')=='/checkout/redirect/'

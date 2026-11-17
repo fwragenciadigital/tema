@@ -190,3 +190,10 @@ Veja `QA-PDP-V18.md` e `tests/qa-pdp-v18.py`. Homologar com o carrinho e a valid
 ## v1.15 — Carrinho responsivo da Loja Integrada
 
 Nova camada visual exclusiva para `.pagina-carrinho` baseada na estrutura nativa da loja. Preserva formulário de checkout, quantidades, remoção de itens, frete, cupons, preços, desconto Pix e avisos comerciais. O bloco lateral exibe valores **copiados** do DOM da Loja Integrada. Estilos em `tractorbel.css`; inicialização em `mountCartPage()` no `tractorbel.js`. Configuração: `paginaCarrinho: { ativo: true }`. Sem mudanças nos links da Vercel. QA: `QA-CARRINHO-V115.md`.
+
+## v1.16.2 — Selo SSL do carrinho sem sobreposicao (17/11/2026)
+
+- O elemento nativo `.selo-ssl` foi movido, **sem clonagem**, da `.acao-editar` para uma area propria abaixo de Finalizar compra e Continuar comprando, dentro do mesmo formulario oficial da LI.
+- Reset escopado de `position`, `inset` e `transform` do selo e da imagem para impedir sobreposicao do CTA em desktop e mobile. `hidden-phone` removido somente do selo na previa personalizavel.
+- Fixture de QA exige que o selo esteja depois dos dois botoes, sem sobreposicao, em todos os nove breakpoints testados pelo script do carrinho.
+- Sem mudancas em quantidade, preco, Pix, frete, cupom ou destino de checkout. Previa segue isolada por `tractorbel_preview=1`.
