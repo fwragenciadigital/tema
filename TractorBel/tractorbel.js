@@ -1,12 +1,12 @@
 /*
- * TractorBel 2026 - FWR Agencia Digital - v1.16.0
+ * TractorBel 2026 - FWR Agencia Digital - v1.16.1
  * Camada visual da Loja Integrada. Sem checkout ou precificacao paralela.
  * Editavel por window.TractorBelSettings no HTML da LI.
  */
 (function (win, doc) {
   'use strict';
   if (win.TractorBel2026) return;
-  var VERSION = '1.16.0';
+  var VERSION = '1.16.1';
   // Assets oficiais da TractorBel, ja hospedados na Loja Integrada.
   // Manter os nomes e extensoes ORIGINAIS, sem converter .jpg/.png para .webp.
   // O nome logico pode continuar .webp para compatibilidade com os componentes existentes.
@@ -116,7 +116,16 @@
 
   var isHome = /^\/?(?:index\.html)?\/?$/.test(location.pathname);
   var isStore = /(?:^|\.)lojatractorbel\.com\.br$/i.test(location.hostname);
-  var preview = /(?:^|[?&])tractorbel_preview=1(?:&|$)/.test(location.search);
+  // Algumas rotas internas da LI removem o parâmetro de prévia.
+  // Preservar a prévia somente na aba de navegação, com saída explícita ?tractorbel_preview=0.
+  var previewParam = new URLSearchParams(location.search).get('tractorbel_preview');
+  var previewStored = false;
+  try {
+    if (previewParam === '1') win.sessionStorage.setItem('tb26-preview-enabled', '1');
+    if (previewParam === '0') win.sessionStorage.removeItem('tb26-preview-enabled');
+    previewStored = win.sessionStorage.getItem('tb26-preview-enabled') === '1';
+  } catch (_previewErr) { /* sessão indisponível: prévia por parâmetro */ }
+  var preview = previewParam === '1' || (previewParam !== '0' && previewStored);
   var enabled = cfg.geral.ativo && (!isStore || cfg.geral.publicarNaLoja || preview);
   var state = { header: false, home: false, footer: false, products: {}, motion: { ativo: false, observados: 0, revelados: 0 }, warnings: [] };
   var motionObserver = null;
@@ -946,8 +955,10 @@
   function instagram() {
     var sec = e('section', 'tb26-instagram'); var inner = e('div', 'tb26-container');
     inner.appendChild(e('h2', 'tb26-title tb26-title--dark tb26-title--left', 'ÚLTIMAS POSTAGENS'));
-    var a = cfg.conteudo.instagram ? link(cfg.conteudo.instagram, 'tb26-instagram__feed') : e('div','tb26-instagram__feed');
-    if(cfg.conteudo.instagram){ a.target = '_blank'; a.rel = 'noopener noreferrer'; a.setAttribute('aria-label', 'Acompanhe a TractorBel nas redes sociais'); }
+    var originalInsta = doc.querySelector('#rodape a[href*="instagram.com/"]');
+    var instaUrl = safeUrl(cfg.conteudo.instagram || (originalInsta && originalInsta.getAttribute('href')) || '');
+    var a = instaUrl ? link(instaUrl, 'tb26-instagram__feed') : e('div','tb26-instagram__feed');
+    if(instaUrl){ a.target = '_blank'; a.rel = 'noopener noreferrer'; a.setAttribute('aria-label', 'Acompanhe a TractorBel nas redes sociais'); }
     a.appendChild(image('insta.webp', 'Publicações da TractorBel sobre máquinas, peças e ofertas', 1720, 522)); append(inner, a); append(sec, inner); return sec;
   }
   // Animacao uma unica vez ao entrar no viewport. Transform/opacity nao provocam CLS.
@@ -1095,7 +1106,7 @@
       institutionalPages.push([text,new URL(url).pathname + new URL(url).search]);
     });
     append(grid,
-      column('ÁREA DO CLIENTE', [['Minha Conta', '/conta/index'], ['Meus Pedidos', '/conta/pedido/listar'], ['Cadastre-se', '/conta/criar'], ['Fale Conosco', '/contato']]),
+      column('ÁREA DO CLIENTE', [['Minha Conta', '/conta/index'], ['Meus Pedidos', '/conta/pedido/listar'], ['Cadastre-se', '/conta/criar'], ['Fale Conosco', 'https://wa.me/' + String(cfg.conteudo.whatsapp).replace(/\D/g,'')]]),
       column('INSTITUCIONAL', institutionalPages)
     );
     var secure = e('div', 'tb26-footer__col tb26-footer__secure'); secure.appendChild(e('h3', '', 'COMPRA SEGURA'));

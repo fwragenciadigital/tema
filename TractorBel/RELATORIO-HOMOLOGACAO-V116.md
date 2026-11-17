@@ -1,4 +1,4 @@
-# TractorBel 2026 — Relatório de homologação final (v1.16.0)
+# TractorBel 2026 — Relatório de homologação final (v1.16.1)
 
 **Data da auditoria:** 17/11/2026  
 **Plataforma:** Loja Integrada  
@@ -51,7 +51,7 @@ Os seguintes links definidos anteriormente no rodapé retornaram HTTP 404:
 - `/pagina/trocas-e-devolucoes.html`
 - `/pagina/politica-de-privacidade.html`
 
-O endereço `/pagina/sobre-nos.html` retornou HTTP 200. O rodapé deixa de gerar links institucionais fictícios: mantém Sobre Nós e incorpora outras páginas apenas quando elas estiverem presentes como links no rodapé nativo da loja.
+O endereço `/pagina/sobre-nos.html` retornou HTTP 200. O modo de prévia também permanece ativo na mesma aba quando a Loja Integrada omite o parâmetro em rotas internas; `?tractorbel_preview=0` desativa essa prévia na aba. O rodapé deixa de gerar links institucionais fictícios: mantém Sobre Nós e incorpora outras páginas apenas quando elas estiverem presentes como links no rodapé nativo da loja.
 
 **Pendência obrigatória antes de publicar:** cadastrar e revisar no painel as páginas de entrega, trocas/devoluções e privacidade, com conteúdo aprovado pelo cliente. Após a publicação, verificar a inclusão dos links nativos no rodapé.
 

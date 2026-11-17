@@ -1,6 +1,7 @@
-## Revisão final 1.16.0 — 17/11/2026
+## Revisão final 1.16.1 — 17/11/2026
 
 - Auditoria desktop/mobile: `RELATORIO-HOMOLOGACAO-V116.md`.
+- Prévia persistente por aba durante navegação e Instagram reutilizando o link do painel.
 - Fallback validado para cinco imagens do layout indisponíveis no CDN da Loja Integrada.
 - Links institucionais inválidos deixam de ser gerados; cadastrar páginas legais no painel antes da publicação geral.
 - Sem alteração de URLs JS/CSS, checkout ou operações nativas de compra.
