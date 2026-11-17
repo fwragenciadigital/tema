@@ -1,26 +1,91 @@
-/* TractorBel | Checkout - CSS de escopo conservador.
- * PENDENTE DE HOMOLOGACAO: nao instalado na loja; DOM do checkout nao acessivel.
- * Somente usar se o painel oficial permitir CSS especificamente no checkout.
- * Confirmar classe body.pagina-checkout antes de aplicar. Nunca injetar JS no checkout.
- * Nao esconde blocos, nao manipula valores, frete, precos ou forma de pagamento.
- */
-body.pagina-checkout{--tb-checkout-yellow:#ffc400;--tb-checkout-line:#e5e5e5;color:#191919;background:#fff;}
-body.pagina-checkout :is(input:not([type="checkbox"]):not([type="radio"]),select,textarea){
- box-sizing:border-box;max-width:100%;border-radius:9px;border-color:var(--tb-checkout-line);box-shadow:none;
+/*
+ TractorBel checkout v1.0 - camada visual CONSERVADORA.
+ Somente para editor CSS EXCLUSIVO do checkout, se disponivel na conta.
+ Nao funciona por Incluir codigo HTML/JS e NAO esta ativa no checkout.
+ A classe body.pagina-checkout e os seletores precisam de homologacao no DOM real.
+*/
+:where(body.pagina-checkout,body.checkout,body.checkout-page,body[class~="checkout"]){
+ --tb-checkout-yellow:#ffc400;--tb-checkout-yellow-hover:#ffd44a;
+ --tb-checkout-ink:#1d1d1d;--tb-checkout-muted:#737373;--tb-checkout-border:#e8e8e8;
+ background:#fff;color:var(--tb-checkout-ink);font-family:Arial,Helvetica,sans-serif;
 }
-body.pagina-checkout :is(input:not([type="checkbox"]):not([type="radio"]),select,textarea):focus-visible{
- outline:2px solid #a77e00;outline-offset:2px;
+:is(body.pagina-checkout,body.checkout,body.checkout-page,body[class~="checkout"]) :is(h1,h2,h3,h4){
+ color:var(--tb-checkout-ink);letter-spacing:-.025em;line-height:1.25;overflow-wrap:break-word;
 }
-body.pagina-checkout :is(button,input[type="submit"],a).botao.principal,
-body.pagina-checkout :is(button,input[type="submit"],a).btn-primary{
- background:var(--tb-checkout-yellow);color:#191919;border:1px solid #d9a700;
- border-radius:9px;box-shadow:none;font-weight:800;
+:is(body.pagina-checkout,body.checkout,body.checkout-page,body[class~="checkout"]) h1{
+ font-size:clamp(26px,3.5vw,39px);font-weight:800;
 }
-body.pagina-checkout :is(button,input[type="submit"],a).botao.principal:focus-visible,
-body.pagina-checkout :is(button,input[type="submit"],a).btn-primary:focus-visible{
- outline:3px solid #191919;outline-offset:3px;
+:is(body.pagina-checkout,body.checkout,body.checkout-page,body[class~="checkout"]) :is(label,.control-label){
+ font-weight:650;color:#414141;line-height:1.45;
+}
+:is(body.pagina-checkout,body.checkout,body.checkout-page,body[class~="checkout"])
+:is(input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]):not([type="submit"]):not([type="button"]):not([type="file"]),select,textarea){
+ box-sizing:border-box;min-height:45px;max-width:100%;padding:10px 12px;
+ border:1px solid var(--tb-checkout-border);border-radius:10px;
+ background:#fff;color:#1d1d1d;box-shadow:none;line-height:1.4;
+ transition:border-color .15s ease,box-shadow .15s ease;
+}
+:is(body.pagina-checkout,body.checkout,body.checkout-page,body[class~="checkout"])
+:is(input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]):not([type="submit"]):not([type="button"]):not([type="file"]),select,textarea):not(:disabled):focus-visible{
+ outline:2px solid #917000;outline-offset:2px;
+}
+:is(body.pagina-checkout,body.checkout,body.checkout-page,body[class~="checkout"]) :is(input,select,textarea)[aria-invalid="true"]{
+ border-color:#b82222;
+}
+:is(body.pagina-checkout,body.checkout,body.checkout-page,body[class~="checkout"])
+:is(button,input[type="submit"],a).botao.principal,
+:is(body.pagina-checkout,body.checkout,body.checkout-page,body[class~="checkout"])
+:is(button,input[type="submit"],a).btn-primary{
+ box-sizing:border-box;max-width:100%;min-height:48px;padding:12px 18px;
+ display:inline-flex;align-items:center;justify-content:center;
+ border:1px solid #dda900;border-radius:10px;background:var(--tb-checkout-yellow);
+ color:#1b1b1b;box-shadow:none;text-shadow:none;text-align:center;
+ font-weight:800;line-height:1.4;white-space:normal;
+}
+:is(body.pagina-checkout,body.checkout,body.checkout-page,body[class~="checkout"])
+:is(button,input[type="submit"],a).botao.principal:not(:disabled):hover,
+:is(body.pagina-checkout,body.checkout,body.checkout-page,body[class~="checkout"])
+:is(button,input[type="submit"],a).btn-primary:not(:disabled):hover{
+ background:var(--tb-checkout-yellow-hover);
+}
+:is(body.pagina-checkout,body.checkout,body.checkout-page,body[class~="checkout"])
+:is(button,input[type="submit"],a).botao.principal:focus-visible,
+:is(body.pagina-checkout,body.checkout,body.checkout-page,body[class~="checkout"])
+:is(button,input[type="submit"],a).btn-primary:focus-visible{
+ outline:3px solid #232323;outline-offset:3px;
+}
+/* Cartoes SOMENTE se a loja utilizar os seletores; nada e reposicionado. */
+:is(body.pagina-checkout,body.checkout,body.checkout-page,body[class~="checkout"])
+:is(.resumo-pedido,.resumo-compra,.resumo-checkout,.checkout-resumo){
+ box-sizing:border-box;max-width:100%;padding:clamp(16px,2.7vw,26px);
+ background:#fff;border:1px solid var(--tb-checkout-border);
+ border-radius:16px;box-shadow:0 16px 48px rgba(0,0,0,.04);
+}
+:is(body.pagina-checkout,body.checkout,body.checkout-page,body[class~="checkout"])
+:is(.resumo-pedido,.resumo-compra,.resumo-checkout,.checkout-resumo) :is(img,svg){
+ max-width:100%;height:auto;
+}
+:is(body.pagina-checkout,body.checkout,body.checkout-page,body[class~="checkout"])
+:is(.resumo-pedido,.resumo-compra,.resumo-checkout,.checkout-resumo) :is(.total,.valor-total){
+ color:#1b1b1b;font-weight:800;
+}
+:is(body.pagina-checkout,body.checkout,body.checkout-page,body[class~="checkout"])
+:is(.alert,.help-block,.errorlist,.invalid-feedback,.field-error){
+ overflow-wrap:break-word;max-width:100%;
 }
 @media(max-width:767px){
- body.pagina-checkout :is(input:not([type="checkbox"]):not([type="radio"]),select,textarea){font-size:16px;}
- body.pagina-checkout :is(.conteiner,.container){max-width:100%;}
+ :is(body.pagina-checkout,body.checkout,body.checkout-page,body[class~="checkout"])
+ :is(input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]):not([type="submit"]):not([type="button"]):not([type="file"]),select,textarea){font-size:16px;}
+ :is(body.pagina-checkout,body.checkout,body.checkout-page,body[class~="checkout"])
+ :is(.conteiner,.container,.row-fluid,.row){box-sizing:border-box;max-width:100%;}
+ :is(body.pagina-checkout,body.checkout,body.checkout-page,body[class~="checkout"])
+ :is(.resumo-pedido,.resumo-compra,.resumo-checkout,.checkout-resumo){padding:16px;}
 }
+@media(prefers-reduced-motion:reduce){
+ :is(body.pagina-checkout,body.checkout,body.checkout-page,body[class~="checkout"])
+ :is(input,select,textarea,button,a){transition:none;}
+}
+/*
+ PROIBIDO sem DOM homologado: grid/reordenacao dos formularios,
+ display:none, esconder erros, substituir CTA, JS, credito/Pix e captura de dados.
+*/
