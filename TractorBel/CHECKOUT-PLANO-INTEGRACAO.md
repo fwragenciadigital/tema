@@ -1,25 +1,25 @@
-# TractorBel | Checkout (17/11/2026)
+# TractorBel — Implementacao de checkout (17/11/2026)
 
-**Status:** conceito de interface publicado para revisão; checkout transacional da Loja Integrada INALTERADO. Este não é um pagamento paralelo.
+Status: camada CSS conservadora desenvolvida no GitHub e distribuida via Vercel. Nao aplicada ao checkout publico. A rota de checkout nao e atendida pelo CSS e JS da home.
 
-## Visual solicitado
-A referência enviada pelo cliente inspira layout minimalista, formulário à esquerda, resumo à direita, identidade branca/preta/amarela e versão mobile. O protótipo é demonstrativo (sem formulários que enviem dados, sem cálculo comercial e sem captura de pagamento).
+## Arquivos
+- checkout-preview.html: conceito responsivo nao transacional conforme referencia aprovada.
+- checkout-native.css: estilo seguro e escopado para o checkout, a ajustar SOMENTE depois de verificar a estrutura de HTML nativa e o editor de CSS especifico para checkout.
 
-## Fontes
-- [Checkout — prévia visual não transacional](checkout-preview.html): renderiza a direção visual para aprovação.
-- [checkout-native.css](checkout-native.css): CSS conservador **não instalado**, a validar contra o DOM real e somente por uma configuração oficialmente permitida de CSS do checkout.
-
-## Restrição oficial
-Loja Integrada (Ajuda, 17/09/2026): o recurso Visual/Personalize > Incluir código HTML não permite HTML/CSS/JavaScript no checkout nem na finalização. Outra documentação informa CSS Avançado de checkout no novo tema padrão, sem comprovar disponibilidade no tema da TractorBel.
-- https://ajuda.lojaintegrada.com.br/pt-BR/articles/911875-como-inserir-um-codigo-html-e-javascript
+## Restricoes oficiais (atualizadas em 2026)
+- O recurso Incluir codigo HTML permite paginas da loja, exceto checkout e confirmacao. Codigo HTML/CSS/JS por esse recurso nao opera no checkout.
+- No novo tema padrao, ha CSS Avancado proprio para Checkout, Minha Conta e Login; o suporte desse editor no tema instalado pela TractorBel nao foi verificado.
+- Desde 01/10/2026, o GTM no checkout e isolado do DOM. Nao usar GTM para injetar layout.
+- Fontes: https://ajuda.lojaintegrada.com.br/pt-BR/articles/911875-como-inserir-um-codigo-html-e-javascript
 - https://ajuda.lojaintegrada.com.br/pt-BR/articles/13335706-novo-tema-padrao-entenda-como-funciona-o-tema-padrao-das-novas-lojas-da-loja-integrada
+- https://ajuda.lojaintegrada.com.br/pt-BR/articles/16962707-como-usar-o-google-tag-manager-na-loja-integrada
 
-## Para viabilizar sem afetar conversão
-1. Verificar se o painel desta loja oferece editor de CSS **nativo do checkout**. NÃO usar inclusão comum de HTML/JS, não redirecionar checkout e não montar checkout novo em Vercel.
-2. Testar a página real em sessão autorizada com item no carrinho; confirmar seus seletores e disponibilidade do CSS antes de habilitar qualquer estilo.
-3. Manter campos, mensagens de validação, pagamento, Frete, Pix, parcelas, descontos, consentimentos e processamento exclusivamente na Loja Integrada.
-4. Homologar 320/360/390/430/768/1024/1440, login, CEP, cupom, formas de pagamento e retorno ao carrinho; sem efetuar pagamento real sem autorização específica.
-5. Publicar apenas após aceite visual e técnico, com rollback pelo editor oficial.
+## Etapas para finalizacao
+1. Verificar no painel desta loja se existe configuracao de CSS especifica de checkout.
+2. Inspecionar o checkout em sessao autorizada com produto no carrinho e verificar os seletores HTML reais.
+3. Ajustar o CSS a DOM conhecido. A referencia de grade esquerda/direita NAO pode ser aplicada as cegas, pois pode ocultar ou reordenar controles transacionais.
+4. Salvar copia do CSS anterior, instalar no editor oficial e testar responsividade 320/360/390/430/768/1024/1440.
+5. Testar validacao, login, CEP, frete, cupons, Pix, cartao, valor de pedido e navegacao; sem pedido real sem autorizacao de cobranca.
+6. Se nao existir editor para checkout, nao realizar redirect ou checkout paralelo. Solicitar a plataforma caminho oficial.
 
-## Limite desta entrega
-O checkout real não estava acessível para inspeção nesta sessão. Nenhuma compra foi criada, nenhum dado foi coletado, e o CSS não foi aplicado à página transacional.
+Nao confundir deploy READY na Vercel com publicacao da alteracao no checkout.
