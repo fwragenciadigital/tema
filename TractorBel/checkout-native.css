@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Michroma&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
 /*
  TractorBel checkout v1.0 - camada visual CONSERVADORA.
  Somente para editor CSS EXCLUSIVO do checkout, se disponivel na conta.
@@ -89,3 +90,8 @@
  PROIBIDO sem DOM homologado: grid/reordenacao dos formularios,
  display:none, esconder erros, substituir CTA, JS, credito/Pix e captura de dados.
 */
+/* Tipografia TractorBel: aplicar somente no editor oficial do checkout, apos validacao. */
+:is(body.pagina-checkout,body.checkout,body.checkout-page,body[class~="checkout"]) {font-family:'Montserrat',Arial,sans-serif!important;}
+:is(body.pagina-checkout,body.checkout,body.checkout-page,body[class~="checkout"]) :is(h1,h2,h3,h4,h5,h6){font-family:'Michroma',Arial,sans-serif!important;letter-spacing:0!important;line-height:1.5!important;}
+:is(body.pagina-checkout,body.checkout,body.checkout-page,body[class~="checkout"]) :is(button,input,select,textarea){font-family:'Montserrat',Arial,sans-serif!important;}
+@media(max-width:767px){:is(body.pagina-checkout,body.checkout,body.checkout-page,body[class~="checkout"]) h1{font-size:clamp(18px,4.8vw,26px)!important;}}

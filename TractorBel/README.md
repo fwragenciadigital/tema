@@ -197,3 +197,13 @@ Nova camada visual exclusiva para `.pagina-carrinho` baseada na estrutura nativa
 - Reset escopado de `position`, `inset` e `transform` do selo e da imagem para impedir sobreposicao do CTA em desktop e mobile. `hidden-phone` removido somente do selo na previa personalizavel.
 - Fixture de QA exige que o selo esteja depois dos dois botoes, sem sobreposicao, em todos os nove breakpoints testados pelo script do carrinho.
 - Sem mudancas em quantidade, preco, Pix, frete, cupom ou destino de checkout. Previa segue isolada por `tractorbel_preview=1`.
+
+
+## v1.17.0 — Fontes da TractorBel (19/11/2026)
+
+- **Titulos:** Michroma (h1–h6, vitrines, nomes de produtos/cards, titulo do carrinho e barra de resumo).
+- **Fonte geral:** Montserrat (menu, paragrafos, botoes, precos, formularios e rotulos).
+- As familias sao importadas pelo CSS externo versionado e por preconnect/stylesheet no arquivo `INTEGRACAO-LOJA-INTEGRADA.html`. A importacao CSS garante a mudanca nos ambientes que ja carregam `tractorbel.css` sem troca do HTML instalado.
+- O CSS e escopado para o modo `tb26-active`; a loja publica com `publicarNaLoja:false` continua sem alterações.
+- Os tamanhos dos titulos largos foram ajustados para mobile; classes de icones nativos nao recebem sobrescrita indiscriminada de fonte.
+- O CSS `checkout-native.css` e a previa HTML acompanham o novo padrao, mas a instalacao no checkout real continua dependendo do editor permitido pela Loja Integrada e da homologacao.
