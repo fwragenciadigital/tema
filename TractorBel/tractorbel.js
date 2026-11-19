@@ -1,12 +1,12 @@
 /*
- * TractorBel 2026 - FWR Agencia Digital - v1.19.0
+ * TractorBel 2026 - FWR Agencia Digital - v1.20.0
  * Camada visual da Loja Integrada. Sem checkout ou precificacao paralela.
  * Editavel por window.TractorBelSettings no HTML da LI.
  */
 (function (win, doc) {
   'use strict';
   if (win.TractorBel2026) return;
-  var VERSION = '1.19.0';
+  var VERSION = '1.20.0';
   // Assets oficiais da TractorBel, ja hospedados na Loja Integrada.
   // Manter os nomes e extensoes ORIGINAIS, sem converter .jpg/.png para .webp.
   // O nome logico pode continuar .webp para compatibilidade com os componentes existentes.
@@ -1982,6 +1982,76 @@
   // Modulos especificos acrescentam melhorias quando reconhecem DOM nativo da LI.
   // Em qualquer outro template, esta camada reaproveita o conteudo/formularios
   // existentes e fornece tipografia + estrutura compartilhada. Sem allowlist.
+  // Mapa visual: nao limita elegibilidade; apenas atribui o tratamento editorial
+  // correto a cada template. Novas rotas recebem o estilo institucional generico.
+  function tb26InternalType() {
+    var path=String(location.pathname||'/').toLowerCase();
+    var cls=String(doc.body.className||'').toLowerCase();
+    if (/(?:^|\/)conta\/(?:login|entrar)(?:\/|$)/.test(path) || /\bpagina-(?:login|autenticacao)\b/.test(cls)) return 'login';
+    if (/(?:^|\/)conta\/(?:criar|cadastrar|cadastro)(?:\/|$)/.test(path) || /\bpagina-(?:cadastro|criar-conta)\b/.test(cls)) return 'cadastro';
+    if (/(?:^|\/)conta\/(?:endere[cç]o|enderecos|endereços)(?:\/|$)/.test(path)||/\bpagina-conta-endereco\b/.test(cls)) return 'enderecos';
+    if (/(?:^|\/)conta\/pedido\/(?:listar|lista)(?:\/|$)/.test(path)||/\bpagina-(?:pedidos|lista-pedidos)\b/.test(cls)) return 'pedidos';
+    if (/(?:^|\/)conta\/pedido(?:\/|$)/.test(path)||/\bpagina-(?:pedido|detalhe-pedido)\b/.test(cls)) return 'pedido';
+    if (/(?:^|\/)conta(?:\/|$)/.test(path)||/\bpagina-conta\b/.test(cls)) return 'conta';
+    if (/(?:^|\/)(?:contato|fale-conosco|faleconosco)(?:\/|$)/.test(path)||/\bpagina-contato\b/.test(cls)) return 'contato';
+    if (/(?:^|\/)(?:pagina|institucional|politica|política|termos)(?:\/|$)/.test(path)||/\bpagina-(?:pagina|institucional|conteudo)\b/.test(cls)) return 'institucional';
+    return 'geral';
+  }
+  // Nao recria formularios, campos, botoes nem dados de pedido/cliente.
+  // A capa de apresentacao e puramente visual e externa ao <form>.
+  function mountInnerPages(main) {
+    if (!main||!main.isConnected||doc.body.classList.contains('tb26-inner-ready')) return;
+    // Checkout e confirmacao sao transacionais e contam com CSS separado.
+    // Uma pagina de pedido (area do cliente) nao e pagina de checkout.
+    if (/^\/(?:checkout|finalizar|pedido\/finalizado)(?:\/|$)/i.test(location.pathname)) return;
+    var type=tb26InternalType();
+    var config={
+      login:['ÁREA DO CLIENTE','Acesse sua conta','Consulte seus pedidos e mantenha seus dados sempre atualizados.'],
+      cadastro:['NOVO CADASTRO','Sua jornada começa aqui','Cadastre-se para acompanhar pedidos e facilitar suas próximas compras.'],
+      conta:['MINHA CONTA','Tudo em um só lugar','Gerencie suas informações e acompanhe seus pedidos com praticidade.'],
+      enderecos:['MEUS ENDEREÇOS','Dados de entrega','Mantenha seus endereços organizados para suas próximas compras.'],
+      pedidos:['HISTÓRICO DE COMPRAS','Seus pedidos, suas informações','Consulte os pedidos realizados e acompanhe as informações disponíveis.'],
+      pedido:['DETALHES DO PEDIDO','Acompanhe seu pedido','Revise os itens, valores e informações fornecidas pela Loja Integrada.'],
+      contato:['FALE COM A TRACTORBEL','Estamos aqui para ajudar','Encontre os canais oficiais de atendimento da TractorBel.'],
+      institucional:['TRACTORBEL • DESDE 1983','Conteúdo e informações','Consulte as informações oficiais da nossa loja.'],
+      geral:['TRACTORBEL • DESDE 1983','Experiência TractorBel','Peças e equipamentos para manter seu maquinário em movimento.']
+    };
+    var item=config[type]||config.geral;
+    doc.body.classList.add('tb26-inner-ready','tb26-inner--'+type);
+    main.classList.add('tb26-inner');
+    main.dataset.tb26InnerType=type;
+    var target=main.querySelector('.secao-principal')||main;
+    target.classList.add('tb26-inner__native');
+    var banner=e('div','tb26-inner__banner');
+    banner.setAttribute('aria-label',item[0]);
+    var textBox=e('div','tb26-inner__banner-copy');
+    append(textBox,e('span','tb26-inner__eyebrow',item[0]),e('div','tb26-inner__banner-title',item[1]),e('p','tb26-inner__banner-desc',item[2]));
+    var decor=e('div','tb26-inner__banner-decor');
+    decor.setAttribute('aria-hidden','true');
+    append(decor,e('span','tb26-inner__banner-mark','T'),e('span','tb26-inner__banner-since','DESDE 1983'));
+    append(banner,textBox,decor);
+    target.insertBefore(banner,target.firstChild);
+    // Nao mover titulo/h1, validacoes, formularios ou blocos de pedido.
+    [].forEach.call(main.querySelectorAll('form'),function(form){
+      if(form.closest('.modal,.modal-backdrop,.popover,.tb26-inner__banner'))return;
+      form.classList.add('tb26-inner__form');
+    });
+    [].forEach.call(main.querySelectorAll('.menu-simples,.menu-conta,.menu-cliente,.abas-conta,.nav-tabs,.nav-pills'),function(menu){
+      menu.classList.add('tb26-inner__navigation');
+    });
+    [].forEach.call(main.querySelectorAll('table'),function(table){
+      table.classList.add('tb26-inner__table');
+    });
+    if(type==='login'||type==='cadastro'||type==='contato') {
+      var tip=e('div','tb26-inner__helper');
+      var helperIcon=e('span','tb26-inner__helper-icon','✓');
+      helperIcon.setAttribute('aria-hidden','true');
+      var helperText=e('p','','Seus dados e solicitações continuam sendo processados diretamente pela Loja Integrada.');
+      append(tip,helperIcon,helperText);
+      target.appendChild(tip);
+    }
+    state.innerPages={active:true,type:type,forms:main.querySelectorAll('.tb26-inner__form').length,tables:main.querySelectorAll('.tb26-inner__table').length,preservedNativeDom:true};
+  }
   function mountUniversalPages() {
     if (!doc.body || !cfg.paginas || cfg.paginas.ativo === false || cfg.paginas.aplicarEmTodas === false) return;
     doc.body.classList.add('tb26-all-pages');
@@ -1994,9 +2064,10 @@
       main.classList.add('tb26-universal__content');
       var principal=main.querySelector('.secao-principal');
       if (principal) principal.classList.add('tb26-universal__main');
-      // Apenas paginas que ainda nao possuem um modulo especifico recebem
-      // moldura generica; titulo, formulario e breadcrumb continuam NATIVOS.
-      if (!isSpecialized) doc.body.classList.add('tb26-generic-page');
+      if (!isSpecialized) {
+        doc.body.classList.add('tb26-generic-page');
+        mountInnerPages(main);
+      }
     }
     state.pages = {
       eligible: true,
@@ -2004,7 +2075,8 @@
       sharedLayout: true,
       nativeContentFound: !!main,
       specialized: isSpecialized,
-      genericFallback: !!main && !isSpecialized
+      genericFallback: !!main && !isSpecialized,
+      internalType:(!isSpecialized&&main)?tb26InternalType():null
     };
   }
   function mount() {

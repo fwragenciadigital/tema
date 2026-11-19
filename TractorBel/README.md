@@ -248,3 +248,14 @@ Os originais anexados em 19/11/2026 foram armazenados integralmente em:
 - A prévia `?tractorbel_preview=1` continua disponível em qualquer rota sem ativar o layout publicamente; `geral.publicarNaLoja:false` permanece inalterado.
 - **Checkout é elegível ao projeto visual, mas a rota transacional da Loja Integrada não recebe o script externo de inclusão HTML**. A personalização do checkout precisa ser concluída separadamente no editor oficial, se a loja o disponibilizar. Não inserir JS externo ou forçar checkout paralelo.
 - Evitar chamadas HTML/CSS/JS duplicadas no tema. Os arquivos legados da loja devem permanecer até teste funcional de migração completa.
+
+
+## v1.20.0 — Páginas internas personalizadas (19/11/2026)
+
+- Login, cadastro, minha conta, endereços, lista/detalhes de pedidos, contato e páginas institucionais recebem tratamento editorial específico com o mesmo preto/amarelo, Michroma nos títulos e Montserrat no restante.
+- `tb26InternalType()` identifica o contexto da rota sem restringir a elegibilidade universal. Rota nova desconhecida recebe estilo geral. A rota **checkout/finalização** mantém personalização separada, pois a Loja Integrada não aceita injeção convencional de JS nessa etapa.
+- `mountInnerPages()` adiciona faixa institucional, classifica formulários, tabelas e navegação já existentes e aplica estilos responsivos. **Não** substitui, duplica, move, intercepta nem envia formulários ou dados de clientes. Nenhum preço ou situação de pedido é inventado.
+- Hero institucional é composto somente de textos e decoração; os títulos H1, breadcrumbs e controles oficiais continuam no DOM original.
+- Campos, validação, foco e mensagens de erro são preservados. O visual de tabelas de pedidos usa os dados e links reais da plataforma.
+- Estilos estão no `tractorbel.css` e lógica no `tractorbel.js`; não há novos arquivos carregados pelo lojista. O bloco `window.TractorBelSettings` e `publicarNaLoja:false` continuam iguais.
+- QA técnico: verificar compilação JS, contagem de chaves CSS e seletores/rotas; inspeção real autenticada, mobile e compra simulada ainda precisam ser testados antes da liberação pública.
