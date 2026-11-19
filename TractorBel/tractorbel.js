@@ -1070,7 +1070,9 @@
     var local=digits.replace(/^55/,'');
     var formatted=local.length===11?'('+local.slice(0,2)+') '+local.slice(2,3)+' '+local.slice(3,7)+'-'+local.slice(7):local;
     content.appendChild(contactLink('https://wa.me/'+digits,'◉','Vendas e suporte',formatted||'WhatsApp'));
-    content.appendChild(contactLink('tel:'+String(cfg.conteudo.telefone||'').replace(/[^\d+]/g,''),'☎','Suporte',cfg.conteudo.telefone));
+    var phoneDigits=String(cfg.conteudo.telefone||'').replace(/\D/g,'');
+    var phoneDial=phoneDigits ? 'tel:+' + (/^55/.test(phoneDigits)?phoneDigits:'55'+phoneDigits) : '#';
+    content.appendChild(contactLink(phoneDial,'☎','Suporte',cfg.conteudo.telefone));
     content.appendChild(contactLink('mailto:'+cfg.conteudo.email,'✉','E-mail',cfg.conteudo.email));
     append(contact,content);append(inner,info,contact);sec.appendChild(inner);
     return sec;
