@@ -1,12 +1,12 @@
 /*
- * TractorBel 2026 - FWR Agencia Digital - v1.17.1
+ * TractorBel 2026 - FWR Agencia Digital - v1.18.0
  * Camada visual da Loja Integrada. Sem checkout ou precificacao paralela.
  * Editavel por window.TractorBelSettings no HTML da LI.
  */
 (function (win, doc) {
   'use strict';
   if (win.TractorBel2026) return;
-  var VERSION = '1.17.1';
+  var VERSION = '1.18.0';
   // Assets oficiais da TractorBel, ja hospedados na Loja Integrada.
   // Manter os nomes e extensoes ORIGINAIS, sem converter .jpg/.png para .webp.
   // O nome logico pode continuar .webp para compatibilidade com os componentes existentes.
@@ -89,7 +89,7 @@
     catalogo: { ativo: true, animacao: true },
     paginaCarrinho: { ativo: true },
     rodape: { ativo: true },
-    vitrines: { ativo: true, destaques: 10, miniaturas: 8, maisVendidos: 10 },
+    vitrines: { ativo: true, destaques: 10, miniaturas: 8, maisVendidos: 10, autoplay: true, loop: true, intervalo: 4500 },
     carrinho: { ativo: true, parcelamento: { maximo: null, semJuros: null, minimoParcela: null } },
     movimento: { ativo: true, fadeIn: true, hover: true, duracao: 740, distancia: 25, intervalo: 80 },
     conteudo: {
@@ -748,9 +748,24 @@
     if (partial === 'Mais vendidos') return wanted || null;
     return wanted || (partial === 'Destaques' ? lists[1] : lists[0]) || doc.querySelector('#corpo');
   }
+
+  // Descontos exibidos somente se confirmados por dois precos reais da LI.
+  function tb26Money(raw) {
+    var hit = String(raw || '').match(/R\$\s*([\d.]+,\d{2})/);
+    return hit ? Number(hit[1].replace(/\./g,'').replace(',','.')) : NaN;
+  }
+  function tb26PixPercent(fullText, pixText) {
+    if (!/\bpix\b/i.test(String(pixText || ''))) return 0;
+    var full=tb26Money(fullText), pix=tb26Money(pixText);
+    if (!isFinite(full)||!isFinite(pix)||full<=0||pix<=0||pix>=full) return 0;
+    var value=(full-pix)*100/full, rounded=Math.round(value);
+    return rounded >= 1 && rounded <= 90 && Math.abs(value-rounded) <= 0.15 ? rounded : 0;
+  }
   function productCard(p) {
     var a = link(p.url, 'tb26-product');
     var photo = e('div', 'tb26-product__image'); var img = e('img'); img.src = p.image || asset('peca1.webp'); img.loading = 'lazy'; img.decoding = 'async'; img.width = 320; img.height = 320; img.alt = p.title; append(photo, img);
+    var discount = tb26PixPercent(p.price,p.pix);
+    if(discount) photo.appendChild(e('span','tb26-product__pix-discount',discount + '% OFF NO PIX'));
     var detail = e('div', 'tb26-product__details'); append(detail, e('h3', 'tb26-product__title', p.title));
     if (p.price) detail.appendChild(e('strong', 'tb26-product__price', p.price));
     else detail.appendChild(e('span', 'tb26-product__consult', 'Consulte o preço'));
@@ -758,17 +773,103 @@
     append(a, photo, detail, e('span', 'tb26-product__cta', 'VER PRODUTO')); return a;
   }
   function carousel(name, title, products, sectionCls) {
-    var sec = e('section', 'tb26-section tb26-carousel ' + (sectionCls || ''));
-    sec.dataset.tb26Section = name;
-    var container = e('div', 'tb26-container');
-    var heading = e('h2', 'tb26-title', title); var view = e('div', 'tb26-carousel__track'); view.setAttribute('tabindex', '0'); view.setAttribute('aria-label', title);
-    products.forEach(function (product) { view.appendChild(productCard(product)); });
-    var ctrl = e('div', 'tb26-carousel__controls');
-    var prev = e('button', 'tb26-arrow', '‹'); prev.type = 'button'; prev.setAttribute('aria-label', 'Ver anteriores');
-    var next = e('button', 'tb26-arrow', '›'); next.type = 'button'; next.setAttribute('aria-label', 'Ver próximos');
-    function step(dir) { var item = view.querySelector('.tb26-product'); view.scrollBy({left: dir * ((item && item.getBoundingClientRect().width || 275) + 14), behavior: 'smooth'}); }
-    prev.addEventListener('click', function () { step(-1); }); next.addEventListener('click', function () { step(1); });
-    append(ctrl, prev, next); append(container, heading, view, ctrl); append(sec, container); return sec;
+    var sec=e('section','tb26-section tb26-carousel '+(sectionCls||''));
+    sec.dataset.tb26Section=name;
+    var container=e('div','tb26-container');
+    var heading=e('h2','tb26-title',title);
+    var view=e('div','tb26-carousel__track');
+    view.tabIndex=0;
+    view.setAttribute('aria-label',title||'Carrossel de miniaturas');
+    view.setAttribute('role','region');
+    view.setAttribute('aria-roledescription','carrossel');
+    products.forEach(function(product){view.appendChild(productCard(product));});
+    var ctrl=e('div','tb26-carousel__controls');
+    var prev=e('button','tb26-arrow','‹'), next=e('button','tb26-arrow','›');
+    prev.type=next.type='button';
+    prev.setAttribute('aria-label','Produtos anteriores');
+    next.setAttribute('aria-label','Próximos produtos');
+    var reduce=Boolean(win.matchMedia&&win.matchMedia('(prefers-reduced-motion: reduce)').matches);
+    var loop=cfg.vitrines.loop!==false && products.length>1;
+    var startPos=0,cycleWidth=0,ready=false,resetting=false;
+    var hovered=false,focused=false,inViewport=false,pauseUntil=0;
+    function measure() {
+      if(!loop||!view.isConnected)return;
+      var nodes=view.children, count=products.length;
+      if(nodes.length<count*3)return;
+      startPos=nodes[count].offsetLeft-nodes[0].offsetLeft;
+      cycleWidth=nodes[count*2].offsetLeft-nodes[count].offsetLeft;
+      if(cycleWidth>0&&!ready){ready=true;view.scrollLeft=startPos;}
+    }
+    function normalize() {
+      if(!ready||resetting||!cycleWidth)return;
+      var value=view.scrollLeft;
+      if(value>=startPos+cycleWidth-2||value<startPos-2){
+        resetting=true;
+        var snap=view.style.scrollSnapType,behavior=view.style.scrollBehavior;
+        view.style.scrollSnapType='none';
+        view.style.scrollBehavior='auto';
+        view.scrollLeft=value+(value<startPos?cycleWidth:-cycleWidth);
+        win.requestAnimationFrame(function(){
+          view.style.scrollSnapType=snap;
+          view.style.scrollBehavior=behavior;
+          resetting=false;
+        });
+      }
+    }
+    function cardStep() {
+      var first=view.children[0],second=view.children[1];
+      return first&&second ? second.offsetLeft-first.offsetLeft:280;
+    }
+    function move(direction,manual) {
+      if(manual)pauseUntil=Date.now()+8000;
+      if(!view.isConnected)return;
+      if(loop&&!ready)measure();
+      view.scrollBy({left:direction*cardStep(),behavior:reduce?'auto':'smooth'});
+    }
+    if(loop) {
+      var original=[].slice.call(view.children);
+      var before=doc.createDocumentFragment(),after=doc.createDocumentFragment();
+      original.forEach(function(card){
+        var first=card.cloneNode(true),last=card.cloneNode(true);
+        [first,last].forEach(function(clone){
+          clone.setAttribute('aria-hidden','true');
+          clone.tabIndex=-1;
+          clone.classList.add('tb26-product--clone');
+          var img=clone.querySelector('img');if(img)img.loading='lazy';
+        });
+        before.appendChild(first);after.appendChild(last);
+      });
+      view.prepend(before);view.appendChild(after);
+      view.addEventListener('scroll',normalize,{passive:true});
+      win.requestAnimationFrame(measure);
+      if('ResizeObserver' in win){
+        var resize=new ResizeObserver(function(){if(!ready){measure();return;}var oldWidth=cycleWidth,oldStart=startPos;measure();if(oldWidth&&oldWidth!==cycleWidth&&Math.abs(view.scrollLeft-oldStart)<oldWidth)view.scrollLeft=startPos;});
+        resize.observe(view);
+      } else win.addEventListener('resize',function(){ready=false;measure();},{passive:true});
+    }
+    prev.addEventListener('click',function(){move(-1,true);});
+    next.addEventListener('click',function(){move(1,true);});
+    view.addEventListener('pointerenter',function(){hovered=true;});
+    view.addEventListener('pointerleave',function(){hovered=false;pauseUntil=Date.now()+2500;});
+    view.addEventListener('focusin',function(){focused=true;});
+    view.addEventListener('focusout',function(evt){if(!view.contains(evt.relatedTarget))focused=false;});
+    ['touchstart','wheel','keydown'].forEach(function(evt){
+      view.addEventListener(evt,function(){pauseUntil=Date.now()+8000;},{passive:true});
+    });
+    if(cfg.vitrines.autoplay!==false&&!reduce&&products.length>1) {
+      if('IntersectionObserver' in win) {
+        var observer=new IntersectionObserver(function(entries){entries.forEach(function(en){if(en.target===sec)inViewport=en.isIntersecting;});},{threshold:.1});
+        observer.observe(sec);
+      } else inViewport=true;
+      var ms=Math.max(2800,Math.min(15000,Number(cfg.vitrines.intervalo)||4500));
+      var timer=win.setInterval(function(){
+        if(!view.isConnected){win.clearInterval(timer);return;}
+        if(!inViewport||doc.hidden||hovered||focused||Date.now()<pauseUntil)return;
+        move(1,false);
+      },ms);
+    }
+    append(ctrl,prev,next);append(container,heading,view,ctrl);append(sec,container);
+    return sec;
   }
   // Carrossel real de marcas: oito logos PNG separados a partir da arte aprovada.
   // Nunca usar a imagem horizontal "Novo Projeto (11).png" como uma unica marca.
@@ -943,14 +1044,36 @@
     }); append(inner, grid); append(sec, inner); return sec;
   }
   function company() {
-    var sec = e('section', 'tb26-company'); var inner = e('div', 'tb26-container tb26-company__grid');
-    var info = e('div', 'tb26-company__info'); setBackground(info, 'novo-projeto-6.webp'); append(info, image('logo-empresa-footer.webp', 'TractorBel e TTL', 698, 103), e('p', '', cfg.conteudo.sobre));
-    info.appendChild(e('p', '', 'Peças, equipamentos e atendimento especializado para manter o seu maquinário em movimento.'));
-    var contact = e('div', 'tb26-company__contact');
-    contact.appendChild(image('box-contato.webp', 'Atendimento especializado TractorBel', 586, 820));
-    var text = e('div', 'tb26-company__contact-text');
-    append(text, e('small', '', 'Não fique com o seu maquinário parado!'), e('h2', '', 'Fale conosco'), link('https://wa.me/' + String(cfg.conteudo.whatsapp).replace(/\D/g, ''), '', 'WhatsApp  (31) 9 9657-3930'), link('tel:+553121051455', '', 'Suporte  ' + cfg.conteudo.telefone), link('mailto:' + cfg.conteudo.email, '', cfg.conteudo.email));
-    append(contact, text); append(inner, info, contact); append(sec, inner); return sec;
+    var sec=e('section','tb26-company');
+    var inner=e('div','tb26-container tb26-company__grid');
+    var info=e('div','tb26-company__info');
+    setBackground(info,'novo-projeto-6.webp');
+    info.appendChild(image('logo-empresa-footer.webp','TractorBel e TTL',698,103));
+    var paragraphs=(cfg.conteudo.empresaDetalhes && cfg.conteudo.empresaDetalhes.length) ? cfg.conteudo.empresaDetalhes : [
+      'Em 1983 nascia a TractorBel Tratores e Peças, em Belo Horizonte, Minas Gerais. Contamos com sede própria de 14.512 m², área para carga e descarga, estacionamento e espaço para clientes.',
+      'Para celebrar quatro décadas de sucesso, lançamos nossa nova marca TTL.',
+      'Temos estoque exclusivo de peças novas e seminovas, máquinas e equipamentos, com qualidade e preço competitivo.'
+    ];
+    paragraphs.forEach(function(paragraph){if(paragraph)info.appendChild(e('p','',String(paragraph)));});
+    var contact=e('div','tb26-company__contact');
+    contact.appendChild(image('box-contato.webp','Atendimento especializado TractorBel',586,820));
+    var content=e('div','tb26-company__contact-text');
+    append(content,e('small','tb26-company__tagline','Não fique com o seu maquinário parado!'),e('h2','','Fale conosco'));
+    function contactLink(href,glyph,label,value){
+      var a=link(href,'tb26-company__contact-link');
+      a.appendChild(e('span','tb26-company__contact-icon',glyph));
+      var lines=e('span','tb26-company__contact-data');
+      append(lines,e('small','',label),e('strong','',value));
+      a.appendChild(lines);return a;
+    }
+    var digits=String(cfg.conteudo.whatsapp || '').replace(/\D/g,'');
+    var local=digits.replace(/^55/,'');
+    var formatted=local.length===11?'('+local.slice(0,2)+') '+local.slice(2,3)+' '+local.slice(3,7)+'-'+local.slice(7):local;
+    content.appendChild(contactLink('https://wa.me/'+digits,'◉','Vendas e suporte',formatted||'WhatsApp'));
+    content.appendChild(contactLink('tel:'+String(cfg.conteudo.telefone||'').replace(/[^\d+]/g,''),'☎','Suporte',cfg.conteudo.telefone));
+    content.appendChild(contactLink('mailto:'+cfg.conteudo.email,'✉','E-mail',cfg.conteudo.email));
+    append(contact,content);append(inner,info,contact);sec.appendChild(inner);
+    return sec;
   }
   function instagram() {
     var sec = e('section', 'tb26-instagram'); var inner = e('div', 'tb26-container');
@@ -1128,8 +1251,14 @@
     var paymentIcons=copyLogos('.pagamento img, .formas-pagamento img, .bandeiras-pagamento img, .bandeiras img, .meios-pagamento img',secure,12);
     if(!paymentIcons) secure.appendChild(e('p', '', 'Consulte os meios disponíveis no checkout.'));
     grid.appendChild(secure); right.appendChild(grid);
-    var legal = e('div', 'tb26-footer__bottom'); append(legal, e('small', '', 'TRACTORBEL TRATORES E PEÇAS BELO HORIZONTE LTDA · CNPJ 17.713.959/0001-77 · © ' + new Date().getFullYear()), e('span', '', 'by FWR Agência Digital'));
-    right.appendChild(legal); append(footer, left, right);
+    var legal=e('div','tb26-footer__bottom');
+    legal.appendChild(e('small','tb26-footer__legal-copy','TRACTORBEL | Todos os direitos reservados. Os preços anunciados neste site ou via e-mail promocional podem ser alterados sem prévio aviso.'));
+    var agency=link('https://fwragenciadigital.com.br/','tb26-footer__agency');
+    agency.target='_blank';agency.rel='noopener noreferrer';agency.setAttribute('aria-label','Desenvolvido por FWR Agência Digital');
+    var agencyLogo=e('img');agencyLogo.src='https://cdn.awsli.com.br/1571/1571465/arquivos/fwr-new.png';agencyLogo.width=95;agencyLogo.height=40;agencyLogo.alt='FWR Agência Digital';agencyLogo.loading='lazy';agencyLogo.decoding='async';
+    agencyLogo.addEventListener('error',function(){agency.replaceChildren(e('span','','by FWR'));},{once:true});
+    agency.appendChild(agencyLogo);legal.appendChild(agency);
+    append(footer,left,right,legal);
     native.parentNode.insertBefore(footer, native); native.classList.add('tb26-native-footer'); doc.body.classList.add('tb26-with-footer'); state.footer = true;
     setupMotion(footer);
   }
@@ -1641,6 +1770,13 @@
           button.removeAttribute('aria-hidden');
           neutralizeNativeExtras(card);
         }
+        // Badge condicional com base nas regras/precos reais do card nativo.
+        var fullNative=firstText(card,['.preco-produto .preco-promocional','.preco-promocional','.preco-venda']);
+        var pixNative=firstText(card,['.desconto-a-vista','.preco-a-vista','.preco-pix']);
+        var pixPercent=tb26PixPercent(fullNative,pixNative);
+        var pixBadge=card.querySelector('.tb26-catalog__pix-discount');
+        if(pixPercent&&!pixBadge){pixBadge=e('span','tb26-catalog__pix-discount');card.appendChild(pixBadge);}
+        if(pixBadge){pixBadge.textContent=pixPercent?pixPercent+'% OFF NO PIX':'';pixBadge.hidden=!pixPercent;}
         // A plataforma fornece os precos, Pix, descontos e disponibilidade.
         if (observer && idx >= 4 && card.getBoundingClientRect().top > win.innerHeight) {
           card.classList.add('tb26-catalog-card--pending');
