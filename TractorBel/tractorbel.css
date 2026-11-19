@@ -1697,3 +1697,89 @@ body.tb26-active .tb26-footer__agency span {font-weight:800;color:#fff;}
  body.tb26-active .tb26-header .tb26-nav__link::before,
  body.tb26-active .tb26-header .tb26-nav__link::after {transition:none!important;}
 }
+
+
+/* ================================================================
+ TractorBel v1.19.0 | TODAS AS PAGINAS ELEGIVEIS
+ Camada visual compartilhada para qualquer rota carregada pelo tema,
+ sem restringir ao nome da pagina (institucional, conta, login, etc).
+ Os modulos especializados continuam aplicando estilos especificos.
+ Integracoes de compra e checkout seguem exclusivamente nativas.
+ ================================================================= */
+body.tb26-active.tb26-all-pages {
+  font-family:'Montserrat',Arial,sans-serif!important;
+  color:var(--tb26-ink);
+}
+body.tb26-active.tb26-all-pages #corpo.tb26-universal__content {
+  font-family:'Montserrat',Arial,sans-serif;
+  min-width:0;
+}
+body.tb26-active.tb26-all-pages #corpo.tb26-universal__content :is(h1,h2,h3,h4,h5,h6) {
+  font-family:'Michroma',Arial,sans-serif!important;
+  letter-spacing:0!important;
+  line-height:1.5;
+  overflow-wrap:break-word;
+}
+body.tb26-active.tb26-all-pages #corpo.tb26-universal__content :is(input,textarea,select,button) {
+  font-family:'Montserrat',Arial,sans-serif!important;
+}
+/* Rota sem modulo especifico: nao altera o DOM, formularios ou comportamento. */
+body.tb26-active.tb26-generic-page #corpo.tb26-universal__content {
+  background:#fff;
+  min-height:45vh;
+}
+body.tb26-active.tb26-generic-page #corpo.tb26-universal__content > :is(.conteiner,.container),
+body.tb26-active.tb26-generic-page #corpo.tb26-universal__content .secao-principal {
+  min-width:0;
+  box-sizing:border-box;
+}
+body.tb26-active.tb26-generic-page #corpo.tb26-universal__content :is(h1,.titulo-pagina) {
+  color:#1b1b1b;
+  font-family:'Michroma',Arial,sans-serif!important;
+  font-weight:400!important;
+  font-size:clamp(17px,2.2vw,28px)!important;
+  line-height:1.6!important;
+  margin-bottom:clamp(18px,2.3vw,32px);
+}
+body.tb26-active.tb26-generic-page #corpo.tb26-universal__content :is(h2,h3) {
+  color:#222;
+  font-size:clamp(14px,1.5vw,21px);
+  line-height:1.55;
+}
+body.tb26-active.tb26-generic-page #corpo.tb26-universal__content :is(.breadcrumbs,.breadcrumb) {
+  color:#777;
+  font-family:'Montserrat',Arial,sans-serif!important;
+  font-size:12px;
+  line-height:1.6;
+  overflow-wrap:anywhere;
+}
+body.tb26-active.tb26-generic-page #corpo.tb26-universal__content :is(.caixa-sombreada,.caixa-destaque,.box,.panel) {
+  box-sizing:border-box;
+  max-width:100%;
+  border-radius:10px;
+}
+body.tb26-active.tb26-generic-page #corpo.tb26-universal__content
+:is(input:not([type="hidden"]):not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="submit"]),textarea,select) {
+  box-sizing:border-box;
+  max-width:100%;
+  border-radius:7px;
+  min-height:42px;
+}
+/* Acessibilidade visual; nao cria uma rotina paralela de login/compra. */
+body.tb26-active.tb26-generic-page #corpo.tb26-universal__content :is(a,button,input,select,textarea):focus-visible {
+  outline:2px solid #a27b00;
+  outline-offset:2px;
+}
+body.tb26-active.tb26-generic-page #corpo.tb26-universal__content :is(img,video,iframe) {
+  max-width:100%;
+}
+@media(max-width:767px){
+  body.tb26-active.tb26-generic-page #corpo.tb26-universal__content :is(h1,.titulo-pagina) {
+    font-size:clamp(16px,4.2vw,22px)!important;
+  }
+  body.tb26-active.tb26-generic-page #corpo.tb26-universal__content
+  :is(input:not([type="hidden"]):not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="submit"]),textarea,select) {
+    font-size:16px;
+    max-width:100%;
+  }
+}

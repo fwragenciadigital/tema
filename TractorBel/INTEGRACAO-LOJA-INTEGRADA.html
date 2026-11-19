@@ -1,7 +1,10 @@
 <!-- TractorBel 2026 | FWR Agência Digital | HTML do rodapé / código personalizado LI -->
-<!-- 1) No ambiente de testes, mantenha publicarNaLoja: false. -->
-<!-- 2) Acesse a home com ?tractorbel_preview=1 para testar no domínio real. -->
-<!-- 3) Depois da homologação, altere somente publicarNaLoja para true. -->
+<!-- 1) Inserir no codigo global da loja (TODAS as paginas que aceitam HTML da LI). -->
+<!-- Páginas de produto, categoria, busca, marca, carrinho, contato, conta, login e institucionais elegíveis. -->
+<!-- Checkout: usar apenas personalização oficial dessa etapa; codigo externo nao carrega la. -->
+<!-- 2) No ambiente de testes, mantenha publicarNaLoja: false. -->
+<!-- 3) Acesse qualquer rota com ?tractorbel_preview=1; a prévia persiste nesta aba. -->
+<!-- 4) Depois da homologação, altere somente publicarNaLoja para true. -->
 <!-- Imagens, carrossel de marcas, animacoes, logo do painel, submenus, header fixo e carrinho lateral sao configurados dentro do tractorbel.js. -->
 <!-- v1.9: PDP com Pix prioritário, resumos dinâmicos e regras nativas da LI. -->
 <!-- v1.7: tb26-hero removido. Marcas, beneficios e institucional sao componentes independentes. -->
@@ -12,6 +15,7 @@ window.TractorBelSettings = {
   geral: { ativo: true, publicarNaLoja: false, debug: false },
   topo: { ativo: true, menu: true },
   home: { ativo: true },
+  paginas: { ativo: true, aplicarEmTodas: true },
   rodape: { ativo: true },
   vitrines: { ativo: true, destaques: 10, miniaturas: 8, maisVendidos: 10, autoplay: true, loop: true, intervalo: 4500 },
   conteudo: {

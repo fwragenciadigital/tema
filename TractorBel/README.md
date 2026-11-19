@@ -237,3 +237,14 @@ Os originais anexados em 19/11/2026 foram armazenados integralmente em:
 - Chaves do bundle, selos e fontes nos arquivos publicados: **PASS**.
 - Deploy automatizado GitHub → Vercel: verificar estado READY na versao publicada.
 - **Pendente**: teste visual mobile/desktop na loja real, revalidacao do carrossel com produtos reais e autorizacao de homologacao comercial. Nenhum pedido real foi realizado. O checkout oficial permanece fora do escopo de injeção.
+
+
+## v1.19.0 — Escopo universal de páginas (19/11/2026)
+
+- **Todas as rotas da loja são elegíveis**, sem lista de páginas permitidas no JavaScript: home, categorias, busca, marcas, produtos, carrinho, institucionais, contato, login, minha conta, pedidos e quaisquer páginas novas que carreguem o bundle.
+- `mountUniversalPages()` adiciona as classes `tb26-all-pages` e `tb26-universal__content` ao conteúdo existente de qualquer página com `#corpo`. Módulos exclusivos continuam atuando em suas páginas apropriadas; demais páginas recebem `tb26-generic-page` com tipografia Michroma/Montserrat, estilos conservadores para títulos, formulários e breadcrumbs.
+- **Não altera as actions dos formulários**, autenticação, carrinho, compra, pagamento, frete nem cálculos comerciais. Páginas sem `#corpo` mantêm header/footer (quando presentes) e estado diagnóstico reporta `nativeContentFound:false`.
+- Cada módulo é inicializado isoladamente: uma falha de um componente não impede tentativa de renderização do header/footer ou da camada geral.
+- A prévia `?tractorbel_preview=1` continua disponível em qualquer rota sem ativar o layout publicamente; `geral.publicarNaLoja:false` permanece inalterado.
+- **Checkout é elegível ao projeto visual, mas a rota transacional da Loja Integrada não recebe o script externo de inclusão HTML**. A personalização do checkout precisa ser concluída separadamente no editor oficial, se a loja o disponibilizar. Não inserir JS externo ou forçar checkout paralelo.
+- Evitar chamadas HTML/CSS/JS duplicadas no tema. Os arquivos legados da loja devem permanecer até teste funcional de migração completa.

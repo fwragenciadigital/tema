@@ -1,12 +1,12 @@
 /*
- * TractorBel 2026 - FWR Agencia Digital - v1.18.0
+ * TractorBel 2026 - FWR Agencia Digital - v1.19.0
  * Camada visual da Loja Integrada. Sem checkout ou precificacao paralela.
  * Editavel por window.TractorBelSettings no HTML da LI.
  */
 (function (win, doc) {
   'use strict';
   if (win.TractorBel2026) return;
-  var VERSION = '1.18.0';
+  var VERSION = '1.19.0';
   // Assets oficiais da TractorBel, ja hospedados na Loja Integrada.
   // Manter os nomes e extensoes ORIGINAIS, sem converter .jpg/.png para .webp.
   // O nome logico pode continuar .webp para compatibilidade com os componentes existentes.
@@ -85,6 +85,8 @@
       textoDepois: ' é referência no segmento de peças novas, seminovas e insumos mecânicos para tratores, escavadeiras e máquinas pesadas.'
     },
     home: { ativo: true },
+    // Camada compartilhada: nenhuma lista de rotas autorizadas/bloqueadas.
+    paginas: { ativo: true, aplicarEmTodas: true },
     produto: { ativo: true, compraFixaMobile: true, pixEmDestaque: true, resumoRapido: true, resumoFixo: true },
     catalogo: { ativo: true, animacao: true },
     paginaCarrinho: { ativo: true },
@@ -1976,14 +1978,56 @@
     }
   }
 
+  // A identidade TractorBel abrange TODAS as rotas que recebem este bundle.
+  // Modulos especificos acrescentam melhorias quando reconhecem DOM nativo da LI.
+  // Em qualquer outro template, esta camada reaproveita o conteudo/formularios
+  // existentes e fornece tipografia + estrutura compartilhada. Sem allowlist.
+  function mountUniversalPages() {
+    if (!doc.body || !cfg.paginas || cfg.paginas.ativo === false || cfg.paginas.aplicarEmTodas === false) return;
+    doc.body.classList.add('tb26-all-pages');
+    var main = doc.querySelector('#corpo');
+    var isSpecialized = doc.body.classList.contains('tb26-with-home') ||
+      doc.body.classList.contains('tb26-with-pdp') ||
+      doc.body.classList.contains('tb26-with-catalog') ||
+      doc.body.classList.contains('tb26-with-cart');
+    if (main) {
+      main.classList.add('tb26-universal__content');
+      var principal=main.querySelector('.secao-principal');
+      if (principal) principal.classList.add('tb26-universal__main');
+      // Apenas paginas que ainda nao possuem um modulo especifico recebem
+      // moldura generica; titulo, formulario e breadcrumb continuam NATIVOS.
+      if (!isSpecialized) doc.body.classList.add('tb26-generic-page');
+    }
+    state.pages = {
+      eligible: true,
+      route: location.pathname,
+      sharedLayout: true,
+      nativeContentFound: !!main,
+      specialized: isSpecialized,
+      genericFallback: !!main && !isSpecialized
+    };
+  }
   function mount() {
     if (!enabled || !doc.body) return;
     if (doc.documentElement.dataset.tb26Mount === '1') return;
     doc.documentElement.dataset.tb26Mount = '1';
     doc.body.classList.add('tb26-active');
-    if (isHome) configureBackgrounds();
-    try { mountHeader(); mountHome(); mountCatalog(); mountProductPage(); mountCartPage(); mountFooter(); }
-    catch (err) { console.error('[TractorBel] Erro no layout, loja nativa preservada onde possível:', err); state.warnings.push(String(err.message)); }
+    // Erros independentes nao impedem que outras paginas/modulos renderizem.
+    function safely(name, callback) {
+      try { callback(); }
+      catch (err) {
+        console.error('[TractorBel] Falha isolada em '+name+'; recursos nativos preservados quando possivel:',err);
+        state.warnings.push(name+': '+String(err && err.message || err));
+      }
+    }
+    if (isHome) safely('fundos',configureBackgrounds);
+    safely('cabecalho',mountHeader);
+    safely('home',mountHome);
+    safely('catalogo',mountCatalog);
+    safely('produto',mountProductPage);
+    safely('carrinho',mountCartPage);
+    safely('rodape',mountFooter);
+    safely('todasPaginas',mountUniversalPages);
     debug('Inicialização', state);
   }
   win.TractorBel2026 = Object.freeze({ version: VERSION, enabled: enabled, config: cfg, arquivos: ASSET_FILES, diagnostico: function () { return JSON.parse(JSON.stringify(state)); }, refresh: function () { return mount(); }, carrinho: { abrir: function () { if (cartDrawerApi) cartDrawerApi.open(); }, fechar: function () { if (cartDrawerApi) cartDrawerApi.close(); }, atualizar: function () { if (cartDrawerApi) cartDrawerApi.refresh(); } } });
