@@ -1,6 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Michroma&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
 /* TractorBel 2026 - FWR Agencia Digital v1.9.0 - CSS escopado */
-:root{--tb26-yellow:#ffbc00;--tb26-yellow-strong:#ffc400;--tb26-dark:#191919;--tb26-ink:#252525;--tb26-muted:#929292;--tb26-width:1660px;--tb26-gutter:clamp(16px,4vw,70px)}
+:root{--tb26-yellow:#ffbc00;--tb26-yellow-strong:#ffc400;--tb26-dark:#191919;--tb26-ink:#252525;--tb26-muted:#929292;--tb26-width:1760px;--tb26-gutter:clamp(16px,4vw,70px)}
 .tb26-active{overflow-x:clip}
 .tb26-active .tb26-home,.tb26-active .tb26-header,.tb26-active .tb26-footer{box-sizing:border-box;font-family:'Montserrat',Arial,sans-serif}
 .tb26-active .tb26-home *, .tb26-active .tb26-header *, .tb26-active .tb26-footer *{box-sizing:border-box}
