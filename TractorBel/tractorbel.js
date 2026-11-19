@@ -1,12 +1,12 @@
 /*
- * TractorBel 2026 - FWR Agencia Digital - v1.20.0
+ * TractorBel 2026 - FWR Agencia Digital - v1.21.0
  * Camada visual da Loja Integrada. Sem checkout ou precificacao paralela.
  * Editavel por window.TractorBelSettings no HTML da LI.
  */
 (function (win, doc) {
   'use strict';
   if (win.TractorBel2026) return;
-  var VERSION = '1.20.0';
+  var VERSION = '1.21.0';
   // Assets oficiais da TractorBel, ja hospedados na Loja Integrada.
   // Manter os nomes e extensoes ORIGINAIS, sem converter .jpg/.png para .webp.
   // O nome logico pode continuar .webp para compatibilidade com os componentes existentes.
@@ -264,6 +264,7 @@
     var native = doc.querySelector('#cabecalho') || doc.querySelector('header');
     if (!native) { warn('Cabeçalho nativo não identificado, mantido sem alterações.'); return; }
     var header = e('header', 'tb26-header'); header.id = 'tb26-header';
+    if (isHome) header.classList.add('tb26-header--home');
     var top = e('div', 'tb26-header__wrap tb26-container');
     var panelLogo = nativeStoreLogo(native);
     var brand = link(panelLogo ? panelLogo.href : '/', 'tb26-logo');
@@ -343,7 +344,12 @@
     doc.addEventListener('click',function(ev){ if(!header.contains(ev.target))closeMenu(); });
     doc.addEventListener('keydown',function(ev){if(ev.key==='Escape' && !ev.target.closest('#tb26-cart-drawer')){closeMenu();header.classList.remove('tb26-search-visible');searchOpen.setAttribute('aria-expanded','false');}});
     var scheduled=false;
-    function setStickyState(){ scheduled=false;header.classList.toggle('is-scrolled',(win.scrollY||doc.documentElement.scrollTop||0)>18); }
+    function setStickyState(){
+      scheduled=false;
+      var scrolled=(win.scrollY||doc.documentElement.scrollTop||0)>18;
+      header.classList.toggle('is-scrolled',scrolled);
+      header.classList.toggle('is-at-top',!scrolled);
+    }
     win.addEventListener('scroll',function(){if(!scheduled){scheduled=true;win.requestAnimationFrame(setStickyState);}}, {passive:true});
     append(action, searchOpen, account, cart, menuBtn); append(top, brand, nav, action); append(header, top, search);
     // Montar fora do .conteiner-principal elimina o espaço residual do tema
@@ -1149,6 +1155,46 @@
     }
   }
 
+  // v1.21 | Referencias reais do catalogo da propria LI para a vitrine de
+  // Miniaturas quando a busca HTML falha, sem inventar precos ou estoque.
+  // A categoria ao vivo sempre tem prioridade e substitui essa selecao.
+  function miniatureCatalogReferences() {
+    return [
+      ['MINIATURA RETROESCAVADEIRA 420E CATERPILLAR – 85143','/miniatura-retroescavadeira-420e-caterpillar-85143','https://cdn.awsli.com.br/300x300/901/901888/produto/256218578/1-vlmbq0h9at.png'],
+      ['MINIATURA ESCAVADEIRA 336E CATERPILLAR – 85279','/miniatura-escavadeira-336eh-caterpillar-85279','https://cdn.awsli.com.br/300x300/901/901888/produto/256212693/1-t773jkn3ck.png'],
+      ['MINIATURA CARREGADEIRA 988K CATERPILLAR – 85901','/miniatura-carregadeira-988k-caterpillar-85901','https://cdn.awsli.com.br/300x300/901/901888/produto/256210478/1-ca899e71qa.png'],
+      ['MINIATURA CARREGADEIRA 950M CATERPILLAR – 85914','/miniatura-carregadeira-950m-caterpillar-85914','https://cdn.awsli.com.br/300x300/901/901888/produto/256193460/1-q7tt8gyee1.png'],
+      ['CAMINHÃO SCANIA JOAL – 385 NORSCOT','/caminhao-scania-joal-385','https://cdn.awsli.com.br/300x300/901/901888/produto/98942823/711e67ca54.jpg'],
+      ['ROLO COMPACTADOR JOAL – 199 NORSCOT','/rolo-compactador-joal-199','https://cdn.awsli.com.br/300x300/901/901888/produto/98942568/8ce39bd3c8.jpg']
+    ].map(function(ref){
+      return {title:ref[0],url:safeUrl(ref[1]),image:ref[2],price:'',pix:'',source:'referencia-catalogo'};
+    }).filter(function(p){return !!p.url;});
+  }
+  function miniatureProductsFromHtml(html, limit) {
+    var parsed=new DOMParser().parseFromString(html,'text/html');
+    var items=getProducts(parsed,limit);
+    if (items.length) return items;
+    // Diversos layouts da LI organizam a listagem em li.produto ou
+    // imagens lazy. Reconstroi somente as informacoes realmente publicadas.
+    var anchors=[].slice.call(parsed.querySelectorAll('.listagem a.nome-produto[href],.listagem-item a[href].nome-produto,.lista-produtos a.nome-produto[href]'));
+    var seen=new Set(),out=[];
+    anchors.forEach(function(a) {
+      var url=safeUrl(a.getAttribute('href'));
+      if (!url || seen.has(url))return;
+      var card=a.closest('.listagem-item,li.produto,.produto')||a.parentElement;
+      var title=(a.textContent||'').replace(/\s+/g,' ').trim();
+      var img=card&&card.querySelector('img[data-src],img[data-original],img[src]');
+      var raw=img&&(img.getAttribute('data-src')||img.getAttribute('data-original')||img.getAttribute('src'));
+      var imageUrl=raw?safeUrl(raw):'';
+      if(!title||!imageUrl)return;
+      seen.add(url);
+      var price=card&&firstText(card,['.preco-promocional','.preco-venda']);
+      var pix=card&&firstText(card,['.preco-a-vista','.desconto-a-vista','.preco-pix']);
+      out.push({title:title,url:url,image:imageUrl,price:price||'',pix:pix||'',source:'categoria-li'});
+    });
+    return out.slice(0,limit||12);
+  }
+
   function mountHome() {
     if (!isHome || !cfg.home.ativo || doc.getElementById('tb26-home')) return;
     var native = doc.querySelector('#corpo');
@@ -1170,24 +1216,53 @@
       setBackground(art, 'bg-miniaturas.webp');
       var holder = e('div', 'tb26-miniatures__products');
       append(layout, art, holder); append(miniInner, layout); append(miniSec, miniInner); root.appendChild(miniSec);
-      function fillMini(items) { holder.replaceChildren(); if (items.length) { var slider = carousel('miniaturas', '', items.slice(0, cfg.vitrines.miniaturas), 'tb26-miniatures__slider'); holder.appendChild(slider); state.products.miniaturas = items.length; } else { holder.appendChild(link('/miniaturas', 'tb26-miniatures__fallback', 'VER TODAS AS MINIATURAS →')); warn('Miniaturas sem resposta; exibido link de categoria.'); } if (state.home) setupMotion(holder); }
-      if (miniatureProducts.length >= 3) fillMini(miniatureProducts);
-      else {
-        // Consulta extra de categoria contabiliza pageview na LI: buscar apenas quando a seção estiver próxima.
-        holder.appendChild(e('span','tb26-miniatures__loading','Carregando miniaturas...'));
-        var startedMini=false;
-        function loadMini() {
-          if(startedMini)return;
-          startedMini=true;
-          fetch('/miniaturas', { credentials: 'same-origin' }).then(function (resp) { if (!resp.ok) throw Error('Resposta ' + resp.status); return resp.text(); }).then(function (html) { return getProducts(new DOMParser().parseFromString(html, 'text/html'), cfg.vitrines.miniaturas); }).then(fillMini).catch(function () { fillMini(miniatureProducts); });
+      var miniLimit=Math.max(3,Math.min(16,Number(cfg.vitrines.miniaturas)||8));
+      function fillMini(items,source) {
+        if (!items||!items.length)return false;
+        holder.replaceChildren();
+        var slider=carousel('miniaturas','',items.slice(0,miniLimit),'tb26-miniatures__slider');
+        holder.appendChild(slider);
+        if(source==='referencias'){
+          var info=e('p','tb26-miniatures__source','Consulte o preço e a disponibilidade atual na página do produto.');
+          holder.appendChild(info);
         }
-        if ('IntersectionObserver' in win) {
-          var miniObserver=new IntersectionObserver(function(entries,observer){
-            entries.forEach(function(entry){ if(entry.isIntersecting){observer.disconnect();loadMini();} });
-          },{rootMargin:'500px 0px'});
-          miniObserver.observe(miniSec);
-        } else loadMini();
+        var categoryLink=link('/miniaturas','tb26-miniatures__all','VER TODAS AS MINIATURAS →');
+        holder.appendChild(categoryLink);
+        state.products.miniaturas=items.length;
+        state.products.miniaturasFonte=source||'categoria-li';
+        if(state.home)setupMotion(holder);
+        return true;
       }
+      // Evita vitrine vazia: produto atual da LI > referencias publicadas no
+      // catalogo da loja > atualizacao pelo HTML real da categoria.
+      var initialMinis=miniatureProducts.length>=3?miniatureProducts:miniatureCatalogReferences();
+      fillMini(initialMinis,miniatureProducts.length>=3?'home-li':'referencias');
+      var loadedMini=false;
+      function loadMini() {
+        if(loadedMini)return;
+        loadedMini=true;
+        fetch('/miniaturas',{method:'GET',credentials:'same-origin',cache:'no-store',headers:{Accept:'text/html'}})
+          .then(function(resp){
+            if(!resp.ok || new URL(resp.url,location.href).origin!==location.origin)throw Error('Categoria Miniaturas indisponível');
+            return resp.text();
+          })
+          .then(function(html){
+            var actual=miniatureProductsFromHtml(html,miniLimit);
+            if(actual.length)fillMini(actual,'categoria-li');
+            else warn('Miniaturas: categoria sem itens interpretaveis; referencias do catalogo preservadas.');
+          })
+          .catch(function(err){
+            warn('Miniaturas: falha no carregamento nativo, vitrine de referencias preservada: '+String(err&&err.message||err));
+          });
+      }
+      // Atualiza os valores vivos somente quando o usuario se aproxima
+      // da secao, sem bloquear a home ou ocultar os cards ja renderizados.
+      if('IntersectionObserver' in win){
+        var miniObserver=new IntersectionObserver(function(entries,observer){
+          entries.forEach(function(entry){if(entry.isIntersecting){observer.disconnect();loadMini();}});
+        },{rootMargin:'650px 0px'});
+        miniObserver.observe(miniSec);
+      }else loadMini();
     }
     if (cfg.vitrines.ativo && (best.length || latest.length)) {
       var source = best.length ? best : latest;

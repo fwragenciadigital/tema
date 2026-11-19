@@ -264,3 +264,12 @@ Os originais anexados em 19/11/2026 foram armazenados integralmente em:
 ## Preparação de produção — 19/11/2026
 
 A integração em `INTEGRACAO-LOJA-INTEGRADA.html` foi preparada com `publicarNaLoja:true`; sua versão anterior está salva como `INTEGRACAO-LOJA-INTEGRADA-PREVIEW.html`. Ver `GUIA-ATIVACAO-OFICIAL.md` para instalação, testes e rollback. A alteração no GitHub/Vercel **não ativa automaticamente** o tema no painel da Loja Integrada: é necessário alterar a configuração já inserida no HTML global da loja. Manter scripts legados que tenham dependências funcionais até concluir QA.
+
+
+## v1.21.0 — Correcoes de topbar e miniaturas (19/11/2026)
+
+- **Espaco de 219 px:** o CSS original da loja aplica `body {padding-top:219px!important}` a partir de 992 px. Agora `html body.tb26-active.tb26-with-header` neutraliza esse valor APENAS quando o layout da TractorBel estiver montado. A tipografia geral continua Montserrat.
+- **Topo transparente:** somente na home, o header fica em `position:fixed`, sobre o fundo do primeiro bloco, transparente no topo, ganhando fundo escuro e sombra apos 18 px de scroll. Nas demais paginas continua sticky solido para contraste. O intro compensa apenas a altura fisica do header (118 / 85 / 72 px), sem recriar o espaco em branco legado.
+- **Miniaturas:** a vitrine nao fica mais vazia se `fetch('/miniaturas')` falhar. Os cards sao preenchidos de imediato com referencias de nomes, imagens e URLs reais encontradas no catalogo publico da TractorBel (sem precos/estoques inventados); quando a requisicao da categoria responde, a vitrine e substituida por produtos e precos efetivamente renderizados pela Loja Integrada. Links de categoria sempre disponiveis e uma nota informa sobre a necessidade de verificar preco/disponibilidade no produto enquanto o fallback for exibido.
+- **Integridade comercial:** botao leva sempre a pagina oficial do produto; nenhuma compra ou pagamento paralelo. CSS, JS e documentacao versionados na origem do GitHub e distribuidos via Vercel.
+- **QA ainda pendente:** teste visual e de rede na loja real, especialmente autenticacao/cookie do catalogo e o efeito transparente sobre o primeiro bloco em mobile. A publicacao automatica do GitHub/Vercel nao altera eventuais snippets CSS colados separadamente no painel LI.
