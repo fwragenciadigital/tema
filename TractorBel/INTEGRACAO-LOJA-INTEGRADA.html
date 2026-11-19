@@ -2,9 +2,9 @@
 <!-- 1) Inserir no codigo global da loja (TODAS as paginas que aceitam HTML da LI). -->
 <!-- Páginas de produto, categoria, busca, marca, carrinho, contato, conta, login e institucionais elegíveis. -->
 <!-- Checkout: usar apenas personalização oficial dessa etapa; codigo externo nao carrega la. -->
-<!-- 2) No ambiente de testes, mantenha publicarNaLoja: false. -->
-<!-- 3) Acesse qualquer rota com ?tractorbel_preview=1; a prévia persiste nesta aba. -->
-<!-- 4) Depois da homologação, altere somente publicarNaLoja para true. -->
+<!-- 2) PRODUCAO: publicarNaLoja:true ativa o layout nas paginas que recebem este bloco. -->
+<!-- 3) A URL de previa nao sera necessaria apos instalar este bloco no painel. -->
+<!-- 4) ROLLBACK: alterar a flag para false no painel da LI. -->
 <!-- Imagens, carrossel de marcas, animacoes, logo do painel, submenus, header fixo e carrinho lateral sao configurados dentro do tractorbel.js. -->
 <!-- v1.9: PDP com Pix prioritário, resumos dinâmicos e regras nativas da LI. -->
 <!-- v1.7: tb26-hero removido. Marcas, beneficios e institucional sao componentes independentes. -->
@@ -12,7 +12,7 @@
 <!-- Parcelamento: valor automatizado apenas se a LI exibir condicoes validas; ver README para opcao manual verificada. -->
 <script>
 window.TractorBelSettings = {
-  geral: { ativo: true, publicarNaLoja: false, debug: false },
+  geral: { ativo: true, publicarNaLoja: true, debug: false },
   topo: { ativo: true, menu: true },
   home: { ativo: true },
   paginas: { ativo: true, aplicarEmTodas: true },

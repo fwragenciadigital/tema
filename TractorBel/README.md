@@ -259,3 +259,8 @@ Os originais anexados em 19/11/2026 foram armazenados integralmente em:
 - Campos, validação, foco e mensagens de erro são preservados. O visual de tabelas de pedidos usa os dados e links reais da plataforma.
 - Estilos estão no `tractorbel.css` e lógica no `tractorbel.js`; não há novos arquivos carregados pelo lojista. O bloco `window.TractorBelSettings` e `publicarNaLoja:false` continuam iguais.
 - QA técnico: verificar compilação JS, contagem de chaves CSS e seletores/rotas; inspeção real autenticada, mobile e compra simulada ainda precisam ser testados antes da liberação pública.
+
+
+## Preparação de produção — 19/11/2026
+
+A integração em `INTEGRACAO-LOJA-INTEGRADA.html` foi preparada com `publicarNaLoja:true`; sua versão anterior está salva como `INTEGRACAO-LOJA-INTEGRADA-PREVIEW.html`. Ver `GUIA-ATIVACAO-OFICIAL.md` para instalação, testes e rollback. A alteração no GitHub/Vercel **não ativa automaticamente** o tema no painel da Loja Integrada: é necessário alterar a configuração já inserida no HTML global da loja. Manter scripts legados que tenham dependências funcionais até concluir QA.
