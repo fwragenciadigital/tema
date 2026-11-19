@@ -207,3 +207,33 @@ Nova camada visual exclusiva para `.pagina-carrinho` baseada na estrutura nativa
 - O CSS e escopado para o modo `tb26-active`; a loja publica com `publicarNaLoja:false` continua sem alterações.
 - Os tamanhos dos titulos largos foram ajustados para mobile; classes de icones nativos nao recebem sobrescrita indiscriminada de fonte.
 - O CSS `checkout-native.css` e a previa HTML acompanham o novo padrao, mas a instalacao no checkout real continua dependendo do editor permitido pela Loja Integrada e da homologacao.
+
+
+## v1.18.0 — Home e identidade aprovada (19/11/2026)
+
+**Entrega versionada nos unicos arquivos externos do layout:** `tractorbel.js` + `tractorbel.css`. Mantida a funcionalidade nativa da Loja Integrada e a chave de previas `?tractorbel_preview=1` (loja publica ainda com `publicarNaLoja:false`).
+
+- Menu superior desktop: borda amarela em L (left + bottom) e animacao ao hover/focus sem mudar links/categorias. No mobile, area de toque permanece de no minimo 44 px.
+- Titulos de vitrines: risco fino e marca amarela abaixo; alinhamento esquerdo em Miniaturas. Michroma nos titulos, Montserrat no conteudo.
+- Carrosseis de produtos e miniaturas: autoplay configuravel `vitrines.autoplay:true`, `intervalo:4500`, `loop:true`, com tres conjuntos clonados, reset de scroll no mesmo item, pausa durante hover/foco/toque, fora da viewport ou com preferencia de movimento reduzido. Clones mantem os links de produto e saem da tabulacao.
+- Cards: badge `N% OFF NO PIX` somente se os textos de preco normal e Pix vierem da LI e validarem a diferenca percentual. Nao recalcula preco nem aplica desconto. Tambem nos cards de categoria/busca quando a plataforma fornecer a informacao.
+- `tb26-miniatures`: zoom e reposicionamento da imagem do trator, area visual ampliada e grid responsivo com trilhos fracionais para nao exceder a largura.
+- `tb26-company`: layout full-bleed da foto industrial, painel direito alto com imagem oficial, icones e contato da loja. Tres paragrafos aprovados preservados como settings editaveis `conteudo.empresaDetalhes`.
+- `tb26-footer`: faixa full-width com mensagem de direitos e logo FWR da versao atual do tema, hospedado em `https://cdn.awsli.com.br/1571/1571465/arquivos/fwr-new.png`, e link para a agencia. Falha de imagem exibe texto.
+
+### Arquivos originais recebidos e compatibilidade
+
+Os originais anexados em 19/11/2026 foram armazenados integralmente em:
+
+- `legacy/loja-css-original-20261119.css` (167.536 caracteres)
+- `legacy/loja-js-original-20261119.js` (204.683 caracteres)
+
+**Nao executar o JS antigo concatenado ao `tractorbel.js`.** O original reestrutura o header, altera o carrinho, liga plugins e faz mutacoes jQuery que conflitariam com as rotinas DOM-first novas. Executa-lo uma segunda vez pode duplicar controles, alterar fluxos de checkout e gerar CLS. A consolidacao mantem UM JS e UM CSS para a camada nova, migrando as funcionalidades compativeis. As alteracoes independentes do tema original nao podem ser retiradas da loja sem inventario/homologacao adicional e substituicao por etapa. Preservar os arquivos legados ate essa etapa.
+
+### Testes realizados e pendencias
+
+- Validacao sintatica do bundle JS por compilacao V8: **PASS**.
+- Calculo do selo Pix validado em oito casos, incluindo R$ 6.000,00 → R$ 5.820,00 = 3% e ausencia de selo sem Pix: **PASS**.
+- Chaves do bundle, selos e fontes nos arquivos publicados: **PASS**.
+- Deploy automatizado GitHub → Vercel: verificar estado READY na versao publicada.
+- **Pendente**: teste visual mobile/desktop na loja real, revalidacao do carrossel com produtos reais e autorizacao de homologacao comercial. Nenhum pedido real foi realizado. O checkout oficial permanece fora do escopo de injeção.
