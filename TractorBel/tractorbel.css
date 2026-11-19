@@ -1497,7 +1497,7 @@ body.tb26-active .tb26-miniatures {
  overflow:hidden;
 }
 body.tb26-active .tb26-miniatures__layout {
- grid-template-columns:minmax(0,39%) minmax(0,61%);
+ grid-template-columns:minmax(0,39fr) minmax(0,61fr);
  gap:clamp(18px,2vw,30px);
  align-items:center;
  min-height:clamp(500px,36vw,660px);
@@ -1659,7 +1659,7 @@ body.tb26-active .tb26-footer__agency span {font-weight:800;color:#fff;}
 
 /* MOBILE E TABLET: equilibrio sem ocultar conteudo ou criar rolagem horizontal. */
 @media(max-width:1100px) {
- body.tb26-active .tb26-miniatures__layout {grid-template-columns:minmax(0,36%) minmax(0,64%);min-height:440px;}
+ body.tb26-active .tb26-miniatures__layout {grid-template-columns:minmax(0,36fr) minmax(0,64fr);min-height:440px;}
  body.tb26-active .tb26-miniatures__art {min-height:420px;background-size:168% auto!important;}
  body.tb26-active .tb26-company__grid {grid-template-columns:minmax(0,1.2fr) minmax(280px,1fr);gap:22px;min-height:530px;}
  body.tb26-active .tb26-company__contact {min-height:530px;}
