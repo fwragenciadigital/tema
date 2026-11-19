@@ -1333,3 +1333,366 @@ body.tb26-active.tb26-with-cart #corpo .tb26-cart__headline h1 small {
   font-family:'Montserrat',Arial,sans-serif!important;
   font-weight:400!important;
 }
+
+
+/* ======================================================================
+ TRACTORBEL v1.18.0 | Menu, vitrine, cards, miniaturas, empresa, rodape
+ Arquivo unico da camada visual; preservar estilos comerciais nativos.
+ ====================================================================== */
+
+/* NAV: canto amarelo em L, linha inferior fina e resposta ao hover. */
+body.tb26-active .tb26-header .tb26-nav__link {
+ position:relative;
+ display:inline-flex;
+ align-items:center;
+ min-height:37px;
+ padding:8px 10px 11px!important;
+ border:0!important;
+ line-height:1.35;
+ text-decoration:none!important;
+ color:#f8f8f8!important;
+ transition:color .2s ease,background .2s ease;
+}
+body.tb26-active .tb26-header .tb26-nav__link::before {
+ content:"";
+ position:absolute;
+ left:0;
+ top:3px;
+ width:3px;
+ height:23px;
+ background:var(--tb26-yellow);
+ transition:height .2s ease;
+}
+body.tb26-active .tb26-header .tb26-nav__link::after {
+ content:"";
+ position:absolute;
+ bottom:0;
+ left:0;
+ height:1px;
+ width:100%;
+ background:var(--tb26-yellow);
+ transform:scaleX(.82);
+ transform-origin:left;
+ transition:height .2s ease,transform .2s ease;
+}
+body.tb26-active .tb26-header .tb26-nav__link:hover,
+body.tb26-active .tb26-header .tb26-nav__link:focus-visible {
+ color:var(--tb26-yellow)!important;
+}
+body.tb26-active .tb26-header .tb26-nav__link:hover::before,
+body.tb26-active .tb26-header .tb26-nav__link:focus-visible::before {height:30px;}
+body.tb26-active .tb26-header .tb26-nav__link:hover::after,
+body.tb26-active .tb26-header .tb26-nav__link:focus-visible::after {
+ height:2px;transform:scaleX(1);
+}
+/* Menu mobile em linha para preservar espaco de toque; sem decoracao lateral. */
+@media(max-width:1100px) {
+ body.tb26-active .tb26-header .tb26-nav__link {
+  display:flex;min-height:44px;padding:11px 14px!important;
+  border-bottom:1px solid #494949!important;
+ }
+ body.tb26-active .tb26-header .tb26-nav__link::before {
+  height:22px;top:11px;
+ }
+ body.tb26-active .tb26-header .tb26-nav__link::after {display:none;}
+}
+
+/* TITULOS DAS VITRINES: risco fino + detalhe amarelo central aprovado. */
+body.tb26-active .tb26-carousel:not(.tb26-miniatures__slider)>.tb26-container>.tb26-title {
+ position:relative;
+ display:table;
+ margin-left:auto;
+ margin-right:auto;
+ margin-bottom:clamp(31px,3.3vw,55px)!important;
+ padding-bottom:14px;
+ text-align:center;
+}
+body.tb26-active .tb26-carousel:not(.tb26-miniatures__slider)>.tb26-container>.tb26-title::before {
+ content:"";
+ position:absolute;
+ bottom:0;
+ left:0;
+ width:100%;
+ height:1px;
+ background:rgba(255,188,0,.48);
+}
+body.tb26-active .tb26-carousel:not(.tb26-miniatures__slider)>.tb26-container>.tb26-title::after {
+ position:absolute;
+ content:"";
+ bottom:-3px;
+ left:50%;
+ transform:translateX(-50%);
+ width:clamp(90px,38%,150px);
+ min-width:0;
+ height:6px;
+ margin:0;
+ background:var(--tb26-yellow);
+}
+/* A linha de miniaturas segue o eixo esquerdo e se estende sobre a vitrine. */
+body.tb26-active .tb26-miniatures .tb26-container>.tb26-title {
+ display:block;
+ width:100%;
+ padding-bottom:18px;
+ margin-bottom:clamp(28px,3vw,45px)!important;
+ text-align:left;
+ border-bottom:1px solid rgba(255,188,0,.32);
+}
+body.tb26-active .tb26-miniatures .tb26-container>.tb26-title::after {
+ content:"";
+ width:clamp(120px,22vw,350px);
+ min-width:0;
+ height:5px;
+ left:0;
+ bottom:-3px;
+ margin:0;
+ transform:none;
+ position:absolute;
+}
+body.tb26-active .tb26-miniatures .tb26-container>.tb26-title::before {display:none;}
+
+/* PRODUTO: desconto comprovado pela diferenca entre preco normal e Pix nativo. */
+body.tb26-active .tb26-product__image {position:relative;}
+body.tb26-active .tb26-product__pix-discount,
+body.tb26-active #corpo .tb26-catalog-card .tb26-catalog__pix-discount {
+ position:absolute;
+ z-index:3;
+ top:11px;
+ right:10px;
+ display:block;
+ width:max-content;
+ max-width:calc(100% - 20px);
+ padding:7px 9px;
+ border-radius:3px;
+ background:var(--tb26-yellow);
+ color:#1b1b1b;
+ font:800 clamp(9px,.7vw,12px)/1.3 'Montserrat',Arial,sans-serif!important;
+ text-transform:uppercase;
+ letter-spacing:.025em;
+ pointer-events:none;
+ box-shadow:0 2px 8px rgba(0,0,0,.1);
+}
+body.tb26-active #corpo .tb26-catalog-card {position:relative;}
+body.tb26-active #corpo .tb26-catalog-card .tb26-catalog__pix-discount[hidden] {display:none!important;}
+body.tb26-active .tb26-product__pix {line-height:1.5!important;min-height:1.5em;}
+
+/* CARROSSEL: 3 conjuntos para volta continua, sem recarregar produtos. */
+body.tb26-active .tb26-carousel__track {
+ overflow-x:auto;
+ scroll-snap-type:x mandatory;
+ scroll-padding-inline:0;
+ overscroll-behavior-inline:contain;
+ scrollbar-width:none;
+}
+body.tb26-active .tb26-carousel__track .tb26-product--clone img {
+ loading:lazy;
+}
+body.tb26-active .tb26-carousel__controls .tb26-arrow:focus-visible {
+ outline:3px solid #fff;outline-offset:3px;
+}
+
+/* MINIATURAS: arte/trator mais proximo, sem sobrepor os cards. */
+body.tb26-active .tb26-miniatures {
+ padding-top:clamp(55px,5.5vw,92px);
+ padding-bottom:clamp(65px,6vw,105px);
+ overflow:hidden;
+}
+body.tb26-active .tb26-miniatures__layout {
+ grid-template-columns:minmax(0,39%) minmax(0,61%);
+ gap:clamp(18px,2vw,30px);
+ align-items:center;
+ min-height:clamp(500px,36vw,660px);
+}
+body.tb26-active .tb26-miniatures__art {
+ min-height:clamp(460px,36vw,660px);
+ background-position:54% 52%!important;
+ background-size:160% auto!important;
+}
+body.tb26-active .tb26-miniatures__products {position:relative;z-index:1;min-width:0;}
+body.tb26-active .tb26-miniatures__products .tb26-section {min-width:0;}
+body.tb26-active .tb26-miniatures__products .tb26-product {flex-basis:calc((100% - 24px)/3);}
+body.tb26-active .tb26-miniatures__products .tb26-product__title {overflow-wrap:anywhere;}
+
+/* EMPRESA: fundo full-bleed da area institucional e card de contato elevado. */
+body.tb26-active .tb26-company {
+ position:relative;
+ z-index:0;
+ isolation:isolate;
+ background:linear-gradient(to bottom,#fff 0%,#fff 28%,#ffc400 28%,#ffc400 88%,#fff 88%,#fff 100%);
+ padding:40px 0 65px;
+ overflow:hidden;
+}
+body.tb26-active .tb26-company::before {
+ content:"";
+ position:absolute;
+ z-index:-1;
+ top:27%;
+ bottom:13%;
+ left:0;
+ width:68%;
+ background-color:#1c1c1c;
+ background-image:var(--tb26-bg-company,none);
+ background-size:cover;
+ background-position:center 44%;
+ background-repeat:no-repeat;
+}
+body.tb26-active .tb26-company__grid {
+ display:grid;
+ grid-template-columns:minmax(0,1.7fr) minmax(330px,.9fr);
+ column-gap:clamp(28px,4vw,75px);
+ align-items:center;
+ min-height:650px;
+}
+body.tb26-active .tb26-company__info {
+ min-width:0;
+ min-height:540px;
+ background:none!important;
+ padding:clamp(30px,4.2vw,75px) clamp(20px,3vw,58px) clamp(24px,3vw,45px) 0;
+ justify-content:center;
+}
+body.tb26-active .tb26-company__info img {
+ width:min(100%,550px);
+ max-height:120px;
+ object-fit:contain;
+ margin:0 0 clamp(38px,4vw,65px);
+}
+body.tb26-active .tb26-company__info p {
+ max-width:850px;
+ font:400 clamp(12px,.96vw,15px)/1.85 'Montserrat',Arial,sans-serif!important;
+ color:#f6f6f6;
+ margin:0 0 clamp(17px,1.75vw,29px);
+ text-shadow:0 1px 2px rgba(0,0,0,.4);
+}
+body.tb26-active .tb26-company__contact {
+ position:relative;
+ min-height:650px;
+ max-width:none;
+ width:100%;
+ margin:0;
+ border-radius:40px 42px 65px 28px;
+ box-shadow:0 14px 32px rgba(0,0,0,.08);
+}
+body.tb26-active .tb26-company__contact>img {object-fit:cover;object-position:50% 30%;}
+body.tb26-active .tb26-company__contact-text {
+ width:100%;
+ padding:35px clamp(23px,3vw,53px) 44px;
+ background:linear-gradient(to bottom,transparent 0%,rgba(27,27,27,.24) 10%,rgba(25,25,25,.96) 38%,#1b1b1b 100%);
+}
+body.tb26-active .tb26-company__tagline {font-size:clamp(11px,.9vw,13px);}
+body.tb26-active .tb26-company__contact-text h2 {
+ font-size:clamp(23px,2.2vw,39px);
+ font-weight:400;
+ line-height:1.5;
+ margin:0 0 14px;
+}
+body.tb26-active .tb26-company__contact-link {
+ display:flex!important;
+ align-items:center;
+ gap:12px;
+ min-height:51px;
+ padding:4px 0!important;
+ max-width:100%;
+ text-decoration:none!important;
+}
+body.tb26-active .tb26-company__contact-icon {
+ flex:0 0 22px;
+ width:22px;
+ color:var(--tb26-yellow);
+ font:600 22px/1 'Montserrat',Arial,sans-serif;
+ text-align:center;
+}
+body.tb26-active .tb26-company__contact-data {
+ flex:1 1 auto;
+ min-width:0;
+ display:flex;
+ flex-direction:column;
+}
+body.tb26-active .tb26-company__contact-data small {
+ display:block;
+ color:#ddd;
+ font:400 11px/1.3 'Montserrat',Arial,sans-serif;
+}
+body.tb26-active .tb26-company__contact-data strong {
+ display:block;
+ color:#fff;
+ font:600 clamp(11px,1vw,16px)/1.5 'Montserrat',Arial,sans-serif;
+ overflow-wrap:anywhere;
+}
+
+/* RODAPE: faixa inferior separada, direitos e logotipo oficial da agencia. */
+body.tb26-active .tb26-footer__bottom {
+ grid-column:1/-1;
+ width:100%;
+ display:flex;
+ align-items:center;
+ justify-content:space-between;
+ gap:20px;
+ min-height:80px;
+ margin:0!important;
+ padding:20px clamp(22px,4.5vw,95px);
+ box-sizing:border-box;
+ background:#242424;
+ color:#e9e9e9;
+}
+body.tb26-active .tb26-footer__legal-copy {
+ font:400 clamp(10px,.9vw,13px)/1.5 'Montserrat',Arial,sans-serif;
+ color:#ededed;
+ max-width:1100px;
+}
+body.tb26-active .tb26-footer__agency {
+ display:flex;
+ flex:0 0 auto;
+ justify-content:center;
+ align-items:center;
+ min-height:40px;
+ max-width:150px;
+ text-decoration:none!important;
+ color:#fff!important;
+}
+body.tb26-active .tb26-footer__agency img {
+ display:block;
+ width:95px;
+ max-height:44px;
+ height:auto;
+ object-fit:contain;
+}
+body.tb26-active .tb26-footer__agency span {font-weight:800;color:#fff;}
+
+/* MOBILE E TABLET: equilibrio sem ocultar conteudo ou criar rolagem horizontal. */
+@media(max-width:1100px) {
+ body.tb26-active .tb26-miniatures__layout {grid-template-columns:minmax(0,36%) minmax(0,64%);min-height:440px;}
+ body.tb26-active .tb26-miniatures__art {min-height:420px;background-size:168% auto!important;}
+ body.tb26-active .tb26-company__grid {grid-template-columns:minmax(0,1.2fr) minmax(280px,1fr);gap:22px;min-height:530px;}
+ body.tb26-active .tb26-company__contact {min-height:530px;}
+ body.tb26-active .tb26-company__info {min-height:460px;}
+}
+@media(max-width:767px) {
+ body.tb26-active .tb26-miniatures__layout {grid-template-columns:minmax(0,1fr);gap:8px;min-height:0;}
+ body.tb26-active .tb26-miniatures__art {
+   min-height:clamp(300px,85vw,450px);
+   background-position:center 52%!important;
+   background-size:130% auto!important;
+ }
+ body.tb26-active .tb26-miniatures__products {min-width:0;}
+ body.tb26-active .tb26-miniatures__products .tb26-product {flex-basis:clamp(190px,65vw,245px);}
+ body.tb26-active .tb26-company {
+   padding:28px 0 60px;
+   background:linear-gradient(to bottom,#1d1d1d 0%,#1d1d1d 59%,#ffc400 59%,#ffc400 90%,#fff 90%);
+ }
+ body.tb26-active .tb26-company::before {top:0;bottom:auto;width:100%;height:60%;background-position:center center;}
+ body.tb26-active .tb26-company__grid {grid-template-columns:minmax(0,1fr);gap:10px;min-height:0;}
+ body.tb26-active .tb26-company__info {
+   min-height:0;
+   padding:35px 8px 20px;
+ }
+ body.tb26-active .tb26-company__info img {width:min(100%,350px);margin:0 0 30px;}
+ body.tb26-active .tb26-company__info p {font-size:12px;line-height:1.75;margin-bottom:15px;}
+ body.tb26-active .tb26-company__contact {min-height:490px;max-width:420px;margin:8px auto 0;}
+ body.tb26-active .tb26-company__contact-text {padding:22px 25px 30px;}
+ body.tb26-active .tb26-company__contact-text h2 {font-size:clamp(20px,5vw,26px);}
+ body.tb26-active .tb26-footer__bottom {flex-direction:column;align-items:center;text-align:center;gap:12px;padding:23px 18px;}
+ body.tb26-active .tb26-footer__legal-copy {font-size:11px;}
+}
+@media(prefers-reduced-motion:reduce) {
+ body.tb26-active .tb26-header .tb26-nav__link::before,
+ body.tb26-active .tb26-header .tb26-nav__link::after {transition:none!important;}
+}
