@@ -1654,6 +1654,7 @@ body.tb26-active .tb26-footer__agency img {
  max-height:44px;
  height:auto;
  object-fit:contain;
+ filter:brightness(0) invert(1); /* selo da agencia branco no fundo escuro */
 }
 body.tb26-active .tb26-footer__agency span {font-weight:800;color:#fff;}
 
