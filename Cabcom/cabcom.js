@@ -6,7 +6,7 @@
 (function (w,d) {
   'use strict';
   if(w.Cabcom2026) return;
-  var VERSION='1.7.0';
+  var VERSION='1.8.0';
   var CDN='https://cdn.awsli.com.br/80/80577/arquivos/';
   var DEFAULTS={
     geral:{ativo:true,publicarNaLoja:false,debug:false},
@@ -1256,6 +1256,141 @@
       else fadeObserver.observe(node);
     });
   }
+  // Produto Cabcom | conversao para orcamento sem alterar o HTML comercial LI.
+  function enhanceProductPage(){
+    if(!cfg.produto || cfg.produto.ativo===false || !d.body)return;
+    if(!d.body.classList.contains('pagina-produto') && !d.querySelector('#corpo #imagemProduto'))return;
+    if(d.body.classList.contains('cc26-pdp-ready'))return;
+    var root=d.querySelector('#corpo .secao-principal .produto') ||
+             d.querySelector('#corpo #produto .produto');
+    if(!root)return;
+    var grid=root.querySelector(':scope > .row-fluid')||root.querySelector('.row-fluid');
+    if(!grid)return;
+    var columns=[].slice.call(grid.children).filter(function(n){return n.nodeType===1&&n.classList.contains('span6')});
+    if(columns.length!==2 || !columns[0].querySelector('#imagemProduto') ||
+       !columns[1].querySelector('.info-principal-produto')) {
+      warn('PDP: markup nativo diferente do esperado. Layout original preservado.');
+      return;
+    }
+    var media=columns[0],info=columns[1];
+    var name=info.querySelector('.info-principal-produto h1, h1.nome-produto') ||
+             root.querySelector('h1.nome-produto');
+    var description=root.querySelector('.produto-descricao, .tab-content, #descricao, .descricao') ||
+                    d.querySelector('#corpo .produto-descricao, #corpo .tab-content, #descricao');
+    var nativeActions=info.querySelector('.acoes-produto')||info;
+    var buttons=[].slice.call(nativeActions.querySelectorAll('a[href],button[type="submit"],button[type="button"],input[type="submit"]'));
+    function btnLabel(elm){return normalized((elm.textContent||elm.value||elm.getAttribute('aria-label')||'').replace(/\s+/g,' '));}
+    function containsWhatsapp(elm){
+      var href=elm.getAttribute('href')||'';
+      return /WHATSAPP/.test(btnLabel(elm))||/wa\.me|api\.whatsapp\.com|web\.whatsapp\.com/i.test(href);
+    }
+    function containsQuote(elm){
+      return /COTAR\s+POR\s+E.?MAIL|COTAR\s+E.?MAIL|ADICIONAR.*ORCAMENTO|LISTA.*ORCAMENTO/.test(btnLabel(elm));
+    }
+    var whatsapp=buttons.find(containsWhatsapp);
+    var quote=buttons.find(containsQuote);
+    // A ficha deve continuar funcional mesmo se o tema usa um botão em outra coluna.
+    if(!whatsapp || !quote){
+      var extra=[].slice.call(info.querySelectorAll('a[href],button,input[type="submit"]'));
+      whatsapp=whatsapp||extra.find(containsWhatsapp);
+      quote=quote||extra.find(containsQuote);
+    }
+    root.classList.add('cc26-pdp');
+    grid.classList.add('cc26-pdp__grid');
+    media.classList.add('cc26-pdp__media');
+    info.classList.add('cc26-pdp__details');
+    var stage=media.querySelector('.conteiner-imagem');
+    if(stage)stage.classList.add('cc26-pdp__image-stage');
+    var thumbs=media.querySelector('.produto-thumbs');
+    if(thumbs)thumbs.classList.add('cc26-pdp__thumbs');
+    var galleryLinks=[].slice.call(media.querySelectorAll('.produto-thumbs .miniaturas a'));
+    galleryLinks.forEach(function(link,index){
+      if(!link.hasAttribute('aria-label'))link.setAttribute('aria-label','Ver imagem '+(index+1)+' do produto');
+    });
+    var heading=info.querySelector('.info-principal-produto');
+    heading.classList.add('cc26-pdp__heading');
+    if(name){
+      name.classList.add('cc26-pdp__name');
+      var eyebrow=el('div','cc26-pdp__eyebrow');
+      eyebrow.appendChild(inlineIcon('shield'));
+      eyebrow.appendChild(el('span','','SOLUÇÕES CABCOM'));
+      name.parentNode.insertBefore(eyebrow,name);
+    }
+    var price=info.querySelector('.preco-produto');
+    if(price)price.classList.add('cc26-pdp__native-price');
+    var controls=info.querySelector('.acoes-produto');
+    if(controls)controls.classList.add('cc26-pdp__native-actions');
+    var purchase=info.querySelector('.principal');
+    if(purchase)purchase.classList.add('cc26-pdp__purchase');
+    if(whatsapp){
+      whatsapp.classList.add('cc26-pdp__cta','cc26-pdp__cta--whatsapp');
+      if(!whatsapp.getAttribute('aria-label'))whatsapp.setAttribute('aria-label','Solicitar cotação por WhatsApp');
+    }
+    if(quote){
+      quote.classList.add('cc26-pdp__cta','cc26-pdp__cta--quote');
+      if(!quote.getAttribute('aria-label'))quote.setAttribute('aria-label','Adicionar à lista de orçamento por e-mail');
+    }
+    var code=info.querySelector('.codigo-produto');
+    if(code)code.classList.add('cc26-pdp__code');
+    var availability=info.querySelector('.disponibilidade-produto, .estoque, .disponibilidade');
+    if(availability)availability.classList.add('cc26-pdp__stock');
+    var crumbs=root.querySelector('.breadcrumbs')||d.querySelector('#corpo .breadcrumbs');
+    if(crumbs)crumbs.classList.add('cc26-pdp__breadcrumbs');
+    var share=media.querySelector('.produto-compartilhar')||root.querySelector('.produto-compartilhar');
+    if(share)share.classList.add('cc26-pdp__share');
+    if(description)description.classList.add('cc26-pdp__description');
+
+    // Conteudo de apoio sem prometer estoque, prazo ou preço nao confirmados.
+    var assistance=el('section','cc26-pdp__assistance');
+    assistance.setAttribute('aria-label','Como solicitar orçamento');
+    var aHeading=el('div','cc26-pdp__assistance-heading');
+    aHeading.appendChild(inlineIcon('phone'));
+    aHeading.appendChild(el('strong','','Precisa de ajuda para escolher?'));
+    assistance.appendChild(aHeading);
+    assistance.appendChild(el('p','','Converse com nossa equipe ou adicione este produto à lista para solicitar uma cotação.'));
+    var steps=el('div','cc26-pdp__steps');
+    [['1','Escolha os produtos'],['2','Monte sua lista'],['3','Solicite o orçamento']].forEach(function(it){
+      var step=el('span','cc26-pdp__step');
+      step.appendChild(el('b','',it[0]));step.appendChild(el('span','',it[1]));steps.appendChild(step);
+    });
+    assistance.appendChild(steps);
+    if(controls && controls.parentNode)controls.parentNode.insertBefore(assistance,controls.nextSibling);
+    else info.appendChild(assistance);
+
+    // Acoes no mobile encaminham o clique para o botao nativo real.
+    if(whatsapp || quote){
+      var bar=el('div','cc26-pdp__mobile-bar');
+      var label=el('div','cc26-pdp__mobile-copy');
+      label.appendChild(el('strong','','Solicitar cotação'));
+      label.appendChild(el('span','','Escolha como deseja falar com a Cabcom'));
+      bar.appendChild(label);
+      var mobileActions=el('div','cc26-pdp__mobile-buttons');
+      if(whatsapp){
+        var whatsBtn=el('button','cc26-pdp__mobile-whatsapp');
+        whatsBtn.type='button';whatsBtn.appendChild(inlineIcon('phone'));
+        whatsBtn.appendChild(el('span','','WhatsApp'));
+        whatsBtn.addEventListener('click',function(){whatsapp.click();});
+        mobileActions.appendChild(whatsBtn);
+      }
+      if(quote){
+        var budgetBtn=el('button','cc26-pdp__mobile-quote');
+        budgetBtn.type='button';budgetBtn.appendChild(inlineIcon('cart'));
+        budgetBtn.appendChild(el('span','','Orçamento'));
+        budgetBtn.addEventListener('click',function(){quote.click();});
+        mobileActions.appendChild(budgetBtn);
+      }
+      bar.appendChild(mobileActions);d.body.appendChild(bar);
+      if(w.IntersectionObserver){
+        var anchor=quote||whatsapp;
+        var viewWatcher=new w.IntersectionObserver(function(entries){
+          entries.forEach(function(entry){bar.classList.toggle('cc26-pdp__mobile-bar--visible',!entry.isIntersecting);});
+        },{threshold:0,rootMargin:'0px 0px -50px 0px'});
+        viewWatcher.observe(anchor);
+      }else bar.classList.add('cc26-pdp__mobile-bar--visible');
+    }
+    d.body.classList.add('cc26-pdp-ready');
+    state.product={active:true,source:'PDP nativa LI',whatsapp:!!whatsapp,quote:!!quote};
+  }
   function enhanceNative(){
     if(cfg.catalogo.ativo){
       [].slice.call(d.querySelectorAll('.listagem .listagem-item, .vitrine-produtos .produto')).forEach(function(item){
@@ -1263,7 +1398,8 @@
         // Acoes originais da LI nunca sao removidas ou substituidas.
       });
     }
-    if(cfg.produto.ativo&&d.querySelector('.pagina-produto,#produto'))d.body.classList.add('cc26-page-product');
+    if(cfg.produto.ativo&&d.querySelector('.pagina-produto,#produto,#imagemProduto'))d.body.classList.add('cc26-page-product');
+    enhanceProductPage();
     if(cfg.rodape.ativo){
       var f=d.querySelector('#rodape');
       if(f){f.classList.add('cc26-native-footer');footer();}
