@@ -2263,3 +2263,69 @@ html body.tb26-active #tb26-miniatures .tb26-miniatures__all:hover {
 @media(max-width:767px){
   html body.tb26-active #tb26-miniatures .tb26-miniatures__products {min-height:300px;}
 }
+
+
+/* ============================================================
+ TractorBel 2026 v1.22 | Nova arte da miniatura e institucional
+ Regras solicitadas para desktop; tratamento mobile seguro.
+ ============================================================ */
+html body.tb26-active #tb26-miniatures .tb26-miniatures__art {
+  background-color:#050505!important;
+  background-repeat:no-repeat!important;
+  background-position:center 70%!important;
+  background-size:cover!important;
+}
+body.tb26-active .tb26-company {
+  position:relative;
+  z-index:0;
+  isolation:isolate;
+  background:linear-gradient(to bottom,#fff 0%,#fff 26%,#ffc400 26%,#ffc400 90%,#fff 90%,#fff 100%);
+  padding:40px 0 65px;
+  overflow:hidden;
+}
+body.tb26-active .tb26-company::before {
+  content:"";
+  position:absolute;
+  z-index:-1;
+  top:0;
+  bottom:10%;
+  left:0;
+  width:65%;
+  background-color:transparent;
+  background-image:var(--tb26-bg-company,none);
+  background-position:center 100%;
+  background-repeat:no-repeat;
+  background-size:cover;
+}
+body.tb26-active .tb26-company__info img {
+  margin:15% 0 clamp(45px,4vw,45px);
+}
+body.tb26-active .tb26-company__contact {
+  box-shadow:none;
+}
+/* Tablet 767 e dispositivos menores: respeitar a arte e o card,
+   sem deixar 65% de faixa preta ocupar parcialmente a tela. */
+@media(max-width:767px) {
+  html body.tb26-active #tb26-miniatures .tb26-miniatures__art {
+    background-size:cover!important;
+    background-position:center 62%!important;
+  }
+  body.tb26-active .tb26-company {
+    background:linear-gradient(to bottom,#1d1d1d 0%,#1d1d1d 59%,#ffc400 59%,#ffc400 90%,#fff 90%);
+    padding:28px 0 60px;
+  }
+  body.tb26-active .tb26-company::before {
+    top:0;
+    bottom:auto;
+    width:100%;
+    height:60%;
+    background-size:cover;
+    background-position:center center;
+  }
+  body.tb26-active .tb26-company__info img {
+    margin:0 0 30px;
+  }
+  body.tb26-active .tb26-company__contact {
+    box-shadow:none;
+  }
+}

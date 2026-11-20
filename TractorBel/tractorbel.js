@@ -1,12 +1,12 @@
 /*
- * TractorBel 2026 - FWR Agencia Digital - v1.21.0
+ * TractorBel 2026 - FWR Agencia Digital - v1.22.0
  * Camada visual da Loja Integrada. Sem checkout ou precificacao paralela.
  * Editavel por window.TractorBelSettings no HTML da LI.
  */
 (function (win, doc) {
   'use strict';
   if (win.TractorBel2026) return;
-  var VERSION = '1.21.0';
+  var VERSION = '1.22.0';
   // Assets oficiais da TractorBel, ja hospedados na Loja Integrada.
   // Manter os nomes e extensoes ORIGINAIS, sem converter .jpg/.png para .webp.
   // O nome logico pode continuar .webp para compatibilidade com os componentes existentes.
@@ -16,7 +16,7 @@
     'bg-footer.webp': 'bg-footer.png',
     'vendedores.webp': 'vendedores.jpg',
     'fullbanner.webp': 'fullbanner.jpg',
-    'bg-miniaturas.webp': 'bg-miniaturas.jpg',
+    'bg-miniaturas.webp': 'trator.jpg',
     'box-contato.webp': 'box-contato.png',
     'novo-projeto-6.webp': 'Novo Projeto (6).jpg',
     'minibox2.webp': 'minibox2.png',

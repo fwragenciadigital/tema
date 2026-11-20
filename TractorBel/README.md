@@ -273,3 +273,11 @@ A integração em `INTEGRACAO-LOJA-INTEGRADA.html` foi preparada com `publicarNa
 - **Miniaturas:** a vitrine nao fica mais vazia se `fetch('/miniaturas')` falhar. Os cards sao preenchidos de imediato com referencias de nomes, imagens e URLs reais encontradas no catalogo publico da TractorBel (sem precos/estoques inventados); quando a requisicao da categoria responde, a vitrine e substituida por produtos e precos efetivamente renderizados pela Loja Integrada. Links de categoria sempre disponiveis e uma nota informa sobre a necessidade de verificar preco/disponibilidade no produto enquanto o fallback for exibido.
 - **Integridade comercial:** botao leva sempre a pagina oficial do produto; nenhuma compra ou pagamento paralelo. CSS, JS e documentacao versionados na origem do GitHub e distribuidos via Vercel.
 - **QA ainda pendente:** teste visual e de rede na loja real, especialmente autenticacao/cookie do catalogo e o efeito transparente sobre o primeiro bloco em mobile. A publicacao automatica do GitHub/Vercel nao altera eventuais snippets CSS colados separadamente no painel LI.
+
+
+## v1.22.0 — Miniaturas e empresa (19/11/2026)
+
+- A arte de `tb26-miniatures__layout` passa a usar o arquivo oficial do lojista `https://cdn.awsli.com.br/901/901888/arquivos/trator.jpg`, via `ASSET_FILES['bg-miniaturas.webp']` no JS central.
+- As regras da seção `tb26-company` solicitadas foram aplicadas no CSS principal: faixa amarela a partir de 26%, fundo industrial em 65% da largura com top 0/bottom 10%, imagem da empresa com margem de 15% e contato sem sombra.
+- O breakpoint máximo de 767px usa composição própria, preservando o card de contato e o fundo em largura integral, sem herdar proporções desktop inviáveis.
+- Checkout: mantido separado dos scripts comerciais até que o editor oficial e o DOM real sejam inspecionados.
