@@ -624,6 +624,141 @@
       summary.classList.toggle('cc26-cart-summary--no-total',!displayed);
     }
   }
+  function footer(){
+    if(!cfg.rodape.ativo || d.getElementById('cc26-footer'))return;
+    var native=d.querySelector('#rodape');
+    if(!native)return;
+    // Conteudo derivado do rodape nativo; alteracoes no painel LI reaparecem no proximo carregamento.
+    var sourceLinks=[].slice.call(native.querySelectorAll('a[href]'));
+    function matchingLink(expression){
+      return sourceLinks.find(function(node){
+        return expression.test(normalized(node.textContent||node.getAttribute('title')||''));
+      });
+    }
+    function hrefOf(node){
+      if(!node)return '';
+      try{
+        var u=new URL(node.href,location.href);
+        return /^(https?:|mailto:|tel:)$/.test(u.protocol)?u.href:'';
+      }catch(e){return '';}
+    }
+    function footerColumn(name,klass){
+      var col=el('section','cc26-footer__column '+klass);
+      col.appendChild(el('h3','',name));
+      return col;
+    }
+    function originalLink(regex,label){
+      var n=matchingLink(regex),href=hrefOf(n);
+      if(!href)return null;
+      return a(href,'cc26-footer__navlink',label||n.textContent.trim());
+    }
+    var f=el('footer','cc26-footer');f.id='cc26-footer';
+    f.setAttribute('aria-label','Rodape Cabcom');
+    var main=el('div','cc26-footer__main');
+    var grid=wrap();grid.classList.add('cc26-footer__grid');
+    var contact=footerColumn('Fale Conosco','cc26-footer__contact');
+    var phone=sourceLinks.find(function(l){return /^tel:/i.test(l.getAttribute('href')||'')}) ||
+      sourceLinks.find(function(l){return /wa\.me|api\.whatsapp\.com/i.test(l.href||'')});
+    var number=phone?(phone.textContent||'').trim().replace(/\s+/g,' '):'';
+    if(!number || number.length>60)number=cfg.conteudo.contato;
+    var telLink=hrefOf(phone)||'tel:'+String(cfg.conteudo.contato||'').replace(/[^\d+]/g,'');
+    if(number&&telLink)contact.appendChild(a(telLink,'cc26-footer__contact-line','◉  '+number));
+    var email=sourceLinks.find(function(l){return /^mailto:/i.test(l.getAttribute('href')||'')});
+    var emailValue=email?(email.textContent||'').trim():cfg.conteudo.email;
+    if(emailValue)contact.appendChild(a(hrefOf(email)||('mailto:'+emailValue),'cc26-footer__contact-line','✉  '+emailValue));
+    var hours=(native.textContent||'').match(/(?:Segunda|Seg)[^\n]{0,95}(?:18(?::?00)?\s*h?|[0-2]\d:\d{2})/i);
+    if(hours)contact.appendChild(el('p','cc26-footer__contact-line','◷  '+hours[0].replace(/\s+/g,' ').slice(0,110)));
+    var logo=el('img');logo.className='cc26-footer__logo';logo.src=asset('logo.png');logo.alt='Cabcom';
+    var nativeLogo=d.querySelector('#cabecalho .logo img');
+    if(nativeLogo)logo.src=nativeLogo.currentSrc||nativeLogo.src||logo.src;
+    contact.appendChild(logo);
+    var social=el('div','cc26-footer__social');
+    sourceLinks.forEach(function(link){
+      var address=hrefOf(link);
+      if(!address||!/instagram\.com|facebook\.com/i.test(address)||social.children.length>=2)return;
+      var text=/instagram/i.test(address)?'Instagram':'Facebook';
+      var clone=a(address,'cc26-footer__social-link',text);
+      clone.target='_blank';clone.rel='noopener noreferrer';social.appendChild(clone);
+    });
+    if(social.children.length)contact.appendChild(social);
+    var account=footerColumn('Minha Conta','cc26-footer__account');
+    [
+      [/^MINHA CONTA$/,'Minha conta'],
+      [/^CRIAR (UMA )?CONTA$/,'Criar uma conta'],
+      [/^MEUS PEDIDOS$/,'Meus pedidos'],
+      [/^MINHA SACOLA$|^MEU CARRINHO$|^MEU ORCAMENTO$/,'Minha sacola'],
+      [/POLITICA DE DEVOLUCAO/,'Política de Devolução'],
+      [/^COMO COMPRAR$/,'Como comprar'],
+      [/^SEGURANCA$/,'Segurança']
+    ].forEach(function(item){var link=originalLink(item[0],item[1]);if(link)account.appendChild(link);});
+    var institutional=footerColumn('Institucional','cc26-footer__institutional');
+    [
+      [/^SOBRE NOS$|^QUEM SOMOS$|^A CABCOM$/,'Sobre nós'],
+      [/^NOTICIAS$/,'Notícias'],
+      [/^NOSSAS LINHAS$/,'Nossas linhas'],
+      [/^FALE CONOSCO$|^CONTATO$/,'Fale conosco'],
+      [/POLITICA DE PRIVACIDADE/,'Política de Privacidade'],
+      [/PROGRAMA DE INTEGRIDADE/,'Programa de Integridade']
+    ].forEach(function(item){var link=originalLink(item[0],item[1]);if(link)institutional.appendChild(link);});
+    // Preservar links nativos e nao exibir Selos ou bandeiras inventados.
+    function logoNodes(selectors,kind){
+      var set=[],seen={};
+      [].slice.call(native.querySelectorAll(selectors)).forEach(function(node){
+        [].slice.call(node.querySelectorAll('img')).forEach(function(im){
+          var url=im.currentSrc||im.getAttribute('src')||im.getAttribute('data-src');
+          if(!url)return;
+          try {url=new URL(url,location.href).href;}catch(e){return;}
+          if(seen[url])return;
+          var key=normalized((im.alt||'')+' '+(im.getAttribute('title')||'')+' '+url+' '+(node.className||''));
+          var pay=/(VISA|MASTER|AMERICAN|ELO|DINERS|HIPER|BOLETO|PAGAMENTO|BANDEIRA|AURA|CARTAO)/.test(key);
+          var secure=/(SEGURO|SEGURANCA|SSL|CERTIFIC|NORTON|VERISIGN|GOOGLE|SITE PROTEGIDO|TRUST)/.test(key);
+          if(kind==='pay'&&!pay&&!/pagamento|bandeira/i.test(String(node.className)))return;
+          if(kind==='secure'&&!secure&&!/selos|seguranca/i.test(String(node.className)))return;
+          seen[url]=true;set.push({url:url,alt:im.alt||''});
+        });
+      });
+      return set.slice(0,15);
+    }
+    var paymentSources='#rodape .pagamento-selos, #rodape .bandeiras, #rodape .bandeiras-pagamento, #rodape .meios-pagamento, #rodape .formas-pagamento, #rodape .pagamento';
+    var securitySources='#rodape .seguranca, #rodape .selos, #rodape .selo-ssl, #rodape .pagamento-selos, #rodape .selos-seguranca';
+    var payments=logoNodes(paymentSources,'pay');
+    var seals=logoNodes(securitySources,'secure');
+    var final=footerColumn('Pagamento','cc26-footer__payment');
+    if(payments.length){
+      var badges=el('div','cc26-footer__badges');
+      payments.forEach(function(it){
+        var i=el('img');i.src=it.url;i.alt=it.alt||'Forma de pagamento';i.loading='lazy';
+        badges.appendChild(i);
+      });
+      final.appendChild(badges);
+    }
+    final.appendChild(el('h3','cc26-footer__security-title','Segurança'));
+    if(seals.length){
+      var sealsGrid=el('div','cc26-footer__seals');
+      seals.forEach(function(it){var i=el('img');i.src=it.url;i.alt=it.alt||'Selo de segurança';i.loading='lazy';sealsGrid.appendChild(i);});
+      final.appendChild(sealsGrid);
+    }
+    grid.appendChild(contact);grid.appendChild(account);grid.appendChild(institutional);grid.appendChild(final);
+    main.appendChild(grid);f.appendChild(main);
+    var bottom=el('div','cc26-footer__bottom');
+    var bottomInner=wrap();bottomInner.classList.add('cc26-footer__bottom-inner');
+    // Informacoes fiscais originais da LI prevalecem sobre a arte de 2025.
+    var legal=native.querySelector('.direitos, .direitos-reservados, .copyright, .rodape-inferior, .credito, .institucional .copyright');
+    var legalText=legal?(legal.textContent||'').replace(/\s+/g,' ').trim():'';
+    if(!legalText){
+      var matched=(native.textContent||'').replace(/\s+/g,' ').match(/(?:SA Digital[^.]{5,180}|(?:©|Todos os direitos reservados)[^.]{3,150})/i);
+      if(matched)legalText=matched[0];
+    }
+    bottomInner.appendChild(el('small','cc26-footer__legal',legalText||'Cabcom — Todos os direitos reservados.'));
+    var creditSource=sourceLinks.find(function(l){return /fwr|desenvolvimento/i.test((l.textContent||'')+' '+(l.href||''));});
+    var brandCredit=creditSource&&hrefOf(creditSource)?a(hrefOf(creditSource),'cc26-footer__credit','FWR'):el('span','cc26-footer__credit','FWR');
+    brandCredit.setAttribute('aria-label','Desenvolvimento FWR');
+    bottomInner.appendChild(brandCredit);
+    bottom.appendChild(bottomInner);f.appendChild(bottom);
+    native.parentNode.insertBefore(f,native);
+    native.classList.add('cc26-footer-source-hidden');
+    state.footer={origin:'Links, contato, logos e dados nativos LI',paymentLogos:payments.length,securityLogos:seals.length};
+  }
   function enhanceNative(){
     if(cfg.catalogo.ativo){
       [].slice.call(d.querySelectorAll('.listagem .listagem-item, .vitrine-produtos .produto')).forEach(function(item){
@@ -634,7 +769,7 @@
     if(cfg.produto.ativo&&d.querySelector('.pagina-produto,#produto'))d.body.classList.add('cc26-page-product');
     if(cfg.rodape.ativo){
       var f=d.querySelector('#rodape');
-      if(f)f.classList.add('cc26-native-footer');
+      if(f){f.classList.add('cc26-native-footer');footer();}
     }
     // Mensagens/cotacoes continuam nativas; sem interceptacao de eventos.
     enhanceCartPage();
@@ -643,7 +778,18 @@
   function refresh(){
     scheduled=false;
     if(!d.body)return;
-    if(home)enhanceShelves(d.querySelector('#corpo')||d.body);
+    if(home){
+      enhanceShelves(d.querySelector('#corpo')||d.body);
+      var corpo=d.querySelector('#corpo');
+      if(corpo && !d.querySelector('.cc26-mini-banners')){
+        var mini=miniBanners();
+        if(mini){var brandNode=d.querySelector('.cc26-brands');if(brandNode)brandNode.parentNode.insertBefore(mini,brandNode);else corpo.appendChild(mini);}
+      }
+      if(corpo && !d.querySelector('.cc26-brands')){
+        var brandsLate=brands();
+        if(brandsLate){var company=d.querySelector('.cc26-institutional');if(company)company.parentNode.insertBefore(brandsLate,company);else corpo.appendChild(brandsLate);}
+      }
+    }
     decorateNativeShelves();
     enhanceNative();
   }
