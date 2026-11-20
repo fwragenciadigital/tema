@@ -914,7 +914,7 @@
         if(!urls.length)return;
         // Chave DOM: NÃO deduplicar somente por URL; banners diferentes podem
         // ter o mesmo thumbnail antes do lazy loading ou usar a mesma arte.
-        var slot=image.closest('a[href],li,.slick-slide,.swiper-slide,.owl-item')||image;
+        var slot=image;
         if(used.has(slot))return;
         used.add(slot);
         var anchor=image.closest('a[href]');
@@ -1794,8 +1794,12 @@
     previewLegacy();
     initFade();
     initExperience();
+    if(home){
+      w.addEventListener('load',schedule,{once:true});
+      [600,1800].forEach(function(ms){w.setTimeout(schedule,ms);});
+    }
     var observer=new MutationObserver(schedule);
-    observer.observe(d.body,{subtree:true,childList:true});
+    observer.observe(d.body,{subtree:true,childList:true,attributes:true,attributeFilter:['src','srcset','data-src','data-original','data-srcset']});
     state.initialized=true;
     log('ativo',state);
   }
