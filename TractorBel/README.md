@@ -281,3 +281,15 @@ A integração em `INTEGRACAO-LOJA-INTEGRADA.html` foi preparada com `publicarNa
 - As regras da seção `tb26-company` solicitadas foram aplicadas no CSS principal: faixa amarela a partir de 26%, fundo industrial em 65% da largura com top 0/bottom 10%, imagem da empresa com margem de 15% e contato sem sombra.
 - O breakpoint máximo de 767px usa composição própria, preservando o card de contato e o fundo em largura integral, sem herdar proporções desktop inviáveis.
 - Checkout: mantido separado dos scripts comerciais até que o editor oficial e o DOM real sejam inspecionados.
+
+
+## v1.23.0 — Ajustes CSS home e vitrine "Aproveite também" (20/11/2026)
+
+- Oculta somente o titulo duplicado do carrossel dentro de `tb26-miniatures__products` (mantem o titulo externo da secao).
+- Miniaturas: padding superior `clamp(55px,5.5vw,122px)` e inferior `clamp(65px,6vw,125px)`.
+- Icone de busca deslocado -8px, grid de solucoes com `gap:0` e titulos padronizados com limite inferior de 40px, preservando `tb26-title--left`.
+- O componente nativo `.listagem.aproveite-tambem.borda-alpha`, na pagina de produto, recebe layout de 4/3/2 cards conforme breakpoint e os mesmos recortes amarelos dos cards novos.
+- `mountRelatedProducts()` anota a listagem nativa e so cria link para pagina do produto quando o proprio card nao tem CTA; se o CTA existente adicionar ao carrinho, conserva destino e evento nativos.
+- Badge amarelo OFF NO PIX apenas se percentual confirmado pelos valores exibidos na Loja Integrada, sem alterar precos, descontos, estoque, parcelas, produto ou cupons.
+- Sem JS adicional no HTML da loja: alteracoes concentradas em `tractorbel.js` e `tractorbel.css`.
+- Pendente: validacao visual e funcional da pagina real em 1440/1366/1280/767/390, pois o HTML da rota PDP nao estava disponivel para inspecao remota nesta sessao.

@@ -2329,3 +2329,369 @@ body.tb26-active .tb26-company__contact {
     box-shadow:none;
   }
 }
+
+
+/* ===============================================================
+ TractorBel v1.23.0 | Ajustes home + vitrine nativa "Aproveite também"
+ A vitrine relacionada reutiliza o DOM e o preço oficial da LI.
+ =============================================================== */
+body.tb26-active .tb26-miniatures .tb26-miniatures__products .tb26-container > .tb26-title{
+  display:none!important;
+}
+body.tb26-active .tb26-miniatures{
+  padding-top:clamp(55px,5.5vw,122px)!important;
+  padding-bottom:clamp(65px,6vw,125px)!important;
+}
+body.tb26-active .tb26-icon.tb26-search-open{
+  margin-top:-8px!important;
+}
+body.tb26-active .tb26-solutions__grid{
+  gap:0!important;
+}
+body.tb26-active .tb26-title:not(.tb26-title--left){
+  display:table;
+  position:relative;
+  margin:0 auto clamp(34px,4vw,40px);
+}
+body.tb26-active .tb26-title--left{
+  position:relative;
+  margin-left:0;
+  margin-right:auto;
+  margin-bottom:clamp(34px,4vw,40px);
+}
+
+/* Container de recomendacoes no PDP. Sem tocar em precos, variacoes e checkout. */
+body.tb26-active.tb26-with-pdp #corpo .listagem.aproveite-tambem.tb26-related{
+  width:100%!important;
+  max-width:100%!important;
+  min-width:0!important;
+  padding:clamp(28px,3.4vw,49px) 0 clamp(35px,5vw,72px)!important;
+  margin:clamp(20px,3vw,45px) 0 0!important;
+  border-top:1px solid #eaeaea!important;
+  border-bottom:0!important;
+  background:#fff!important;
+  box-sizing:border-box!important;
+}
+body.tb26-active.tb26-with-pdp #corpo .listagem.aproveite-tambem.tb26-related
+:is(.titulo-categoria,.titulo){
+  font:400 clamp(17px,1.45vw,24px)/1.6 'Michroma',Arial,sans-serif!important;
+  color:#242424!important;
+  letter-spacing:0!important;
+  text-transform:uppercase!important;
+  margin:0 0 clamp(22px,2.8vw,36px)!important;
+  padding:0 0 13px!important;
+  border:0!important;
+  overflow-wrap:break-word;
+}
+body.tb26-active.tb26-with-pdp #corpo .listagem.aproveite-tambem.tb26-related > ul{
+  display:grid!important;
+  grid-template-columns:repeat(4,minmax(0,1fr))!important;
+  gap:clamp(12px,1.4vw,22px)!important;
+  width:100%!important;
+  min-width:0!important;
+  padding:0!important;
+  margin:0!important;
+  list-style:none!important;
+  align-items:stretch!important;
+}
+body.tb26-active.tb26-with-pdp #corpo .listagem.aproveite-tambem.tb26-related
+:is(.listagem-linha,.listagem-linha > ul){
+  display:contents!important;
+}
+body.tb26-active.tb26-with-pdp #corpo .listagem.aproveite-tambem.tb26-related
+.listagem-linha::before,
+body.tb26-active.tb26-with-pdp #corpo .listagem.aproveite-tambem.tb26-related
+.listagem-linha::after{
+  display:none!important;
+  content:none!important;
+}
+body.tb26-active.tb26-with-pdp #corpo .listagem.aproveite-tambem.tb26-related
+.listagem-linha > ul::before,
+body.tb26-active.tb26-with-pdp #corpo .listagem.aproveite-tambem.tb26-related
+.listagem-linha > ul::after{
+  display:none!important;
+  content:none!important;
+}
+body.tb26-active.tb26-with-pdp #corpo .listagem.aproveite-tambem.tb26-related
+.listagem-linha > ul > li{
+  float:none!important;
+  clear:none!important;
+  display:block!important;
+  width:100%!important;
+  max-width:100%!important;
+  min-width:0!important;
+  padding:0!important;
+  margin:0!important;
+  list-style:none!important;
+  box-sizing:border-box!important;
+}
+body.tb26-active.tb26-with-pdp #corpo .listagem.aproveite-tambem.tb26-related
+.listagem-item.tb26-related__card{
+  position:relative!important;
+  isolation:isolate!important;
+  display:flex!important;
+  flex-direction:column!important;
+  width:100%!important;
+  height:100%!important;
+  min-width:0!important;
+  padding:0!important;
+  margin:0!important;
+  box-sizing:border-box!important;
+  border:1px solid #e8e8e6!important;
+  border-radius:0!important;
+  background:#fff!important;
+  color:#232323!important;
+  box-shadow:0 6px 19px rgba(0,0,0,.07)!important;
+  overflow:hidden!important;
+  clip-path:polygon(0 0,100% 0,100% calc(100% - 16px),calc(100% - 16px) 100%,0 100%);
+}
+body.tb26-active.tb26-with-pdp #corpo .listagem.aproveite-tambem.tb26-related
+.tb26-related__card .imagem-produto{
+  position:relative!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  width:100%!important;
+  height:auto!important;
+  aspect-ratio:1.1/1!important;
+  min-width:0!important;
+  padding:12px!important;
+  margin:0!important;
+  box-sizing:border-box!important;
+  background:linear-gradient(150deg,#fff,#f5f5f5)!important;
+  border:0!important;
+  overflow:hidden!important;
+}
+body.tb26-active.tb26-with-pdp #corpo .listagem.aproveite-tambem.tb26-related
+.tb26-related__card .imagem-produto img{
+  display:block!important;
+  position:static!important;
+  width:100%!important;
+  height:100%!important;
+  max-width:100%!important;
+  max-height:100%!important;
+  padding:0!important;
+  margin:0!important;
+  object-fit:contain!important;
+  opacity:1!important;
+  visibility:visible!important;
+}
+body.tb26-active.tb26-with-pdp #corpo .listagem.aproveite-tambem.tb26-related
+.tb26-related__card > a.produto-sobrepor{
+  position:absolute!important;
+  top:0!important;left:0!important;right:0!important;bottom:auto!important;
+  width:100%!important;
+  height:auto!important;
+  aspect-ratio:1.1/1!important;
+  z-index:2!important;
+  display:block!important;
+  background:none!important;
+}
+body.tb26-active.tb26-with-pdp #corpo .listagem.aproveite-tambem.tb26-related
+.tb26-related__card .info-produto{
+  display:flex!important;
+  flex-direction:column!important;
+  flex:1 1 auto!important;
+  min-height:0!important;
+  min-width:0!important;
+  width:100%!important;
+  padding:14px clamp(10px,1vw,17px) 15px!important;
+  margin:0!important;
+  box-sizing:border-box!important;
+  background:#fff!important;
+  text-align:left!important;
+}
+body.tb26-active.tb26-with-pdp #corpo .listagem.aproveite-tambem.tb26-related
+.tb26-related__card a.nome-produto{
+  display:-webkit-box!important;
+  -webkit-box-orient:vertical!important;
+  -webkit-line-clamp:2!important;
+  overflow:hidden!important;
+  min-height:3.2em!important;
+  max-height:3.2em!important;
+  padding:0!important;
+  margin:0 0 12px!important;
+  font:400 clamp(10px,.9vw,13px)/1.6 'Michroma',Arial,sans-serif!important;
+  letter-spacing:0!important;
+  color:#222!important;
+  text-decoration:none!important;
+  text-transform:uppercase!important;
+  text-align:left!important;
+}
+body.tb26-active.tb26-with-pdp #corpo .listagem.aproveite-tambem.tb26-related
+.tb26-related__card .preco-produto{
+  display:flex!important;
+  flex-direction:column!important;
+  justify-content:flex-end!important;
+  align-items:flex-start!important;
+  width:100%!important;
+  min-width:0!important;
+  min-height:76px!important;
+  height:auto!important;
+  padding:0!important;
+  margin:auto 0 0!important;
+  border:0!important;
+  background:transparent!important;
+  text-align:left!important;
+}
+body.tb26-active.tb26-with-pdp #corpo .listagem.aproveite-tambem.tb26-related
+.tb26-related__card .preco-produto > div{
+  width:100%!important;
+  min-width:0!important;
+  margin:0!important;
+  padding:0!important;
+}
+body.tb26-active.tb26-with-pdp #corpo .listagem.aproveite-tambem.tb26-related
+.tb26-related__card .preco-venda{
+  display:block!important;
+  margin:0 0 4px!important;
+  color:#919191!important;
+  font:400 11px/1.3 'Montserrat',Arial,sans-serif!important;
+  text-decoration:line-through!important;
+}
+body.tb26-active.tb26-with-pdp #corpo .listagem.aproveite-tambem.tb26-related
+.tb26-related__card .preco-promocional{
+  display:block!important;
+  max-width:100%!important;
+  margin:0!important;
+  padding:0!important;
+  color:#1e1e1e!important;
+  font:850 clamp(18px,1.6vw,27px)/1.2 'Montserrat',Arial,sans-serif!important;
+  white-space:normal!important;
+  letter-spacing:-.025em!important;
+  font-variant-numeric:tabular-nums!important;
+}
+body.tb26-active.tb26-with-pdp #corpo .listagem.aproveite-tambem.tb26-related
+.tb26-related__card .desconto-a-vista{
+  display:block!important;
+  width:100%!important;
+  max-width:100%!important;
+  margin:7px 0 0!important;
+  padding:0!important;
+  color:#666!important;
+  background:none!important;
+  font:400 11px/1.45 'Montserrat',Arial,sans-serif!important;
+}
+body.tb26-active.tb26-with-pdp #corpo .listagem.aproveite-tambem.tb26-related
+.tb26-related__card .desconto-a-vista strong{
+  font-weight:750!important;
+  color:#222!important;
+}
+body.tb26-active.tb26-with-pdp #corpo .listagem.aproveite-tambem.tb26-related
+.tb26-related__pix-discount{
+  position:absolute!important;
+  top:10px!important;
+  right:10px!important;
+  z-index:4!important;
+  width:max-content!important;
+  max-width:calc(100% - 20px)!important;
+  padding:7px 9px!important;
+  margin:0!important;
+  border:0!important;
+  border-radius:4px!important;
+  background:#ffbc00!important;
+  color:#1d1d1d!important;
+  box-shadow:0 3px 10px rgba(0,0,0,.12)!important;
+  font:850 10px/1.35 'Montserrat',Arial,sans-serif!important;
+  white-space:normal!important;
+  text-align:center!important;
+  pointer-events:none!important;
+}
+body.tb26-active.tb26-with-pdp #corpo .listagem.aproveite-tambem.tb26-related
+.tb26-related__has-pix :is(.bandeiras-produto,.produto-selo,.selos,.tag-promocao){
+  display:none!important;
+}
+body.tb26-active.tb26-with-pdp #corpo .listagem.aproveite-tambem.tb26-related
+.tb26-related__card .acoes-produto{
+  position:relative!important;
+  inset:auto!important;
+  display:flex!important;
+  align-items:stretch!important;
+  flex:0 0 50px!important;
+  width:100%!important;
+  height:50px!important;
+  min-height:50px!important;
+  margin:0!important;
+  padding:0!important;
+  float:none!important;
+  clear:both!important;
+  border:0!important;
+  background:#fff!important;
+  opacity:1!important;
+  visibility:visible!important;
+  transform:none!important;
+  overflow:hidden!important;
+  box-sizing:border-box!important;
+  z-index:3!important;
+}
+body.tb26-active.tb26-with-pdp #corpo .listagem.aproveite-tambem.tb26-related
+.tb26-related__card .acoes-produto > a.tb26-related__cta{
+  position:relative!important;
+  inset:auto!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:flex-start!important;
+  width:84%!important;
+  height:50px!important;
+  min-height:50px!important;
+  padding:0 15px!important;
+  margin:0!important;
+  box-sizing:border-box!important;
+  border:0!important;
+  border-radius:0!important;
+  background:#ffbc00!important;
+  color:#171717!important;
+  box-shadow:none!important;
+  text-shadow:none!important;
+  clip-path:polygon(0 0,78% 0,100% 100%,0 100%)!important;
+  text-decoration:none!important;
+  text-transform:uppercase!important;
+  text-align:left!important;
+  font:800 clamp(11px,.92vw,15px)/1.2 'Montserrat',Arial,sans-serif!important;
+  opacity:1!important;
+  visibility:visible!important;
+  white-space:nowrap!important;
+}
+body.tb26-active.tb26-with-pdp #corpo .listagem.aproveite-tambem.tb26-related
+.tb26-related__card .acoes-produto > a.tb26-related__cta:hover{
+  filter:brightness(1.07)!important;
+}
+@media(max-width:1199px){
+  body.tb26-active.tb26-with-pdp #corpo .listagem.aproveite-tambem.tb26-related > ul{
+    grid-template-columns:repeat(3,minmax(0,1fr))!important;
+    gap:14px!important;
+  }
+}
+@media(max-width:899px){
+  body.tb26-active.tb26-with-pdp #corpo .listagem.aproveite-tambem.tb26-related > ul{
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    gap:12px!important;
+  }
+  body.tb26-active.tb26-with-pdp #corpo .listagem.aproveite-tambem.tb26-related .tb26-related__card a.nome-produto{
+    font-size:11px!important;
+  }
+}
+@media(max-width:480px){
+  body.tb26-active.tb26-with-pdp #corpo .listagem.aproveite-tambem.tb26-related > ul{gap:10px!important;}
+  body.tb26-active.tb26-with-pdp #corpo .listagem.aproveite-tambem.tb26-related
+  .tb26-related__card .info-produto{padding:11px 9px 12px!important;}
+  body.tb26-active.tb26-with-pdp #corpo .listagem.aproveite-tambem.tb26-related
+  .tb26-related__card .preco-promocional{font-size:clamp(15px,4.2vw,20px)!important;}
+  body.tb26-active.tb26-with-pdp #corpo .listagem.aproveite-tambem.tb26-related
+  .tb26-related__card .acoes-produto > a.tb26-related__cta{
+    width:92%!important;
+    padding:0 9px!important;
+    font-size:10px!important;
+  }
+}
+@media(max-width:359px){
+  body.tb26-active.tb26-with-pdp #corpo .listagem.aproveite-tambem.tb26-related > ul{
+    grid-template-columns:1fr!important;
+  }
+}
+@media(prefers-reduced-motion:reduce){
+  body.tb26-active.tb26-with-pdp #corpo .listagem.aproveite-tambem.tb26-related .tb26-related__card,
+  body.tb26-active.tb26-with-pdp #corpo .listagem.aproveite-tambem.tb26-related .tb26-related__card img{
+    transition:none!important;
+  }
+}

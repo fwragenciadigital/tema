@@ -1,12 +1,12 @@
 /*
- * TractorBel 2026 - FWR Agencia Digital - v1.22.0
+ * TractorBel 2026 - FWR Agencia Digital - v1.23.0
  * Camada visual da Loja Integrada. Sem checkout ou precificacao paralela.
  * Editavel por window.TractorBelSettings no HTML da LI.
  */
 (function (win, doc) {
   'use strict';
   if (win.TractorBel2026) return;
-  var VERSION = '1.22.0';
+  var VERSION = '1.23.0';
   // Assets oficiais da TractorBel, ja hospedados na Loja Integrada.
   // Manter os nomes e extensoes ORIGINAIS, sem converter .jpg/.png para .webp.
   // O nome logico pode continuar .webp para compatibilidade com os componentes existentes.
@@ -1761,6 +1761,89 @@
     // Avoid automatic hiding/translation on the main product image (LCP).
   }
 
+  // v1.23 | Produtos relacionados da PDP — adaptador visual da vitrine nativa.
+  // Mantem produtos, precos, links, CTA de compra e estoque da Loja Integrada.
+  function mountRelatedProducts() {
+    if (!doc.body || !doc.body.classList.contains('tb26-with-pdp')) return;
+    var host=doc.querySelector('#corpo');
+    if (!host) return;
+    var shelfObserver=null, waitingObserver=null, queued=false;
+
+    function enhance() {
+      var shelf=host.querySelector('.listagem.aproveite-tambem.borda-alpha, .listagem.aproveite-tambem');
+      if (!shelf) return false;
+      shelf.classList.add('tb26-related');
+      var cards=[].slice.call(shelf.querySelectorAll('.listagem-item'));
+      var count=0;
+      cards.forEach(function(card){
+        if (card.classList.contains('tb26-related__card')) { count++; return; }
+        var name=card.querySelector('a.nome-produto[href],.nome-produto a[href]');
+        var photo=card.querySelector('.imagem-produto img');
+        if (!name || !photo) return;
+        var url=safeUrl(name.getAttribute('href'));
+        if (!url || new URL(url).origin!==location.origin) return;
+        card.classList.add('tb26-related__card');
+        photo.decoding='async';
+        if (!photo.hasAttribute('loading')) photo.loading='lazy';
+        var overlay=card.querySelector('a.produto-sobrepor');
+        if(overlay && !overlay.getAttribute('aria-label'))
+          overlay.setAttribute('aria-label','Ver produto: '+(name.textContent||'').trim());
+
+        // Badge somente com preco regular e valor no Pix extraidos do DOM vivo.
+        var full=firstText(card,['.preco-produto .preco-promocional','.preco-promocional','.preco-venda']);
+        var pix=firstText(card,['.preco-produto .desconto-a-vista','.desconto-a-vista','.preco-a-vista','.preco-pix']);
+        var percent=tb26PixPercent(full,pix);
+        if(percent){
+          var tag=e('span','tb26-related__pix-discount',percent+'% OFF NO PIX');
+          tag.setAttribute('aria-label',percent+' por cento de desconto no Pix');
+          card.appendChild(tag);
+          card.classList.add('tb26-related__has-pix');
+        }
+        // O botao de compra nativo conserva seu proprio destino/eventos.
+        // Sem CTA nativo, o link adicional abre somente a pagina oficial.
+        var actions=card.querySelector('.acoes-produto');
+        var existing=actions && actions.querySelector('a.botao-comprar[href],a.botao[href]');
+        if(existing){
+          existing.classList.add('tb26-related__cta');
+          var existingUrl=safeUrl(existing.getAttribute('href'));
+          if(existingUrl && existingUrl===url)existing.textContent='VER PRODUTO';
+        }else{
+          if(!actions){
+            actions=e('div','acoes-produto tb26-related__actions');
+            card.appendChild(actions);
+          }
+          var cta=link(url,'botao botao-comprar tb26-related__cta','VER PRODUTO');
+          cta.setAttribute('aria-label','Ver detalhes de '+(name.textContent||'').trim());
+          actions.appendChild(cta);
+        }
+        count++;
+      });
+      state.relatedProducts={active:true,items:count,source:'vitrine nativa aproveite-tambem'};
+      if(!shelfObserver && 'MutationObserver' in win) {
+        shelfObserver=new MutationObserver(function(changes){
+          if(!changes.some(function(change){return change.addedNodes.length>0;}))return;
+          if(queued)return;
+          queued=true;
+          win.requestAnimationFrame(function(){queued=false;enhance();});
+        });
+        shelfObserver.observe(shelf,{childList:true,subtree:true});
+      }
+      return true;
+    }
+    if(!enhance() && 'MutationObserver' in win){
+      waitingObserver=new MutationObserver(function(changes){
+        if(!changes.some(function(change){return change.addedNodes.length>0;}))return;
+        if(queued)return;
+        queued=true;
+        win.requestAnimationFrame(function(){
+          queued=false;
+          if(enhance())waitingObserver.disconnect();
+        });
+      });
+      waitingObserver.observe(host,{childList:true,subtree:true});
+    }
+  }
+
   // v1.12 — quatro cards por linha nas categorias e busca, sem duplicar dados nativos.
   // Nao clona precos, produtos, paginacao, filtros ou controle de compra.
   function mountCatalog() {
@@ -2172,6 +2255,7 @@
     safely('home',mountHome);
     safely('catalogo',mountCatalog);
     safely('produto',mountProductPage);
+    safely('relacionados',mountRelatedProducts);
     safely('carrinho',mountCartPage);
     safely('rodape',mountFooter);
     safely('todasPaginas',mountUniversalPages);
