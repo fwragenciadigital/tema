@@ -103,23 +103,152 @@
     if(anchor&&anchor.parentNode)anchor.parentNode.insertBefore(node,anchor.nextSibling);
   }
   function enableHeader(){
-    if(!cfg.topo.ativo) return;
-    var header=d.querySelector('#cabecalho');
-    if(!header) return;
-    header.classList.add('cc26-native-header');
-    d.body.classList.add('cc26-has-header');
-    // Busca, menus, links de conta e orcamento permanecem no DOM oficial da LI.
-    // Nunca copiar <form> ou substituir handlers internos.
-    var search=header.querySelector('form[action*="buscar"], .busca form, form');
-    if(search)search.classList.add('cc26-native-search');
-    var menu=header.querySelector('.menu.superior, .menu');
-    if(menu)menu.classList.add('cc26-native-menu');
+    if (!cfg.topo.ativo || d.getElementById('cc26-new-header')) return;
+    var nativeHeader=d.querySelector('#cabecalho');
+    if (!nativeHeader) { warn('Cabecalho nativo nao encontrado: fallback mantido'); return; }
+    var nativeNav=nativeHeader.querySelector('.menu.superior .nivel-um, .menu.superior > ul');
+    if (!nativeNav) { warn('Categorias nativas nao encontradas: fallback mantido'); return; }
+    var navItems=[].slice.call(nativeNav.children).filter(function(li){
+      return li.tagName==='LI' && li.querySelector('a[href]');
+    });
+    if (!navItems.length) return;
+    var header=el('header','cc26-site-header');
+    header.id='cc26-new-header';
+    var top=el('div','cc26-site-header__top');
+    var promo=d.querySelector('.barra-inicial .conteiner, #barra-top .conteiner, .barra-topo .conteiner');
+    var promoText=promo?String(promo.textContent||'').replace(/\s+/g,' ').trim():'';
+    top.textContent=promoText && promoText.length<180 ? promoText : 'CABCOM · FIOS E CABOS ELÉTRICOS';
+    header.appendChild(top);
+    var inner=el('div','cc26-site-header__inner');
+    var main=el('div','cc26-site-header__main');
+    var homeLink=navAnchor('INICIAL')||location.origin+'/';
+    var logo=a(homeLink,'cc26-site-header__brand');
+    var logoOriginal=nativeHeader.querySelector('.logo img');
+    var logoImage=el('img');
+    logoImage.src=logoOriginal && (logoOriginal.currentSrc||logoOriginal.src) ? (logoOriginal.currentSrc||logoOriginal.src) : asset('logo.png');
+    logoImage.alt=logoOriginal && logoOriginal.alt ? logoOriginal.alt : 'Cabcom';
+    logo.appendChild(logoImage);
+    logo.appendChild(el('span','cc26-site-header__wordmark','Cabcom'));
+    main.appendChild(logo);
+    var navigation=el('nav','cc26-site-header__nav');
+    navigation.id='cc26-navigation';
+    navigation.setAttribute('aria-label','Categorias');
+    var navList=el('ul','cc26-site-header__list');
+    var preferred=['ACESSÓRIOS','ANTENAS','CABOS','CONECTORES','FERRAMENTAS','ISOLANTES','RADIOS'];
+    var mainNodes=[];
+    preferred.forEach(function(name){
+      var node=navItems.find(function(li){
+        var anchor=li.querySelector(':scope > a[href]');
+        return anchor && normalized(anchor.textContent)===normalized(name);
+      });
+      if(node)mainNodes.push(node);
+    });
+    // Outras categorias nativas continuam acessiveis; nenhuma e fabricada.
+    var remaining=navItems.filter(function(li){return mainNodes.indexOf(li)<0;});
+    function menuItem(li){
+      var original=li.querySelector(':scope > a[href]');
+      if(!original)return null;
+      var row=el('li','cc26-site-header__navitem');
+      var item=a(original.href,'cc26-site-header__navlink',original.textContent.trim());
+      row.appendChild(item);
+      var childList=li.querySelector(':scope > ul');
+      if(childList){
+        var sub=el('ul','cc26-site-header__submenu');
+        var childAnchors=[].slice.call(childList.querySelectorAll('a[href]')).slice(0,45);
+        childAnchors.forEach(function(c){
+          var child=el('li');
+          child.appendChild(a(c.href,'',c.textContent.trim()));
+          sub.appendChild(child);
+        });
+        if(sub.children.length)row.appendChild(sub);
+      }
+      return row;
+    }
+    mainNodes.forEach(function(li){var row=menuItem(li);if(row)navList.appendChild(row);});
+    if(remaining.length){
+      var more=el('li','cc26-site-header__navitem cc26-site-header__more');
+      var text=el('span','cc26-site-header__navlink','MAIS');
+      more.appendChild(text);
+      var sub=el('ul','cc26-site-header__submenu');
+      remaining.forEach(function(li){
+        var anchor=li.querySelector(':scope > a[href]');
+        if(!anchor)return;
+        var item=el('li');item.appendChild(a(anchor.href,'',anchor.textContent.trim()));sub.appendChild(item);
+      });
+      if(sub.children.length)more.appendChild(sub);
+      navList.appendChild(more);
+    }
+    navigation.appendChild(navList);
+    main.appendChild(navigation);
+    var actions=el('div','cc26-site-header__actions');
+    // Pesquisa proxied pelo formulario nativo: submete o MESMO elemento da LI.
+    var nativeForm=nativeHeader.querySelector('.busca form, form[action*="buscar"], form[action*="busca"]');
+    var nativeInput=nativeForm&&nativeForm.querySelector('input[name]:not([type="hidden"])');
+    if(nativeForm && nativeInput){
+      var search=el('form','cc26-site-header__search');
+      search.setAttribute('role','search');
+      var input=el('input');input.type='search';input.placeholder='Buscar na loja';input.setAttribute('aria-label','Buscar na loja');
+      var submit=el('button','', '⌕');submit.type='submit';submit.setAttribute('aria-label','Pesquisar');
+      search.appendChild(input);search.appendChild(submit);
+      search.addEventListener('submit',function(ev){
+        ev.preventDefault();
+        if(!input.value.trim())return;
+        nativeInput.value=input.value;
+        nativeInput.dispatchEvent(new Event('input',{bubbles:true}));
+        if(typeof nativeForm.requestSubmit==='function')nativeForm.requestSubmit();
+        else nativeForm.submit();
+      });
+      actions.appendChild(search);
+    }
+    var account=nativeHeader.querySelector('.minha-conta > a[href], a[href*="/conta/"], a[href*="/login"]');
+    if(account){
+      var user=a(account.href,'cc26-site-header__action','♙');
+      user.setAttribute('aria-label','Minha conta');actions.appendChild(user);
+    }
+    var cart=nativeHeader.querySelector('.carrinho > a[href], a[href*="/carrinho/"]');
+    if(cart){
+      var quote=a(cart.href,'cc26-site-header__action cc26-site-header__cart','🛒');
+      quote.setAttribute('aria-label','Meu orçamento');
+      var count=nativeHeader.querySelector('.qtd-carrinho');
+      if(count&&count.textContent.trim())quote.appendChild(el('span','cc26-site-header__count',count.textContent.trim()));
+      actions.appendChild(quote);
+    }
+    var toggle=el('button','cc26-site-header__toggle','☰');
+    toggle.type='button';toggle.setAttribute('aria-label','Abrir menu');toggle.setAttribute('aria-controls','cc26-navigation');
+    toggle.setAttribute('aria-expanded','false');
+    toggle.addEventListener('click',function(){
+      var isOpen=header.classList.toggle('cc26-site-header--open');
+      toggle.setAttribute('aria-expanded',String(isOpen));
+      toggle.setAttribute('aria-label',isOpen?'Fechar menu':'Abrir menu');
+    });
+    header.addEventListener('keydown',function(ev){
+      if(ev.key==='Escape'){header.classList.remove('cc26-site-header--open');toggle.setAttribute('aria-expanded','false');}
+    });
+    actions.appendChild(toggle);
+    main.appendChild(actions);inner.appendChild(main);header.appendChild(inner);
+    nativeHeader.parentNode.insertBefore(header,nativeHeader);
+    nativeHeader.classList.add('cc26-native-header');
+    d.body.classList.add('cc26-with-custom-header');
+    state.header='custom';
   }
   function hero(corpo){
     if(!cfg.home.hero)return null;
     // Se a Loja Integrada oferece banner administravel, mantemos esse banner,
     // usando apenas o estilo Cabcom. Assim continua editavel no painel.
     var nativeBanner=corpo.querySelector('.banner.cheio, .banner-full, .banner-principal, .banner.vitrine, .banner-home');
+    if(preview && cfg.home.previewHeroAprovado !== false){
+      var shot=section('cc26-hero cc26-approved-preview-hero');
+      var approved=img('fullbanner.jpg','Linha de cabos para Internet e Rede',true);
+      var destination=navAnchor('CABOS DE REDE')||navAnchor('CABOS');
+      var surface=destination?a(destination,'cc26-hero__link'):el('div','cc26-hero__link');
+      surface.appendChild(approved);shot.appendChild(surface);
+      corpo.parentNode.insertBefore(shot,corpo);
+      approved.addEventListener('load',function(){
+        if(nativeBanner)nativeBanner.classList.add('cc26-preview-native-banner-hidden');
+      },{once:true});
+      approved.addEventListener('error',function(){shot.remove();warn('Banner aprovado ausente no CDN. Banner nativo mantido.');},{once:true});
+      return shot;
+    }
     if(nativeBanner && nativeBanner.querySelector('img, picture')){
       nativeBanner.classList.add('cc26-native-hero');
       return nativeBanner;
