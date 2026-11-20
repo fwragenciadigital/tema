@@ -935,6 +935,10 @@
       }
     }
     previewLegacy();
+    if(!experience.mounted) {
+      if(!d.getElementById('cc26-new-header'))enableHeader();
+      initNavigationExperience();
+    }
     watchFade();
   }
   function schedule(){
@@ -980,9 +984,9 @@
   }
   function initNavigationExperience(){
     if(experience.mounted||!cfg.efeitos||cfg.efeitos.ativo===false||cfg.efeitos.navegacao===false)return;
-    experience.mounted=true;
     var header=d.getElementById('cc26-new-header');
     if(!header)return;
+    experience.mounted=true;
     header.classList.add('cc26-nav-ready');
     var current=location.pathname.replace(/\/+$/,'')||'/';
     [].slice.call(header.querySelectorAll('.cc26-site-header__navlink[href]')).forEach(function(link){
