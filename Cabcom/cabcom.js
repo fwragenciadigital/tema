@@ -6,7 +6,7 @@
 (function (w,d) {
   'use strict';
   if(w.Cabcom2026) return;
-  var VERSION='1.9.2';
+  var VERSION='1.9.3';
   var CDN='https://cdn.awsli.com.br/80/80577/arquivos/';
   var DEFAULTS={
     geral:{ativo:true,publicarNaLoja:false,debug:false},
@@ -808,38 +808,186 @@
     return results;
   }
   function findNativeMiniSources(){
-    // Nunca usar Banner Vitrine, banners-extras ou imagem arbitraria.
-    var candidates=[].slice.call(d.querySelectorAll(
-      '#corpo .banner.mini, #corpo .mini-banner, #corpo .mini-banners, #corpo .banner-mini, #corpo .banners-mini, #corpo [data-posicao="minibanner"], #corpo [data-banner-position="mini"], #corpo [data-banner-type="mini"], #corpo [data-banner-posicao="mini"]'
-    )).filter(function(node){return !node.closest('.cc26-section');});
+    // Fonte exclusiva: secao Mini Banner do painel LI. Nao usar Banner Vitrine.
+    var selectors=[
+      '#corpo .banner.mini','#corpo .mini-banner','#corpo .mini-banners',
+      '#corpo .banner-mini','#corpo .banners-mini',
+      '#corpo [data-posicao="minibanner"]','#corpo [data-posicao="mini-banner"]',
+      '#corpo [data-banner-position="mini"]','#corpo [data-banner-type="mini"]',
+      '#corpo [data-banner-posicao="mini"]',
+      '.mini-banner','.mini-banners','.banner-mini','.banners-mini',
+      '[id*="mini-banner"]','[class*="mini_banner"]',
+      '[data-posicao="minibanner"]','[data-banner-type="mini"]'
+    ];
+    var candidates=[].slice.call(d.querySelectorAll(selectors.join(','))).filter(function(node){
+      return !node.closest('.cc26-section') &&
+             !node.closest('#cc26-footer') &&
+             !node.closest('.cc26-cart-sidebar');
+    });
+    // A div de grupo abrange todas as banners sem selecionar suas filhas duas vezes.
     return candidates.filter(function(node){
       return !candidates.some(function(parent){return parent!==node && parent.contains(node);});
     });
   }
+  function miniBannerUrl(raw){
+    if(!raw)return '';
+    var candidate=String(raw).trim();
+    if(!candidate || /^data:|^blob:|^javascript:/i.test(candidate))return '';
+    try{
+      var u=new URL(candidate,location.href);
+      return /^https?:$/.test(u.protocol)?u.href:'';
+    }catch(e){return '';}
+  }
+  function fullMiniBannerUrl(href){
+    // Remover APENAS prefixos de resize CDN AWSLI conhecidos e manter
+    // o original como fallback caso o arquivo sem resize nao exista.
+    var original=miniBannerUrl(href);
+    if(!original)return '';
+    var replacement=original.replace(
+      /^(https:\/\/cdn\.awsli\.com\.br)\/(?:\d{2,5}x\d{2,5})\/(80\/80577\/arquivos\/)/i,
+      '$1/$2'
+    );
+    return replacement===original?'':replacement;
+  }
+  function miniBannerSrcset(value){
+    if(!value)return '';
+    var entries=String(value).split(',').map(function(part){
+      var segments=part.trim().split(/\s+/);
+      var score=1;
+      if(segments[1]){
+        var width=segments[1].match(/^(\d+)w$/),density=segments[1].match(/^([\d.]+)x$/);
+        score=width?Number(width[1]):density?Number(density[1])*1000:1;
+      }
+      return {url:miniBannerUrl(segments[0]),score:score};
+    }).filter(function(part){return !!part.url;});
+    entries.sort(function(a,b){return b.score-a.score;});
+    return entries.length?entries[0].url:'';
+  }
+  function miniBannerImageCandidates(image,holder){
+    var list=[];
+    function add(candidate){
+      var url=miniBannerUrl(candidate);
+      if(url && list.indexOf(url)<0)list.push(url);
+    }
+    if(image){
+      // Em browsers com lazy load, currentSrc pode ser miniatura ou placeholder.
+      // Priorizar srcsets, data-original e tamanho integral publicado pela LI.
+      var picture=image.closest('picture');
+      if(picture) [].slice.call(picture.querySelectorAll('source[srcset]')).forEach(function(s){
+        add(miniBannerSrcset(s.getAttribute('srcset')));
+      });
+      add(miniBannerSrcset(image.getAttribute('data-srcset')));
+      add(miniBannerSrcset(image.getAttribute('srcset')));
+      ['data-image-full','data-full','data-large','data-original','data-src','data-lazy-src'].forEach(function(attr){
+        add(image.getAttribute(attr));
+      });
+      add(image.getAttribute('src'));
+      add(image.currentSrc);
+    }
+    var target=holder||image;
+    if(target){
+      ['data-background','data-bg','data-image','data-banner-image','data-src'].forEach(function(attr){
+        add(target.getAttribute(attr));
+      });
+      var styled=target.getAttribute('style')||'';
+      var match=styled.match(/background(?:-image)?\s*:\s*[^;]*url\(\s*["']?([^"')]+)["']?\s*\)/i);
+      if(match)add(match[1]);
+      var linked=target.closest('a[href]')||target.querySelector('a[href]');
+      if(linked && /\.(?:png|jpe?g|webp|avif)(?:[?#]|$)/i.test(linked.href||''))add(linked.href);
+    }
+    // Versao não redimensionada da imagem mais confiável; teste com fallback.
+    var high=list.length?fullMiniBannerUrl(list[0]):'';
+    if(high)list.unshift(high);
+    return list;
+  }
+  function readMiniBanners(sources){
+    var entries=[],used=new Set();
+    sources.forEach(function(source){
+      if(entries.length>=4)return;
+      var images=[].slice.call(source.querySelectorAll('img'));
+      // Imagens estão às vezes no próprio bloco .mini-banner via CSS.
+      if(source.matches('img'))images.unshift(source);
+      images.forEach(function(image){
+        if(entries.length>=4 || image.closest('.slick-cloned, .swiper-slide-duplicate, .owl-item.cloned'))return;
+        var parent=image.closest('a[href],.mini-banner,.banner-mini,.banner')||image.parentElement;
+        var urls=miniBannerImageCandidates(image,parent);
+        if(!urls.length)return;
+        // Chave DOM: NÃO deduplicar somente por URL; banners diferentes podem
+        // ter o mesmo thumbnail antes do lazy loading ou usar a mesma arte.
+        var slot=image.closest('a[href],li,.slick-slide,.swiper-slide,.owl-item')||image;
+        if(used.has(slot))return;
+        used.add(slot);
+        var anchor=image.closest('a[href]');
+        var link='';
+        if(anchor){
+          try{
+            var u=new URL(anchor.href,location.href);
+            if(/^https?:$/.test(u.protocol))link=u.href;
+          }catch(e){}
+        }
+        entries.push({id:'mini-'+entries.length,image:urls[0],fallbacks:urls.slice(1),
+          link:link,alt:image.getAttribute('alt')||'',src:image});
+      });
+      // Banners cuja imagem é background (sem tag IMG).
+      if(!images.length && entries.length<4){
+        var backgrounds=[source].concat([].slice.call(source.querySelectorAll(
+          '[style*="background"],[data-background],[data-bg],[data-banner-image]'
+        )));
+        backgrounds.forEach(function(elm){
+          if(entries.length>=4||used.has(elm))return;
+          var urls=miniBannerImageCandidates(null,elm);
+          if(!urls.length)return;
+          used.add(elm);
+          var a=elm.closest('a[href]')||elm.querySelector('a[href]');
+          entries.push({id:'mini-'+entries.length,image:urls[0],fallbacks:urls.slice(1),
+            link:a?miniBannerUrl(a.getAttribute('href')):'',alt:elm.getAttribute('aria-label')||'',src:elm});
+        });
+      }
+    });
+    return entries.slice(0,4);
+  }
   function miniBanners(){
     if(cfg.home.miniBanners===false || !cfg.home.miniBanners)return null;
-    var sources=findNativeMiniSources(),items=[],unique={};
-    sources.forEach(function(source){
-      nativeMediaItems(source,8).forEach(function(item){
-        if(items.length>=4 || unique[item.image])return;
-        unique[item.image]=true;items.push(item);
-      });
-    });
+    var sources=findNativeMiniSources(),items=readMiniBanners(sources);
+    var existing=d.querySelector('.cc26-mini-banners');
     if(items.length<2){
-      warn('Mini Banner LI nao foi exposto no DOM: mantido sem inventar imagens');
-      return null;
+      if(!existing)warn('Mini Banner LI: menos de 2 imagens encontradas no HTML.');
+      return existing||null;
     }
-    var s=section('cc26-mini-banners');
-    var grid=wrap();grid.classList.add('cc26-mini-banners__grid');
+    var currentSignature=items.map(function(it){return it.image+'@'+it.link;}).join('|');
+    if(existing && existing.dataset.cc26Signature===currentSignature)return existing;
+    var s=existing||section('cc26-mini-banners');
+    var grid=existing?existing.querySelector('.cc26-mini-banners__grid'):null;
+    if(!grid){
+      grid=wrap();grid.classList.add('cc26-mini-banners__grid');
+      s.appendChild(grid);
+    }
+    grid.replaceChildren();
     items.forEach(function(item){
       var tile=item.link?a(item.link,'cc26-mini-banner'):el('div','cc26-mini-banner');
-      var picture=el('img');picture.src=item.image;picture.alt=item.alt;picture.loading='lazy';picture.decoding='async';
+      var picture=el('img');picture.alt=item.alt;picture.loading='lazy';
+      picture.decoding='async';
+      picture.src=item.image;
+      // Preferir arquivo full-res da CDN, retornando ao original se falhar.
+      var candidates=item.fallbacks.slice();
+      picture.addEventListener('error',function(){
+        if(candidates.length)picture.src=candidates.shift();
+        else warn('Mini Banner LI: imagem sem origem válida.');
+      });
+      picture.addEventListener('load',function(){
+        if(picture.naturalWidth && picture.getBoundingClientRect().width > picture.naturalWidth*1.35){
+          warn('Mini Banner LI: original publicado com resolução baixa ('+picture.naturalWidth+'px).');
+        }
+      });
       tile.appendChild(picture);grid.appendChild(tile);
     });
-    s.appendChild(grid);
+    s.dataset.cc26Signature=currentSignature;
+    s.dataset.cc26Count=String(items.length);
     s.dataset.nativeSource='minibanner';
     sources.forEach(function(source){source.classList.add('cc26-mini-native-hidden');});
-    state.miniBanners={origin:'Loja Integrada / Mini Banner',count:items.length};
+    state.miniBanners={origin:'Loja Integrada / Mini Banner',count:items.length,expected:4,
+      complete:items.length===4,sourceNodes:sources.length};
+    if(items.length<4)warn('Mini Banner LI: '+items.length+' de 4 imagens legíveis no DOM; verificando carregamento.');
     return s;
   }
   function findNativeBrandSource(){
@@ -1501,9 +1649,15 @@
     if(home){
       enhanceShelves(d.querySelector('#corpo')||d.body);
       var corpo=d.querySelector('#corpo');
-      if(corpo && !d.querySelector('.cc26-mini-banners')){
+      if(corpo){
+        // Atualiza também a grade existente quando a LI carregar o 4º
+        // Mini Banner depois da inicialização da home.
         var mini=miniBanners();
-        if(mini){var brandNode=d.querySelector('.cc26-brands');if(brandNode)brandNode.parentNode.insertBefore(mini,brandNode);else corpo.appendChild(mini);}
+        if(mini && !mini.parentNode){
+          var brandNode=d.querySelector('.cc26-brands');
+          if(brandNode)brandNode.parentNode.insertBefore(mini,brandNode);
+          else corpo.appendChild(mini);
+        }
       }
       if(corpo && !d.querySelector('.cc26-brands')){
         var brandsLate=brands();
