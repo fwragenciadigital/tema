@@ -285,3 +285,21 @@
   .cc26-site-header__brand img{max-width:38px}
   .cc26-site-header__search{width:92px}
 }
+/* Corrigir limites de largura impostos pelo conteiner original da Loja Integrada. */
+.cc26-active .cc26-section{
+  position:relative;left:50%;transform:translateX(-50%);width:100vw;max-width:100vw;
+  clear:both
+}
+.cc26-active.cc26-with-custom-header .cc26-original-menu,
+.cc26-active.cc26-with-custom-header #barra-top,
+.cc26-active.cc26-with-custom-header .barra-inicial{
+  position:absolute!important;left:-10000px!important;top:auto!important;
+  width:1px!important;height:1px!important;min-height:0!important;
+  padding:0!important;margin:0!important;overflow:hidden!important;
+  clip-path:inset(50%)!important;pointer-events:none!important
+}
+.cc26-active .cc26-site-header a:focus-visible,
+.cc26-active .cc26-site-header button:focus-visible,
+.cc26-active .cc26-site-header input:focus-visible{
+  outline:2px solid #ffec75;outline-offset:3px
+}
