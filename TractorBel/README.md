@@ -293,3 +293,11 @@ A integração em `INTEGRACAO-LOJA-INTEGRADA.html` foi preparada com `publicarNa
 - Badge amarelo OFF NO PIX apenas se percentual confirmado pelos valores exibidos na Loja Integrada, sem alterar precos, descontos, estoque, parcelas, produto ou cupons.
 - Sem JS adicional no HTML da loja: alteracoes concentradas em `tractorbel.js` e `tractorbel.css`.
 - Pendente: validacao visual e funcional da pagina real em 1440/1366/1280/767/390, pois o HTML da rota PDP nao estava disponivel para inspecao remota nesta sessao.
+
+
+## v1.24.0 — Carrinho: subtotal e parcelamento (20/11/2026)
+
+- Retirado o subtotal visual do resumo lateral e ocultada apenas a linha nativa `tr.tb26-cart__subtotal-row`, sem apagar dados, campos ou alterar calculos de frete e Pix.
+- O total oficial da LI permanece em `.tb26-cart__summary-total-value`; abaixo dele, `.tb26-cart__summary-installments` mostra a quantidade e o valor de parcelas **apenas se um elemento nativo do total do pedido fornecer essa informacao**. Quando nao ha dado verificavel: `Parcelamento: consulte as condições no checkout`, sem inventar taxa ou juros.
+- O checkout continua na rota e no formulario originais. Alteracoes de CSS especifico do checkout exigem o HTML real; nao foram feitas mudancas transacionais nesta versao.
+- Teste funcional e visual no carrinho real, incluindo variacoes de frete, cupom e quantidade, permanece pendente.

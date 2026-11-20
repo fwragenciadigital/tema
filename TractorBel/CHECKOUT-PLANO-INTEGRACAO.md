@@ -28,3 +28,8 @@ Nao confundir deploy READY na Vercel com publicacao da alteracao no checkout.
 ## Checkout visual referência duas colunas (19/11/2026)
 
 Prévia visual atualizada com identificação, entrega e pagamento à esquerda; três itens ilustrativos da captura, resumo, total, cupom, segurança e CTA à direita. CSS nativo preparado com classes de checkout conhecidas, sem mudança de ordem de elementos transacionais. Checkout real ainda não conectado ao editor oficial de CSS; nenhum produto foi adicionado ou cobrança iniciada nesta sessão. Exige homologação com DOM autenticado e testes 1440, 1366, 1280, 767 (duas passagens), além de 390.
+
+
+## 20/11/2026 — HTML transacional nao presente na ultima mensagem
+
+O usuario solicitou refazer o checkout e disse enviar HTML completo, mas nesta conversa o HTML nao estava presente como arquivo ou texto acessivel. Nao aplicar grade de colunas especulativa nem substituir formulario da LI sem a estrutura real. Ajustes da v1.24.0 se limitam ao carrinho e seus valores nativos.

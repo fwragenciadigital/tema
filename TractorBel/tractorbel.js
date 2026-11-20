@@ -1,12 +1,12 @@
 /*
- * TractorBel 2026 - FWR Agencia Digital - v1.23.0
+ * TractorBel 2026 - FWR Agencia Digital - v1.24.0
  * Camada visual da Loja Integrada. Sem checkout ou precificacao paralela.
  * Editavel por window.TractorBelSettings no HTML da LI.
  */
 (function (win, doc) {
   'use strict';
   if (win.TractorBel2026) return;
-  var VERSION = '1.23.0';
+  var VERSION = '1.24.0';
   // Assets oficiais da TractorBel, ja hospedados na Loja Integrada.
   // Manter os nomes e extensoes ORIGINAIS, sem converter .jpg/.png para .webp.
   // O nome logico pode continuar .webp para compatibilidade com os componentes existentes.
@@ -2060,21 +2060,20 @@
     summary.setAttribute('aria-label','Resumo do pedido');
     var kicker=e('span','tb26-cart__summary-kicker','FINALIZAÇÃO');
     var title=e('h2','tb26-cart__summary-title','Resumo do pedido');
-    var subtotalRow=e('div','tb26-cart__summary-line');
-    var subtotalLabel=e('span','','Subtotal dos produtos');
-    var subtotalValue=e('strong','tb26-cart__summary-subtotal','—');
-    append(subtotalRow,subtotalLabel,subtotalValue);
+    // O subtotal continua no DOM nativo da Loja Integrada, mas nao e repetido na interface.
     var totalRow=e('div','tb26-cart__summary-total');
     var totalLabel=e('span','','Total do pedido');
     var totalValue=e('strong','tb26-cart__summary-total-value','—');
-    append(totalRow,totalLabel,totalValue);
+    var installmentValue=e('small','tb26-cart__summary-installments');
+    installmentValue.hidden=true;
+    append(totalRow,totalLabel,totalValue,installmentValue);
     var pix=e('div','tb26-cart__summary-pix');
     var pixLabel=e('div','tb26-cart__summary-pix-label','PREÇO ESPECIAL NO PIX');
     var pixValue=e('strong','tb26-cart__summary-pix-value');
     var pixDetail=e('small','tb26-cart__summary-pix-detail','Valor informado pela loja');
     append(pix,pixLabel,pixValue,pixDetail);
     var tip=e('p','tb26-cart__summary-note','Frete, cupons e condições finais são calculados pela Loja Integrada.');
-    append(summary,kicker,title,subtotalRow,totalRow,pix,tip);
+    append(summary,kicker,title,totalRow,pix,tip);
     checkout.insertBefore(summary, checkout.firstChild);
 
     var action=checkout.querySelector('.acao-editar');
@@ -2107,16 +2106,44 @@
       var txt=(node.textContent||'').replace(/\s+/g,' ').trim();
       return /R\$\s*\d/.test(txt) ? txt : '';
     }
+    // Exibir o valor de parcela SOMENTE se houver cotacao vinculada ao
+    // TOTAL DO PEDIDO no HTML oficial da LI. Nao somar parcelas individuais
+    // nem presumir numero de vezes/juros. Sem fonte: texto informativo.
+    function nativeTotalInstallments(totalText) {
+      var selectors=[
+        '.parcelamento-total','.parcelas-total','.parcelamento-carrinho',
+        '.parcelamento-pedido','[data-parcelamento-total]',
+        '.tb26-cart__total-row .preco-parcela',
+        '.tb26-cart__total-row .parcelamento'
+      ];
+      var source=null;
+      for(var i=0;i<selectors.length;i++){
+        source=checkout.querySelector(selectors[i]) || table.querySelector(selectors[i]);
+        if(source && source!==installmentValue)break;
+        source=null;
+      }
+      if(!source)return '';
+      var phrase=String(source.getAttribute('data-parcelamento-total')||source.textContent||'').replace(/\s+/g,' ').trim();
+      var match=phrase.match(/(?:até\s*)?(\d{1,2})\s*[xX]\s*(?:de\s*)?(R\$\s*[\d.]+,\d{2})\s*(sem\s+juros|com\s+juros)?/i);
+      if(!match)return '';
+      var times=Number(match[1]), unit=tb26Money(match[2]), total=tb26Money(totalText);
+      if(times<2||times>24||!isFinite(unit)||!isFinite(total)||total<=0)return '';
+      // Com juros, a soma das parcelas pode exceder o total. A validacao
+      // de igualdade so se aplica a cotacoes indicadas "sem juros".
+      var detail=(match[3]||'').toLowerCase();
+      if(detail.indexOf('sem')===0 && Math.abs(times*unit-total)>Math.max(.1,times*.02))return '';
+      return (/\baté\b/i.test(phrase)?'Até ':'Em ')+times+'x de '+match[2]+(detail?' '+detail:'');
+    }
     function updateSummary() {
-      // Apenas copiar exibicao da LI. Nao recalcular impostos, Pix, cupom ou frete.
-      var sourceSubtotal=table.querySelector('.valor-subtotal');
+      // Os valores seguem exclusivamente o DOM nativo da LI; nao calculamos descontos.
       var sourceTotal=table.querySelector('.valor-total');
       var sourcePix=table.querySelector('.valores-descontos .descontos.avista strong, .valores-descontos .descontos.avista .titulo');
-      var currentSubtotal=validCurrency(sourceSubtotal);
       var currentTotal=validCurrency(sourceTotal);
       var currentPix=validCurrency(sourcePix);
-      subtotalValue.textContent=currentSubtotal || currentTotal || 'A calcular';
       totalValue.textContent=currentTotal || 'A calcular';
+      var installment=nativeTotalInstallments(currentTotal);
+      installmentValue.textContent=installment || 'Parcelamento: consulte as condições no checkout';
+      installmentValue.hidden=!currentTotal;
       pix.hidden=!currentPix;
       if(currentPix) pixValue.textContent=currentPix;
       var count=[].reduce.call(table.querySelectorAll('tr[data-produto-id]'),function(n,row){

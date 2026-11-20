@@ -2695,3 +2695,51 @@ body.tb26-active.tb26-with-pdp #corpo .listagem.aproveite-tambem.tb26-related
     transition:none!important;
   }
 }
+
+
+/* =========================================================
+ TractorBel v1.24.0 | Carrinho: sem subtotal duplicado,
+ parcelamento abaixo do valor normal, sem calculos paralelos.
+ ========================================================= */
+/* Preserva a linha de subtotal no DOM nativo para integracoes e LI,
+   removendo somente sua representacao visual do carrinho novo. */
+body.tb26-active.tb26-with-cart #corpo
+.tb26-cart__table > tbody > tr.tb26-cart__subtotal-row{
+  display:none!important;
+}
+body.tb26-active.tb26-with-cart #corpo
+.tb26-cart__summary-line{
+  display:none!important;
+}
+body.tb26-active.tb26-with-cart #corpo
+.tb26-cart__summary-total{
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:flex-start!important;
+  gap:5px!important;
+  margin:0 0 20px!important;
+}
+body.tb26-active.tb26-with-cart #corpo
+.tb26-cart__summary-installments{
+  display:block!important;
+  width:100%!important;
+  max-width:100%!important;
+  padding:0!important;
+  margin:3px 0 0!important;
+  color:#777!important;
+  font:500 clamp(11px,.95vw,13px)/1.5 'Montserrat',Arial,sans-serif!important;
+  text-transform:none!important;
+  letter-spacing:0!important;
+  overflow-wrap:anywhere;
+}
+body.tb26-active.tb26-with-cart #corpo
+.tb26-cart__summary-installments[hidden]{
+  display:none!important;
+}
+@media(max-width:767px){
+  body.tb26-active.tb26-with-cart #corpo
+  .tb26-cart__summary-installments{
+    font-size:12px!important;
+    line-height:1.55!important;
+  }
+}
