@@ -2132,7 +2132,7 @@
       // de igualdade so se aplica a cotacoes indicadas "sem juros".
       var detail=(match[3]||'').toLowerCase();
       if(detail.indexOf('sem')===0 && Math.abs(times*unit-total)>Math.max(.1,times*.02))return '';
-      return (/\baté\b/i.test(phrase)?'Até ':'Em ')+times+'x de '+match[2]+(detail?' '+detail:'');
+      return (/\bat[eé](?:\s|$)/i.test(phrase)?'Até ':'Em ')+times+'x de '+match[2]+(detail?' '+detail:'');
     }
     function updateSummary() {
       // Os valores seguem exclusivamente o DOM nativo da LI; nao calculamos descontos.
