@@ -638,7 +638,14 @@ body.pagina-carrinho.carrinho-checkout #barraTopo{
     max-width:100%;
   }
   body.pagina-carrinho.carrinho-checkout #corpo
+  .secao-principal>.campos-pedido>.campos-pedido>#login-content{order:1;}
+  body.pagina-carrinho.carrinho-checkout #corpo
+  .secao-principal>.campos-pedido>.campos-pedido>.checkout-alerta-seguro{order:2;}
+  body.pagina-carrinho.carrinho-checkout #corpo
+  .secao-principal>.campos-pedido>.campos-pedido>#formularioCheckout{order:3;}
+  body.pagina-carrinho.carrinho-checkout #corpo
   .secao-principal>.campos-pedido>.campos-pedido>.row-fluid:has(.resumo-compra){
+    order:4;
     width:100%!important;
     position:static;
     top:auto;

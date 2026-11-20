@@ -33,3 +33,35 @@ Prévia visual atualizada com identificação, entrega e pagamento à esquerda; 
 ## 20/11/2026 — HTML transacional nao presente na ultima mensagem
 
 O usuario solicitou refazer o checkout e disse enviar HTML completo, mas nesta conversa o HTML nao estava presente como arquivo ou texto acessivel. Nao aplicar grade de colunas especulativa nem substituir formulario da LI sem a estrutura real. Ajustes da v1.24.0 se limitam ao carrinho e seus valores nativos.
+
+
+## v1.25 — Checkout nativo, seletores confirmados pelo HTML (20/11/2026)
+
+A amostra original do lojista (arquivo boxx.html) foi lida integralmente **somente para identificar estrutura e seletores**. Ela possui dados de sessao/transacao; **NAO versionar, compartilhar nem executar os scripts deste HTML**.
+
+**Estrutura nativa (confirmada):**
+- `body.pagina-carrinho.carrinho-checkout` — classe da rota real /checkout/.
+- `#cabecalho` — logo e contatos, preservados.
+- `#corpo .secao-principal > .campos-pedido > .campos-pedido` — wrapper com login, resumo do pedido e formulario.
+- `.resumo-compra .tabela-carrinho` — produtos, quantidade, subtotal, frete, desconto e total da plataforma.
+- `#formularioCheckout` — formulario POST nativo, todos os campos e regras de validacao mantidos.
+- `.dados-cadastro` e `#tipoCadastro` — identificacao PF/PJ, CPF/CNPJ e criacao de senha.
+- `#formularioEndereco`, `#formasEnvio` — CEP, endereco, frete e opcoes de entrega.
+- `#formularioObservacao` — observacoes.
+- `#formasPagamento`, `.li-box-payment`, `.accordion-group` — integracoes de cartao, Pix, boleto, pagamento na entrega etc.
+- `#finalizarCompra` — botao transacional existente (com classe disabled quando condicoes nao estao completas).
+- `.acao-editar .selo-ssl` — selo oficial, sem sobreposicao do botao.
+
+**Desenho CSS publicado no codigo-fonte:**
+- Desktop acima de 991px: dados de identificacao/entrega/pagamento empilhados na coluna esquerda, resumo sticky na direita. Tudo CSS: nenhum componente transacional muda de pai.
+- Tablet e mobile <=991px: formulario primeiro, resumo depois, um unico fluxo vertical. Revisar 767px duas vezes e 390px em dispositivo emulado.
+- Títulos Michroma, textos e formularios Montserrat, amarelo #ffc400, preto e branco.
+- Sem mover inputs hidden, token de pagamento, radio, modal de erro, validacao, captcha, select, checkout_ref, form action e handlers. Nao copiar o HTML da captura para outro dominio.
+
+**Instalacao e limites:**
+- O arquivo `checkout-native.css` e a fonte versionada, ainda **NAO INJETADA NA ROTA DE CHECKOUT DA LOJA REAL**. Deploy Vercel sozinho nao realiza essa acao.
+- A documentacao oficial (setembro 2026) esclarece que `Visual > Incluir codigo HTML` **NAO** funciona no checkout e finalizacao: https://ajuda.lojaintegrada.com.br/pt-BR/articles/911875-como-inserir-um-codigo-html-e-javascript
+- Algumas modalidades de tema permitem CSS avancado especifico: https://ajuda.lojaintegrada.com.br/pt-BR/articles/13335706-novo-tema-padrao-entenda-como-funciona-o-tema-padrao-das-novas-lojas-da-loja-integrada . **Verificar no painel da TractorBel** se ha editor de CSS que efetivamente carrega em /checkout/ e se o tema usado autoriza.
+- Nao adicionar `checkout-native.css` ao `tractorbel.css` geral esperando que passe a valer no checkout. Nao usar injetor externo nao autorizado, iframe, DOM clonado, endpoint de pagamento proprio ou alteracao dos formularios nativos.
+
+**QA pendente de homologacao na Loja Integrada (nao certificado por snapshot HTML):** teste no browser com 1440/1366/1280/767 viewport/767 emulacao mobile/390, telefone, CPF/PJ, CEP, opcoes frete, cartao, Pix, boleto, alteracao de pagamento, mensagens de erro, botao disabled/ativo, selo SSL, cupons, sem concluir pagamento real. Aplicar somente apos confirmar que o CSS de checkout pode ser carregado sem afetar conversao.
