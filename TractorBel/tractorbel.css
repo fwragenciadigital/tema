@@ -2743,3 +2743,71 @@ body.tb26-active.tb26-with-cart #corpo
     line-height:1.55!important;
   }
 }
+
+
+/* ==========================================================
+ TractorBel 2026 v1.25.0 — ajustes oficiais fornecidos pela FWR.
+ Escopo restrito aos componentes, sem duplicar blocos solicitados.
+ ========================================================== */
+body.tb26-active .tb26-company__info {
+  padding:10px!important;
+}
+body.tb26-active .tb26-company__info img {
+  margin:0 0 60px!important;
+}
+body.tb26-active .tb26-company::before {
+  top:11%!important;
+  bottom:13%!important;
+}
+body.tb26-active .tb26-company {
+  background:linear-gradient(to bottom,#fff 0%,#fff 17%,#ffc400 17%,#ffc400 80%,#fff 80%,#fff 100%)!important;
+}
+body.tb26-active .tb26-company__contact {
+  background:transparent!important;
+  min-height:820px!important;
+}
+body.tb26-active .tb26-footer__art {
+  min-height:400px!important;
+}
+body.tb26-active .tb26-footer__bottom {
+  display:flex!important;
+  flex-direction:column!important;
+  gap:10px!important;
+  padding:0!important;
+  justify-content:center!important;
+  min-height:75px!important;
+  background:#141414!important;
+}
+body.tb26-active .tb26-product__cta {
+  font-weight:800!important;
+  font-size:12px!important;
+}
+body.tb26-active .tb26-intro {
+  background:linear-gradient(to bottom,#242424 0%,#292929 19%,#626262 19%,#9a9a9a 49%,#dfdfdf 74%,#2b2b2b 74%,#292929 100%)!important;
+}
+html body.tb26-active.tb26-with-home #tb26-home > .tb26-intro {
+  padding-top:30px!important;
+}
+body.tb26-active .tb26-brands__title {
+  margin-bottom:0!important;
+}
+body.tb26-active .tb26-intro > .tb26-brands {
+  padding-bottom:0!important;
+}
+body.tb26-active.tb26-with-cart #corpo .tb26-cart__summary-total-value {
+  font:600 26px/1.13 'Montserrat',Arial,sans-serif!important;
+  color:#202020!important;
+  letter-spacing:0!important;
+}
+@media(max-width:767px){
+  body.tb26-active .tb26-company__contact {
+    min-height:0!important;
+  }
+  body.tb26-active .tb26-company__info img {
+    margin:0 0 35px!important;
+  }
+  body.tb26-active .tb26-company::before {
+    top:6%!important;
+    bottom:10%!important;
+  }
+}

@@ -1,12 +1,12 @@
 /*
- * TractorBel 2026 - FWR Agencia Digital - v1.24.0
+ * TractorBel 2026 - FWR Agencia Digital - v1.25.0
  * Camada visual da Loja Integrada. Sem checkout ou precificacao paralela.
  * Editavel por window.TractorBelSettings no HTML da LI.
  */
 (function (win, doc) {
   'use strict';
   if (win.TractorBel2026) return;
-  var VERSION = '1.24.0';
+  var VERSION = '1.25.0';
   // Assets oficiais da TractorBel, ja hospedados na Loja Integrada.
   // Manter os nomes e extensoes ORIGINAIS, sem converter .jpg/.png para .webp.
   // O nome logico pode continuar .webp para compatibilidade com os componentes existentes.
@@ -2110,29 +2110,48 @@
     // TOTAL DO PEDIDO no HTML oficial da LI. Nao somar parcelas individuais
     // nem presumir numero de vezes/juros. Sem fonte: texto informativo.
     function nativeTotalInstallments(totalText) {
-      var selectors=[
-        '.parcelamento-total','.parcelas-total','.parcelamento-carrinho',
-        '.parcelamento-pedido','[data-parcelamento-total]',
+      // O carrinho da LI mostra "via Pix ... ou em até 6x de R$ ... sem juros"
+      // dentro das condicoes do total. Copiamos exclusivamente essa oferta
+      // do DOM nativo e NUNCA montamos parcelas a partir de um calculo proprio.
+      var candidates=[
+        '.tb26-cart__total-row .valores-descontos',
+        '.tb26-cart__total-row .parcelamento',
+        '.tb26-cart__total-row .parcelas',
         '.tb26-cart__total-row .preco-parcela',
-        '.tb26-cart__total-row .parcelamento'
+        '.valores-descontos',
+        '.parcelamento-total',
+        '.parcelas-total',
+        '.parcelamento-carrinho',
+        '.parcelamento-pedido',
+        '[data-parcelamento-total]'
       ];
-      var source=null;
-      for(var i=0;i<selectors.length;i++){
-        source=checkout.querySelector(selectors[i]) || table.querySelector(selectors[i]);
-        if(source && source!==installmentValue)break;
-        source=null;
+      var total=tb26Money(totalText);
+      if(!isFinite(total)||total<=0)return '';
+      var contexts=[table,checkout];
+      for(var i=0;i<candidates.length;i++) {
+        for(var j=0;j<contexts.length;j++) {
+          var sources=contexts[j].querySelectorAll(candidates[i]);
+          for(var k=0;k<sources.length;k++){
+            var node=sources[k];
+            if(node===installmentValue||installmentValue.contains(node))continue;
+            var phrase=String(node.getAttribute('data-parcelamento-total')||node.textContent||'')
+              .replace(/\s+/g,' ').trim();
+            var match=phrase.match(/(?:ou\s+em\s+)?(?:at[eé]\s*)?(\d{1,2})\s*[xX]\s*(?:de\s*)?(R\$\s*[\d.]+,\d{2})\s*(sem\s+juros|com\s+juros)?/i);
+            if(!match)continue;
+            var times=Number(match[1]),unit=tb26Money(match[2]);
+            if(times<2||times>24||!isFinite(unit)||unit<=0)continue;
+            // Pode haver arredondamento de centavos no calculo da plataforma.
+            var detail=(match[3]||'').toLowerCase();
+            if(detail.indexOf('sem')===0 &&
+               Math.abs(times*unit-total)>Math.max(.1,times*.02))continue;
+            var fullMatch=match[0].replace(/\s+/g,' ').trim();
+            if(/^ou\s+em\s+/i.test(fullMatch))return fullMatch;
+            return (/at[eé]/i.test(fullMatch)?'até ':'')+
+              times+'x de '+match[2]+(detail?' '+detail:'');
+          }
+        }
       }
-      if(!source)return '';
-      var phrase=String(source.getAttribute('data-parcelamento-total')||source.textContent||'').replace(/\s+/g,' ').trim();
-      var match=phrase.match(/(?:até\s*)?(\d{1,2})\s*[xX]\s*(?:de\s*)?(R\$\s*[\d.]+,\d{2})\s*(sem\s+juros|com\s+juros)?/i);
-      if(!match)return '';
-      var times=Number(match[1]), unit=tb26Money(match[2]), total=tb26Money(totalText);
-      if(times<2||times>24||!isFinite(unit)||!isFinite(total)||total<=0)return '';
-      // Com juros, a soma das parcelas pode exceder o total. A validacao
-      // de igualdade so se aplica a cotacoes indicadas "sem juros".
-      var detail=(match[3]||'').toLowerCase();
-      if(detail.indexOf('sem')===0 && Math.abs(times*unit-total)>Math.max(.1,times*.02))return '';
-      return (/\bat[eé](?:\s|$)/i.test(phrase)?'Até ':'Em ')+times+'x de '+match[2]+(detail?' '+detail:'');
+      return '';
     }
     function updateSummary() {
       // Os valores seguem exclusivamente o DOM nativo da LI; nao calculamos descontos.

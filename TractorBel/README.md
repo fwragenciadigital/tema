@@ -301,3 +301,10 @@ A integração em `INTEGRACAO-LOJA-INTEGRADA.html` foi preparada com `publicarNa
 - O total oficial da LI permanece em `.tb26-cart__summary-total-value`; abaixo dele, `.tb26-cart__summary-installments` mostra a quantidade e o valor de parcelas **apenas se um elemento nativo do total do pedido fornecer essa informacao**. Quando nao ha dado verificavel: `Parcelamento: consulte as condições no checkout`, sem inventar taxa ou juros.
 - O checkout continua na rota e no formulario originais. Alteracoes de CSS especifico do checkout exigem o HTML real; nao foram feitas mudancas transacionais nesta versao.
 - Teste funcional e visual no carrinho real, incluindo variacoes de frete, cupom e quantidade, permanece pendente.
+
+
+## v1.25.0 — Correcoes finais CSS e parcelamento (20/11/2026)
+
+- Aplica uma unica vez os ajustes de company, footer, intro, marcas, CTA e titulo total do carrinho. Em mobile, altura de 820px do contato nao e aplicada para evitar vazio excessivo.
+- Parcelamento lido prioritariamente do bloco nativo `tr.tb26-cart__total-row .valores-descontos` ou `.valores-descontos`, como no print. Busca em elementos do carrinho e do formulario, preserva expressão com `ou em até`, juros e valor da Loja Integrada. Sem dados oficiais, usa fallback informativo; validacao de centavos quando `sem juros`.
+- Nenhuma alteracao no metodo de pagamento, carrinho transacional, endpoints ou descontos.
