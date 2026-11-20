@@ -3064,3 +3064,186 @@ body.cc26-active.cc26-page-product:not(.cc26-pdp-ready) #corpo .produto-thumbs .
   display:flex!important;align-items:center;
   flex-wrap:wrap;gap:9px;
 }
+
+
+/* Cabcom v1.9.2 — miniaturas reais .thumbs-vertical abaixo da imagem + resumo LI. */
+body.cc26-active.cc26-pdp-ready #corpo .cc26-pdp--editorial .cc26-pdp__media{
+  display:flex!important;
+  flex-direction:column!important;
+  gap:14px!important;
+  align-items:stretch!important;
+}
+body.cc26-active.cc26-pdp-ready #corpo .cc26-pdp--editorial .cc26-pdp__media .cc26-pdp__image-stage{
+  order:0!important;
+  flex:0 0 auto!important;
+  width:100%!important;
+}
+body.cc26-active.cc26-pdp-ready #corpo .cc26-pdp--editorial .cc26-pdp__media .cc26-pdp__thumbs,
+body.cc26-active.cc26-pdp-ready #corpo .cc26-pdp--editorial .cc26-pdp__media .thumbs-vertical{
+  position:relative!important;
+  inset:auto!important;
+  order:1!important;
+  display:block!important;
+  flex:0 0 auto!important;
+  width:100%!important;
+  max-width:100%!important;
+  min-width:0!important;
+  height:auto!important;
+  min-height:0!important;
+  max-height:none!important;
+  margin:0!important;
+  padding:2px 0 6px!important;
+  float:none!important;
+  clear:both!important;
+  overflow:visible!important;
+  visibility:visible!important;
+  opacity:1!important;
+  transform:none!important;
+  background:transparent!important;
+  border:0!important;
+  box-shadow:none!important;
+}
+body.cc26-active.cc26-pdp-ready #corpo .cc26-pdp--editorial .cc26-pdp__thumbs :is(.miniaturas,ul,.slick-track,.owl-stage,.bxslider,.slides){
+  display:flex!important;
+  flex-flow:row nowrap!important;
+  align-items:stretch!important;
+  justify-content:flex-start!important;
+  gap:10px!important;
+  width:max-content!important;
+  min-width:100%!important;
+  max-width:none!important;
+  height:auto!important;
+  min-height:0!important;
+  max-height:none!important;
+  margin:0!important;
+  padding:3px 1px 7px!important;
+  list-style:none!important;
+  float:none!important;
+  position:relative!important;
+  left:auto!important;
+  top:auto!important;
+  transform:none!important;
+  transition:none!important;
+}
+body.cc26-active.cc26-pdp-ready #corpo .cc26-pdp--editorial .cc26-pdp__thumbs :is(.slick-list,.flex-viewport,.owl-stage-outer,.bx-viewport){
+  position:relative!important;
+  width:100%!important;
+  height:auto!important;
+  max-height:none!important;
+  min-height:0!important;
+  overflow-x:auto!important;
+  overflow-y:hidden!important;
+  margin:0!important;
+  padding:0!important;
+  box-shadow:none!important;
+  scrollbar-width:thin;
+  -webkit-overflow-scrolling:touch;
+}
+body.cc26-active.cc26-pdp-ready #corpo .cc26-pdp--editorial .cc26-pdp__thumbs:is(ul,.miniaturas,.slick-track){
+  display:flex!important;
+  flex-flow:row nowrap!important;
+  align-items:center!important;
+  gap:10px!important;
+  overflow-x:auto!important;
+  overflow-y:hidden!important;
+  scrollbar-width:thin;
+}
+body.cc26-active.cc26-pdp-ready #corpo .cc26-pdp--editorial .cc26-pdp__thumbs :is(li,.slick-slide,.owl-item),
+body.cc26-active.cc26-pdp-ready #corpo .cc26-pdp--editorial .cc26-pdp__thumbs > :is(a,div>a){
+  box-sizing:border-box!important;
+  display:flex!important;
+  flex:0 0 86px!important;
+  width:86px!important;
+  height:86px!important;
+  min-width:0!important;
+  min-height:0!important;
+  max-height:86px!important;
+  float:none!important;
+  clear:none!important;
+  margin:0!important;
+  padding:0!important;
+  position:relative!important;
+  inset:auto!important;
+  transform:none!important;
+  opacity:1!important;
+  visibility:visible!important;
+  list-style:none!important;
+}
+body.cc26-active.cc26-pdp-ready #corpo .cc26-pdp--editorial .cc26-pdp__thumbs :is(a:has(img)){
+  box-sizing:border-box!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  width:86px!important;
+  height:86px!important;
+  max-width:100%!important;
+  max-height:100%!important;
+  margin:0!important;
+  padding:7px!important;
+  border:1px solid #e2e5e9!important;
+  border-radius:8px!important;
+  background:#f6f6f4!important;
+  overflow:hidden!important;
+  opacity:1!important;
+  visibility:visible!important;
+}
+body.cc26-active.cc26-pdp-ready #corpo .cc26-pdp--editorial .cc26-pdp__thumbs a:has(img):is(:hover,:focus-visible,.cc26-pdp__thumb-selected){
+  border-color:#1775f4!important;
+  background:#fff!important;
+}
+body.cc26-active.cc26-pdp-ready #corpo .cc26-pdp--editorial .cc26-pdp__thumbs img{
+  position:static!important;
+  display:block!important;
+  width:100%!important;
+  height:100%!important;
+  max-height:100%!important;
+  max-width:100%!important;
+  object-fit:contain!important;
+  opacity:1!important;
+  visibility:visible!important;
+  transform:none!important;
+}
+body.cc26-active.cc26-pdp-ready #corpo .cc26-pdp--editorial .cc26-pdp__thumbs :is(.slick-arrow,.bx-controls,.owl-nav,.flex-direction-nav){
+  display:none!important;
+}
+/* O resumo vem depois do bloco de assistência; sem área vazia. */
+body.cc26-active.cc26-pdp-ready #corpo .cc26-pdp--editorial .cc26-pdp__synopsis{
+  display:block!important;
+  width:100%!important;
+  max-width:100%!important;
+  margin:22px 0 0!important;
+  padding:20px 0 0!important;
+  border:0!important;
+  border-top:1px solid #e8eaee!important;
+  background:transparent!important;
+  box-shadow:none!important;
+}
+body.cc26-active.cc26-pdp-ready #corpo .cc26-pdp--editorial .cc26-pdp__synopsis-title{
+  margin:0 0 9px!important;
+  padding:0!important;
+  color:#1c222b!important;
+  background:transparent!important;
+  font:700 18px/1.3 var(--cc26-font-title)!important;
+}
+body.cc26-active.cc26-pdp-ready #corpo .cc26-pdp--editorial .cc26-pdp__synopsis-text{
+  margin:0!important;
+  padding:0!important;
+  color:#687481!important;
+  font:450 13px/1.8 var(--cc26-font-text)!important;
+  overflow-wrap:anywhere;
+}
+@media(max-width:600px){
+  body.cc26-active.cc26-pdp-ready #corpo .cc26-pdp--editorial .cc26-pdp__thumbs :is(li,.slick-slide,.owl-item),
+  body.cc26-active.cc26-pdp-ready #corpo .cc26-pdp--editorial .cc26-pdp__thumbs > :is(a,div>a){
+    flex-basis:65px!important;width:65px!important;height:65px!important;max-height:65px!important;
+  }
+  body.cc26-active.cc26-pdp-ready #corpo .cc26-pdp--editorial .cc26-pdp__thumbs a:has(img){
+    width:65px!important;height:65px!important;
+  }
+  body.cc26-active.cc26-pdp-ready #corpo .cc26-pdp--editorial .cc26-pdp__synopsis{
+    margin-top:18px!important;padding-top:17px!important;
+  }
+  body.cc26-active.cc26-pdp-ready #corpo .cc26-pdp--editorial .cc26-pdp__synopsis-title{
+    font-size:16px!important;
+  }
+}
