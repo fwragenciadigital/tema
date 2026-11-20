@@ -6,7 +6,7 @@
 (function (w,d) {
   'use strict';
   if(w.Cabcom2026) return;
-  var VERSION='1.3.0';
+  var VERSION='1.3.1';
   var CDN='https://cdn.awsli.com.br/80/80577/arquivos/';
   var DEFAULTS={
     geral:{ativo:true,publicarNaLoja:false,debug:false},
@@ -398,21 +398,28 @@
     });
     return results;
   }
-  function findNativeMiniSource(){
+  function findNativeMiniSources(){
     // Nunca usar Banner Vitrine, banners-extras ou imagem arbitraria.
     var candidates=[].slice.call(d.querySelectorAll(
       '#corpo .banner.mini, #corpo .mini-banner, #corpo .mini-banners, #corpo .banner-mini, #corpo .banners-mini, #corpo [data-posicao="minibanner"], #corpo [data-banner-position="mini"], #corpo [data-banner-type="mini"], #corpo [data-banner-posicao="mini"]'
-    ));
-    return candidates.find(function(node){
-      return !node.closest('.cc26-section') && nativeMediaItems(node,8).length>=2;
-    })||null;
+    )).filter(function(node){return !node.closest('.cc26-section');});
+    return candidates.filter(function(node){
+      return !candidates.some(function(parent){return parent!==node && parent.contains(node);});
+    });
   }
   function miniBanners(){
     if(cfg.home.miniBanners===false || !cfg.home.miniBanners)return null;
-    var source=findNativeMiniSource();
-    if(!source){warn('Mini Banner LI nao foi exposto no DOM: mantido sem inventar imagens');return null;}
-    var items=nativeMediaItems(source,4);
-    if(items.length<2)return null;
+    var sources=findNativeMiniSources(),items=[],unique={};
+    sources.forEach(function(source){
+      nativeMediaItems(source,8).forEach(function(item){
+        if(items.length>=4 || unique[item.image])return;
+        unique[item.image]=true;items.push(item);
+      });
+    });
+    if(items.length<2){
+      warn('Mini Banner LI nao foi exposto no DOM: mantido sem inventar imagens');
+      return null;
+    }
     var s=section('cc26-mini-banners');
     var grid=wrap();grid.classList.add('cc26-mini-banners__grid');
     items.forEach(function(item){
@@ -422,7 +429,7 @@
     });
     s.appendChild(grid);
     s.dataset.nativeSource='minibanner';
-    source.classList.add('cc26-mini-native-hidden');
+    sources.forEach(function(source){source.classList.add('cc26-mini-native-hidden');});
     state.miniBanners={origin:'Loja Integrada / Mini Banner',count:items.length};
     return s;
   }
