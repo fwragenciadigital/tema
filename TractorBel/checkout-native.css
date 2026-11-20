@@ -1,14 +1,28 @@
 @import url('https://fonts.googleapis.com/css2?family=Michroma&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
 
-/*
-  TRACTORBEL | CHECKOUT NATIVO LOJA INTEGRADA | v1.25.0
-  Base: HTML de checkout fornecido em 20/11/2026 (boxx.html).
-  INSTALACAO: CSS especifico autorizado para /checkout/, nao pelo
-  <script> global: a plataforma pode bloquear codigos comuns nesta etapa.
-  NAO substituir #formularioCheckout, seus inputs, acoes ou gateways.
-  NAO alterar .hide / [disabled] / .disabled / campos de validacao.
-  O HTML de sessao do usuario NAO e armazenado no GitHub.
-*/
+.logo a {
+    height: 65px;
+}
+
+#exibirFormasPagamento .btn {
+    background: var(--tbck-yellow);
+    font-weight: 700;
+    font-size: 13px;
+}
+
+body.pagina-carrinho.carrinho-checkout #corpo .resumo-compra .tabela-carrinho tr.tr-checkout-total .total {
+    padding-left: 0px;
+    margin-left: -40%;
+}
+
+.resumo-compra .tabela-carrinho .padding-preco>div {
+    padding-left: 0;
+}
+
+body.pagina-carrinho.carrinho-checkout #corpo .resumo-compra .tabela-carrinho tr.bg-dark.tr-checkout-total td.text-right span{
+    display: none !important;
+    font-size: 0;
+}
 
 body.pagina-carrinho.carrinho-checkout {
   --tbck-yellow:#ffc400;
@@ -53,7 +67,7 @@ body.pagina-carrinho.carrinho-checkout #cabecalho .logo{
   margin:14px 0!important;
 }
 body.pagina-carrinho.carrinho-checkout #cabecalho .logo img{
-  max-height:65px;
+  max-height: 65px;
   max-width:100%;
   object-fit:contain;
 }
@@ -70,14 +84,14 @@ body.pagina-carrinho.carrinho-checkout #cabecalho .atendimento :is(a,span,strong
   color:#f3f3f3!important;
 }
 body.pagina-carrinho.carrinho-checkout #corpo{
-  padding:34px 0 80px;
-  background:var(--tbck-surface);
+  padding: 34px 0 80px;
 }
 body.pagina-carrinho.carrinho-checkout #corpo>.conteiner{
   width:min(calc(100% - 48px),var(--tbck-width))!important;
   max-width:var(--tbck-width)!important;
   margin:0 auto!important;
   padding:0!important;
+  box-shadow: none;
 }
 body.pagina-carrinho.carrinho-checkout #corpo .secao-principal,
 body.pagina-carrinho.carrinho-checkout #corpo .secao-principal>.campos-pedido{
@@ -216,6 +230,7 @@ body.pagina-carrinho.carrinho-checkout #corpo #formularioCheckout
   max-width:100%;
   min-width:0;
   box-sizing:border-box;
+  margin-top: 0px;
 }
 body.pagina-carrinho.carrinho-checkout #corpo #formularioCheckout
 .control-group{
@@ -291,7 +306,7 @@ body.pagina-carrinho.carrinho-checkout #corpo #formularioCheckout
   border-radius:8px;
   background:#fff;
   color:#353535;
-  font:700 11px/1.5 'Montserrat',Arial,sans-serif;
+  font: 500 11px/1.5 'Montserrat',Arial,sans-serif;
   text-decoration:none;
 }
 body.pagina-carrinho.carrinho-checkout #corpo #formularioCheckout
@@ -532,7 +547,7 @@ body.pagina-carrinho.carrinho-checkout #corpo
   max-width:100%;
   min-width:0;
   color:#303030;
-  font:650 10.5px/1.55 'Montserrat',Arial,sans-serif!important;
+  font: 600 12px/1.55 'Montserrat',Arial,sans-serif!important;
 }
 body.pagina-carrinho.carrinho-checkout #corpo
 .resumo-compra .tabela-carrinho .produto-info ul{
@@ -645,7 +660,7 @@ body.pagina-carrinho.carrinho-checkout #barraTopo{
   .secao-principal>.campos-pedido>.campos-pedido>#formularioCheckout{order:3;}
   body.pagina-carrinho.carrinho-checkout #corpo
   .secao-principal>.campos-pedido>.campos-pedido>.row-fluid:has(.resumo-compra){
-    order:4;
+    order: 1;
     width:100%!important;
     position:static;
     top:auto;
@@ -663,6 +678,13 @@ body.pagina-carrinho.carrinho-checkout #barraTopo{
     width:calc(100% - 26px)!important;
     padding:0!important;
   }
+  .bg-dark.tr-checkout-total {
+    width: 100% !important;
+    display: flex !important;
+}
+  .bg-dark.tr-checkout-total .padding-preco {
+    width: 100%;
+}
   body.pagina-carrinho.carrinho-checkout #cabecalho .logo img{
     max-height:53px;
   }
