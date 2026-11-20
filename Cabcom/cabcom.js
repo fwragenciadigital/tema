@@ -1142,8 +1142,14 @@
       // Transferir botões nativos para o mesmo rodapé preserva handlers originais.
       whats.classList.add('cc26-card-quote-actions__whatsapp');
       email.classList.add('cc26-card-quote-actions__email');
-      if(!whats.textContent.trim())whats.textContent='Cotar por WhatsApp';
-      if(!email.textContent.trim())email.textContent='Cotar por e-mail';
+      // Legendas iguais às do layout aprovado, inclusive quando o tema
+      // fornece um botão genérico 'Ver mais'. O elemento/link nativo é mantido.
+      whats.textContent='';whats.appendChild(inlineIcon('phone'));
+      whats.appendChild(el('span','','Cotar por WhatsApp'));
+      email.textContent='';email.appendChild(inlineIcon('mail'));
+      email.appendChild(el('span','','Cotar por e-mail'));
+      whats.setAttribute('aria-label','Cotar por WhatsApp');
+      email.setAttribute('aria-label','Cotar por e-mail');
       newActions.appendChild(whats);newActions.appendChild(email);
       existing.forEach(function(anchor){
         if(anchor!==whats&&anchor!==email)anchor.classList.add('cc26-card-legacy-action');
