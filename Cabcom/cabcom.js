@@ -6,10 +6,12 @@
 (function (w,d) {
   'use strict';
   if(w.Cabcom2026) return;
-  var VERSION='1.3.1';
+  var VERSION='1.4.0';
   var CDN='https://cdn.awsli.com.br/80/80577/arquivos/';
   var DEFAULTS={
     geral:{ativo:true,publicarNaLoja:false,debug:false},
+    previsualizacao:{ocultarBlocosLegados:true},
+    efeitos:{ativo:true,fadeUp:true,imagens:true},
     imagensBase:CDN,
     topo:{ativo:true},
     home:{ativo:true,hero:true,beneficios:true,apresentacao:true,cabos:true,conectores:true,atalhos:true,miniBanners:true,marcas:true,institucional:true,instagram:true},
@@ -58,7 +60,19 @@
       x.classList.add('cc26-image-unavailable');
       warn('Imagem ausente no CDN oficial: '+file);
     },{once:true});
+    imageTransition(x);
     return x;
+  }
+  function imageTransition(image){
+    if(!cfg.efeitos || cfg.efeitos.imagens===false || !image || !image.addEventListener)return;
+    image.classList.add('cc26-image-loading');
+    function done(){
+      image.classList.remove('cc26-image-loading');
+      image.classList.add('cc26-image-loaded');
+    }
+    image.addEventListener('load',done,{once:true});
+    image.addEventListener('error',done,{once:true});
+    if(image.complete)done();
   }
   function section(cls){
     var s=el('section','cc26-section '+cls);
@@ -108,7 +122,16 @@
       user:'<circle cx="12" cy="8" r="4"/><path d="M4 21v-2c0-4 3.6-6 8-6s8 2 8 6v2"/>',
       cart:'<path d="M2 3h3l2.5 12H19l2-9H6"/><circle cx="9" cy="20" r="1"/><circle cx="18" cy="20" r="1"/>',
       menu:'<path d="M4 6h16M4 12h16M4 18h16"/>',
-      arrow:'<path d="m9 5 7 7-7 7"/>'
+      arrow:'<path d="m9 5 7 7-7 7"/>',
+      truck:'<path d="M3 5h11v11H3zM14 9h4l3 4v3h-7M6 19a2 2 0 1 0 0-4 2 2 0 0 0 0 4ZM17 19a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z"/>',
+      credit:'<rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20M6 15h5"/>',
+      tag:'<path d="M20.5 13.4 13 20.9 3 11V3h8l9.5 10.4Z"/><circle cx="7.5" cy="7.5" r="1.2"/>',
+      shield:'<path d="M12 2 20 5v6c0 5-3.2 8.5-8 11-4.8-2.5-8-6-8-11V5l8-3Z"/><path d="m8.5 12 2.5 2.5 4.5-5"/>',
+      phone:'<path d="M6.5 3H4a2 2 0 0 0-2 2c0 9.4 7.6 17 17 17a2 2 0 0 0 2-2v-2.5l-5.5-2-2.2 2.2a15 15 0 0 1-7-7l2.2-2.2L6.5 3Z"/>',
+      mail:'<rect x="2.5" y="5" width="19" height="14" rx="2"/><path d="m3 6 9 7 9-7"/>',
+      clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/>',
+      instagram:'<rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><path d="M17.5 6.7h.01"/>',
+      facebook:'<path d="M15.5 4H13a3 3 0 0 0-3 3v3H7v4h3v7h4v-7h3l.5-4H14V7h2z"/>'
     };
     var span=el('span','cc26-icon');
     span.innerHTML='<svg aria-hidden="true" viewBox="0 0 24 24" focusable="false" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'+(icons[name]||'')+'</svg>';
@@ -287,12 +310,11 @@
       ['tag','Condições especiais','Consulte descontos para pagamento à vista'],
       ['lock','Compra segura','Atendimento e pagamento pela loja']
     ];
-    var icons={
-      truck:'🚚',card:'▤',tag:'◇',lock:'♙'
-    };
+    var icons={truck:'truck',card:'credit',tag:'tag',lock:'shield'};
     items.forEach(function(item){
       var box=el('div','cc26-benefit');
-      var icon=el('span','cc26-benefit__icon',icons[item[0]]);icon.setAttribute('aria-hidden','true');
+      var icon=el('span','cc26-benefit__icon');icon.appendChild(inlineIcon(icons[item[0]]));
+      icon.setAttribute('aria-hidden','true');
       var words=el('div');
       words.appendChild(el('strong','',item[1]));
       words.appendChild(el('small','',item[2]));
@@ -356,27 +378,70 @@
     if(!count)return null;
     grid.appendChild(cards);s.appendChild(grid);return s;
   }
+  function shortcutSource(){
+    // Fonte exclusiva: imagens do banner-central-marcas cadastrado no painel LI.
+    var nodes=[].slice.call(d.querySelectorAll(
+      '#corpo .banner-central-marcas, #corpo #banner-central-marcas, .banner-central-marcas, #banner-central-marcas'
+    ));
+    return nodes.find(function(node){
+      return !node.closest('.cc26-section') && node.querySelector('img');
+    })||null;
+  }
+  function readShortcuts(source){
+    if(!source)return [];
+    var result=[],seen={};
+    [].slice.call(source.querySelectorAll('img')).forEach(function(im){
+      if(result.length>=12)return;
+      var url=im.getAttribute('data-src')||im.getAttribute('data-original')||
+        im.getAttribute('src')||im.currentSrc||im.src;
+      if(!url||url.indexOf('data:')===0)return;
+      try{url=new URL(url,location.href).href;}catch(e){return;}
+      if(seen[url])return;
+      var link=im.closest('a[href]');
+      var text=(link&&link.textContent||'').replace(/\s+/g,' ').trim();
+      var alt=(im.getAttribute('alt')||'').trim();
+      if(!text && im.parentElement) {
+        var label=im.parentElement.querySelector('h2,h3,h4,strong,span');
+        if(label)text=(label.textContent||'').replace(/\s+/g,' ').trim();
+      }
+      text=(text||alt).slice(0,70);
+      var href='';
+      if(link){
+        try{
+          var parsed=new URL(link.href,location.href);
+          if(parsed.origin===location.origin && parsed.protocol.indexOf('http')===0)href=parsed.href;
+        }catch(e){}
+      }
+      if(!href && text)href=navAnchor(text);
+      if(!href)return; // Nunca simular link de categoria que nao existe.
+      seen[url]=true;result.push({url:url,href:href,label:text});
+    });
+    return result;
+  }
   function shortcuts(){
     if(!cfg.home.atalhos)return null;
-    var items=[
-      ['CABOS DE REDE','Cabo RJ45','⌁'],
-      ['CABOS COAXIAIS','Cabo Coaxial','◉'],
-      ['CONECTORES RJ45','Conectores','▦'],
-      ['FERRAMENTAS','Crimpadores','⚒'],
-      ['ADESIVOS','Fitas Isolantes','▰']
-    ];
+    var source=shortcutSource(),items=readShortcuts(source);
+    if(!items.length) {
+      warn('banner-central-marcas sem imagens/links de categorias acessiveis; atalhos aguardando fonte LI');
+      return null;
+    }
     var s=section('cc26-shortcuts');
     var grid=wrap();grid.classList.add('cc26-shortcuts__grid');
-    items.forEach(function(item){
-      var url=navAnchor(item[0]);
-      if(!url)return;
-      var link=a(url,'cc26-shortcut');
-      link.appendChild(el('span','cc26-shortcut__symbol',item[2]));
-      link.appendChild(el('strong','',item[1]));
+    items.slice(0,8).forEach(function(item){
+      var link=a(item.href,'cc26-shortcut');
+      var med=el('span','cc26-shortcut__media');
+      var picture=el('img');picture.src=item.url;picture.alt=item.label||'Categoria Cabcom';
+      picture.decoding='async';picture.loading='lazy';
+      imageTransition(picture);
+      med.appendChild(picture);link.appendChild(med);
+      if(item.label)link.appendChild(el('strong','cc26-shortcut__label',item.label));
+      link.setAttribute('aria-label',item.label||'Abrir categoria');
       grid.appendChild(link);
     });
     if(!grid.children.length)return null;
-    s.appendChild(grid);return s;
+    s.appendChild(grid);
+    state.shortcuts={origin:'Loja Integrada / banner-central-marcas',count:grid.children.length};
+    return s;
   }
   function nativeMediaItems(source,limit){
     var results=[],seen={};
@@ -669,12 +734,18 @@
     var number=phone?(phone.textContent||'').trim().replace(/\s+/g,' '):'';
     if(!number || number.length>60)number=cfg.conteudo.contato;
     var telLink=hrefOf(phone)||'tel:'+String(cfg.conteudo.contato||'').replace(/[^\d+]/g,'');
-    if(number&&telLink)contact.appendChild(a(telLink,'cc26-footer__contact-line','◉  '+number));
+    function contactLine(kind,href,label){
+      var node=href?a(href,'cc26-footer__contact-line'):el('p','cc26-footer__contact-line');
+      var ico=inlineIcon(kind);ico.setAttribute('aria-hidden','true');
+      node.appendChild(ico);node.appendChild(el('span','',label));
+      contact.appendChild(node);
+    }
+    if(number&&telLink)contactLine('phone',telLink,number);
     var email=sourceLinks.find(function(l){return /^mailto:/i.test(l.getAttribute('href')||'')});
     var emailValue=email?(email.textContent||'').trim():cfg.conteudo.email;
-    if(emailValue)contact.appendChild(a(hrefOf(email)||('mailto:'+emailValue),'cc26-footer__contact-line','✉  '+emailValue));
+    if(emailValue)contactLine('mail',hrefOf(email)||('mailto:'+emailValue),emailValue);
     var hours=(native.textContent||'').match(/(?:Segunda|Seg)[^\n]{0,95}(?:18(?::?00)?\s*h?|[0-2]\d:\d{2})/i);
-    if(hours)contact.appendChild(el('p','cc26-footer__contact-line','◷  '+hours[0].replace(/\s+/g,' ').slice(0,110)));
+    if(hours)contactLine('clock','',hours[0].replace(/\s+/g,' ').slice(0,110));
     var logo=el('img');logo.className='cc26-footer__logo';logo.src=asset('logo.png');logo.alt='Cabcom';
     var nativeLogo=d.querySelector('#cabecalho .logo img');
     if(nativeLogo)logo.src=nativeLogo.currentSrc||nativeLogo.src||logo.src;
@@ -684,7 +755,9 @@
       var address=hrefOf(link);
       if(!address||!/instagram\.com|facebook\.com/i.test(address)||social.children.length>=2)return;
       var text=/instagram/i.test(address)?'Instagram':'Facebook';
-      var clone=a(address,'cc26-footer__social-link',text);
+      var clone=a(address,'cc26-footer__social-link');
+      clone.appendChild(inlineIcon(text==='Instagram'?'instagram':'facebook'));
+      clone.setAttribute('aria-label',text);
       clone.target='_blank';clone.rel='noopener noreferrer';social.appendChild(clone);
     });
     if(social.children.length)contact.appendChild(social);
@@ -766,6 +839,57 @@
     native.classList.add('cc26-footer-source-hidden');
     state.footer={origin:'Links, contato, logos e dados nativos LI',paymentLogos:payments.length,securityLogos:seals.length};
   }
+  function previewLegacy(){
+    if(!preview||!home || cfg.previsualizacao.ocultarBlocosLegados===false)return;
+    var matched=[].slice.call(d.querySelectorAll(
+      '.banner-central, #banner-central, .banner-tarja-central, #banner-tarja-central, .banner-central-marcas, #banner-central-marcas, .box-vitrine, #box-vitrine'
+    ));
+    var counter=0;
+    matched.forEach(function(node){
+      if(node.closest('.cc26-section')||node.querySelector('.cc26-section'))return;
+      var isShortcuts=node.matches('.banner-central-marcas, #banner-central-marcas');
+      // Nao ocultar a fonte antes que os atalhos usem as imagens reais.
+      if(isShortcuts && !d.querySelector('.cc26-shortcuts'))return;
+      if(!node.classList.contains('cc26-preview-legacy-hidden')){
+        node.classList.add('cc26-preview-legacy-hidden');counter++;
+      }
+    });
+    if(counter)state.previewHidden=(state.previewHidden||0)+counter;
+  }
+  var fadeObserver=null;
+  function initFade(){
+    if(!cfg.efeitos || cfg.efeitos.ativo===false || cfg.efeitos.fadeUp===false)return;
+    if(!w.IntersectionObserver)return;
+    if(w.matchMedia && w.matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+    fadeObserver=new w.IntersectionObserver(function(entries){
+      entries.forEach(function(entry){
+        if(entry.isIntersecting){
+          entry.target.classList.add('cc26-inview');
+          fadeObserver.unobserve(entry.target);
+        }
+      });
+    },{rootMargin:'0px 0px -28px 0px',threshold:0.06});
+    d.body.classList.add('cc26-motion-ready');
+    watchFade();
+  }
+  function watchFade(){
+    if(!fadeObserver)return;
+    var els=d.querySelectorAll(
+      '.cc26-section, .cc26-section .cc26-category-card, .cc26-section .cc26-shortcut, '+
+      '.cc26-section .cc26-mini-banner, .cc26-section .cc26-brands__brand, '+
+      '.cc26-footer__column, #listagemProdutos .listagem-item'
+    );
+    [].slice.call(els).forEach(function(node,index){
+      if(node.classList.contains('cc26-reveal'))return;
+      if(node.closest('.cc26-preview-legacy-hidden'))return;
+      node.classList.add('cc26-reveal');
+      node.style.setProperty('--cc26-reveal-delay',String(Math.min(index%6,5)*45)+'ms');
+      // Elementos acima da dobra ficam visiveis imediatamente, sem flash inicial.
+      var rect=node.getBoundingClientRect();
+      if(rect.bottom>0 && rect.top<w.innerHeight*.9)node.classList.add('cc26-inview');
+      else fadeObserver.observe(node);
+    });
+  }
   function enhanceNative(){
     if(cfg.catalogo.ativo){
       [].slice.call(d.querySelectorAll('.listagem .listagem-item, .vitrine-produtos .produto')).forEach(function(item){
@@ -799,6 +923,17 @@
     }
     decorateNativeShelves();
     enhanceNative();
+    // Temas LI injetam banners/carrosseis apos DOMContentLoaded.
+    if(home && !d.querySelector('.cc26-shortcuts')){
+      var lateShortcuts=shortcuts(),body=d.querySelector('#corpo');
+      if(lateShortcuts && body){
+        var after=d.querySelector('.cc26-category-grid--cabos');
+        if(after && after.parentNode)insertAfter(after,lateShortcuts);
+        else body.appendChild(lateShortcuts);
+      }
+    }
+    previewLegacy();
+    watchFade();
   }
   function schedule(){
     if(scheduled)return;
@@ -816,6 +951,8 @@
     homeContent();
     decorateNativeShelves();
     enhanceNative();
+    previewLegacy();
+    initFade();
     var observer=new MutationObserver(schedule);
     observer.observe(d.body,{subtree:true,childList:true});
     state.initialized=true;
