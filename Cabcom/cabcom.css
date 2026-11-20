@@ -303,3 +303,16 @@
 .cc26-active .cc26-site-header input:focus-visible{
   outline:2px solid #ffec75;outline-offset:3px
 }
+
+/* Identificacao visual inequívoca de que o modo de homologacao esta ativo. */
+body.cc26-active.cc26-preview::after{
+  content:"CABCOM 2026 · PRÉVIA ATIVA";
+  position:fixed;right:14px;bottom:14px;z-index:2147483000;
+  display:block;background:#001b35;color:#fff;padding:8px 12px;
+  border:1px solid #00c99b;border-radius:6px;box-shadow:0 4px 15px #001b3555;
+  font:700 11px/1.3 Arial,sans-serif;letter-spacing:.035em;
+  pointer-events:none
+}
+@media(max-width:767px){
+  body.cc26-active.cc26-preview::after{right:8px;bottom:8px;font-size:9px;padding:6px 9px}
+}
