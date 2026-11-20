@@ -27,6 +27,15 @@ A URL \`?cabcom_preview=1\` **não injeta** JS/CSS por conta própria. O código
 **Arquivos gráficos:** o arquivo \`Fatiado.rar\` não equivale a upload para a CDN. Enquanto os arquivos não estiverem acessíveis nas URLs da LI, os módulos gráficos exclusivos não terão fidelidade ao layout. Não afirmar que imagens foram publicadas só porque foram descompactadas.
 
 
+## Revisão v1.4.0 — 20/11/2026
+
+- **Somente em `?cabcom_preview=1`**: as áreas legadas `.banner-central`, `.banner-tarja-central`, `.banner-central-marcas` e `.box-vitrine` recebem ocultação visual depois da montagem das seções Cabcom. Todos os nós continuam disponíveis no DOM para a Loja Integrada e para leitura das imagens. Não ocultar um contêiner que inclua módulos novos.
+- `.cc26-shortcuts` lê imagens, rótulos e **links reais** da seção `.banner-central-marcas`. Se não houver imagens ou links no HTML do tema, mantém o bloco original disponível até que a origem seja encontrada; não inventa imagens ou slugs.
+- Ícones da faixa de benefícios, navegação e contatos substituídos por SVGs padronizados, sem emojis.
+- Fade-up progressivo com `IntersectionObserver`, hover e imagens com transição de carregamento. Respeita `prefers-reduced-motion` e mantém conteúdo visível caso o navegador não suporte a API.
+- `window.Cabcom2026.state.shortcuts` informa a origem e a quantidade de atalhos, e `state.previewHidden` quantifica contêineres ocultados em modo de prévia.
+- **Atenção:** publicação na Vercel não significa que os recursos já foram homologados no DOM real; comparar desktop/mobile e checar navegação/ação dos atalhos antes de ativar produção.
+
 ## Links permanentes
 - JS: https://cabcom-2026.vercel.app/cabcom.js
 - CSS: https://cabcom-2026.vercel.app/cabcom.css
