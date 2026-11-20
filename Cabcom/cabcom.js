@@ -6,13 +6,13 @@
 (function (w,d) {
   'use strict';
   if(w.Cabcom2026) return;
-  var VERSION='1.2.0';
+  var VERSION='1.3.0';
   var CDN='https://cdn.awsli.com.br/80/80577/arquivos/';
   var DEFAULTS={
     geral:{ativo:true,publicarNaLoja:false,debug:false},
     imagensBase:CDN,
     topo:{ativo:true},
-    home:{ativo:true,hero:true,beneficios:true,apresentacao:true,cabos:true,conectores:true,atalhos:true,marcas:true,institucional:true,instagram:true},
+    home:{ativo:true,hero:true,beneficios:true,apresentacao:true,cabos:true,conectores:true,atalhos:true,miniBanners:true,marcas:true,institucional:true,instagram:true},
     catalogo:{ativo:true},
     produto:{ativo:true},
     rodape:{ativo:true},
@@ -102,6 +102,18 @@
   function insertAfter(anchor,node){
     if(anchor&&anchor.parentNode)anchor.parentNode.insertBefore(node,anchor.nextSibling);
   }
+  function inlineIcon(name){
+    var icons={
+      search:'<circle cx="11" cy="11" r="7"/><path d="m16 16 5 5"/>',
+      user:'<circle cx="12" cy="8" r="4"/><path d="M4 21v-2c0-4 3.6-6 8-6s8 2 8 6v2"/>',
+      cart:'<path d="M2 3h3l2.5 12H19l2-9H6"/><circle cx="9" cy="20" r="1"/><circle cx="18" cy="20" r="1"/>',
+      menu:'<path d="M4 6h16M4 12h16M4 18h16"/>',
+      arrow:'<path d="m9 5 7 7-7 7"/>'
+    };
+    var span=el('span','cc26-icon');
+    span.innerHTML='<svg aria-hidden="true" viewBox="0 0 24 24" focusable="false" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'+(icons[name]||'')+'</svg>';
+    return span;
+  }
   function enableHeader(){
     if (!cfg.topo.ativo || d.getElementById('cc26-new-header')) return;
     var nativeHeader=d.querySelector('#cabecalho');
@@ -117,7 +129,8 @@
     var top=el('div','cc26-site-header__top');
     var promo=d.querySelector('.barra-inicial .conteiner, #barra-top .conteiner, .barra-topo .conteiner');
     var promoText=promo?String(promo.textContent||'').replace(/\s+/g,' ').trim():'';
-    top.textContent=promoText && promoText.length<180 ? promoText : 'CABCOM · FIOS E CABOS ELÉTRICOS';
+    top.textContent=promoText && promoText.length<180 ? promoText : '';
+    if(!top.textContent.trim())top.classList.add('cc26-site-header__top--empty');
     header.appendChild(top);
     var inner=el('div','cc26-site-header__inner');
     var main=el('div','cc26-site-header__main');
@@ -128,7 +141,7 @@
     logoImage.src=logoOriginal && (logoOriginal.currentSrc||logoOriginal.src) ? (logoOriginal.currentSrc||logoOriginal.src) : asset('logo.png');
     logoImage.alt=logoOriginal && logoOriginal.alt ? logoOriginal.alt : 'Cabcom';
     logo.appendChild(logoImage);
-    if(!logoOriginal)logo.appendChild(el('span','cc26-site-header__wordmark','Cabcom'));
+    logoImage.addEventListener('error',function(){if(!logo.querySelector('.cc26-site-header__wordmark'))logo.appendChild(el('span','cc26-site-header__wordmark','Cabcom'));},{once:true});
     main.appendChild(logo);
     var navigation=el('nav','cc26-site-header__nav');
     navigation.id='cc26-navigation';
@@ -188,7 +201,7 @@
       var search=el('form','cc26-site-header__search');
       search.setAttribute('role','search');
       var input=el('input');input.type='search';input.placeholder='Buscar na loja';input.setAttribute('aria-label','Buscar na loja');
-      var submit=el('button','', '⌕');submit.type='submit';submit.setAttribute('aria-label','Pesquisar');
+      var submit=el('button');submit.type='submit';submit.setAttribute('aria-label','Pesquisar');submit.appendChild(inlineIcon('search'));
       search.appendChild(input);search.appendChild(submit);
       search.addEventListener('submit',function(ev){
         ev.preventDefault();
@@ -202,18 +215,18 @@
     }
     var account=nativeHeader.querySelector('.minha-conta > a[href], a[href*="/conta/"], a[href*="/login"]');
     if(account){
-      var user=a(account.href,'cc26-site-header__action','♙');
+      var user=a(account.href,'cc26-site-header__action');user.appendChild(inlineIcon('user'));
       user.setAttribute('aria-label','Minha conta');actions.appendChild(user);
     }
     var cart=nativeHeader.querySelector('.carrinho > a[href], a[href*="/carrinho/"]');
     if(cart){
-      var quote=a(cart.href,'cc26-site-header__action cc26-site-header__cart','🛒');
+      var quote=a(cart.href,'cc26-site-header__action cc26-site-header__cart');quote.appendChild(inlineIcon('cart'));
       quote.setAttribute('aria-label','Meu orçamento');
       var count=nativeHeader.querySelector('.qtd-carrinho');
       if(count&&count.textContent.trim())quote.appendChild(el('span','cc26-site-header__count',count.textContent.trim()));
       actions.appendChild(quote);
     }
-    var toggle=el('button','cc26-site-header__toggle','☰');
+    var toggle=el('button','cc26-site-header__toggle');toggle.appendChild(inlineIcon('menu'));
     toggle.type='button';toggle.setAttribute('aria-label','Abrir menu');toggle.setAttribute('aria-controls','cc26-navigation');
     toggle.setAttribute('aria-expanded','false');
     toggle.addEventListener('click',function(){
@@ -365,18 +378,91 @@
     if(!grid.children.length)return null;
     s.appendChild(grid);return s;
   }
+  function nativeMediaItems(source,limit){
+    var results=[],seen={};
+    if(!source)return results;
+    [].slice.call(source.querySelectorAll('img')).forEach(function(image){
+      if(results.length>=limit)return;
+      var candidate=image.getAttribute('data-src')||image.getAttribute('data-original')||image.getAttribute('src')||image.currentSrc||image.src;
+      if(!candidate || candidate.indexOf('data:image')===0)return;
+      var absolute;
+      try {absolute=new URL(candidate,location.href);}catch(e){return;}
+      if(!/^https?:$/.test(absolute.protocol) || seen[absolute.href])return;
+      seen[absolute.href]=true;
+      var owner=image.closest('a[href]'), link=owner?owner.href:'';
+      if(link){
+        try {var valid=new URL(link,location.href);if(!/^https?:$/.test(valid.protocol))link='';else link=valid.href;}
+        catch(e){link='';}
+      }
+      results.push({image:absolute.href,link:link,alt:image.getAttribute('alt')||''});
+    });
+    return results;
+  }
+  function findNativeMiniSource(){
+    // Nunca usar Banner Vitrine, banners-extras ou imagem arbitraria.
+    var candidates=[].slice.call(d.querySelectorAll(
+      '#corpo .banner.mini, #corpo .mini-banner, #corpo .mini-banners, #corpo .banner-mini, #corpo .banners-mini, #corpo [data-posicao="minibanner"], #corpo [data-banner-position="mini"], #corpo [data-banner-type="mini"], #corpo [data-banner-posicao="mini"]'
+    ));
+    return candidates.find(function(node){
+      return !node.closest('.cc26-section') && nativeMediaItems(node,8).length>=2;
+    })||null;
+  }
+  function miniBanners(){
+    if(cfg.home.miniBanners===false || !cfg.home.miniBanners)return null;
+    var source=findNativeMiniSource();
+    if(!source){warn('Mini Banner LI nao foi exposto no DOM: mantido sem inventar imagens');return null;}
+    var items=nativeMediaItems(source,4);
+    if(items.length<2)return null;
+    var s=section('cc26-mini-banners');
+    var grid=wrap();grid.classList.add('cc26-mini-banners__grid');
+    items.forEach(function(item){
+      var tile=item.link?a(item.link,'cc26-mini-banner'):el('div','cc26-mini-banner');
+      var picture=el('img');picture.src=item.image;picture.alt=item.alt;picture.loading='lazy';picture.decoding='async';
+      tile.appendChild(picture);grid.appendChild(tile);
+    });
+    s.appendChild(grid);
+    s.dataset.nativeSource='minibanner';
+    source.classList.add('cc26-mini-native-hidden');
+    state.miniBanners={origin:'Loja Integrada / Mini Banner',count:items.length};
+    return s;
+  }
+  function findNativeBrandSource(){
+    var sources=[].slice.call(d.querySelectorAll('#corpo .marcas.hidden-phone, #corpo .marcas, .marcas.hidden-phone'));
+    return sources.find(function(node){
+      return !node.closest('.cc26-section') && nativeMediaItems(node,25).length>=2;
+    })||null;
+  }
   function brands(){
     if(!cfg.home.marcas)return null;
+    var source=findNativeBrandSource();
+    if(!source){warn('Marcas nativas da LI nao encontradas: sem logotipos artificiais');return null;}
+    var items=nativeMediaItems(source,25);
+    if(items.length<2)return null;
     var s=section('cc26-brands');
     var content=wrap();
     content.appendChild(title('Compre por marca'));
-    var list=el('div','cc26-brands__grid');
-    ['DATALINK','BELDEN','BETACAVI','RFS','SIEMENS','UGREEN'].forEach(function(label){
-      var url=navAnchor(label);
-      var node=url?a(url,'cc26-brands__brand',label):el('span','cc26-brands__brand',label);
-      list.appendChild(node);
+    var carousel=el('div','cc26-brands__carousel');
+    var prev=el('button','cc26-brands__arrow cc26-brands__arrow--prev');
+    prev.type='button';prev.setAttribute('aria-label','Marcas anteriores');
+    prev.appendChild(inlineIcon('arrow'));
+    var list=el('div','cc26-brands__track');
+    list.setAttribute('role','group');list.setAttribute('aria-label','Marcas cadastradas');
+    items.forEach(function(item){
+      var link=item.link?a(item.link,'cc26-brands__brand'):el('div','cc26-brands__brand');
+      var image=el('img');image.src=item.image;image.alt=item.alt||'Marca';image.loading='lazy';image.decoding='async';
+      link.appendChild(image);list.appendChild(link);
     });
-    content.appendChild(list);s.appendChild(content);return s;
+    var next=el('button','cc26-brands__arrow cc26-brands__arrow--next');
+    next.type='button';next.setAttribute('aria-label','Proximas marcas');
+    next.appendChild(inlineIcon('arrow'));
+    function move(direction){list.scrollBy({left:direction*Math.max(list.clientWidth*.72,210),behavior:'smooth'});}
+    prev.addEventListener('click',function(){move(-1);});
+    next.addEventListener('click',function(){move(1);});
+    carousel.appendChild(prev);carousel.appendChild(list);carousel.appendChild(next);
+    content.appendChild(carousel);s.appendChild(content);
+    source.classList.add('cc26-brands-native-hidden');
+    state.brands={origin:'Loja Integrada / marcas',count:items.length};
+    return s;
   }
   function institutional(){
     if(!cfg.home.institucional)return null;
@@ -446,18 +532,19 @@
     }
     var shelves=enhanceShelves(corpo);
     var cabos=categoryGrid('cabos'),conect=categoryGrid('conectores');
-    var shortcut=shortcuts(),brand=brands(),inst=institutional(),ig=instagram();
-    // Sem deslocar/duplicar cards nativos ou handlers da Loja Integrada.
+    var shortcut=shortcuts(),mini=miniBanners(),brand=brands(),inst=institutional(),ig=instagram();
+    // Ordem do layout aprovado: vitrines, cabos, atalhos, conectores, mais vendidos, mini banners, marcas.
+    // Preserva os produtos e suas acoes nativas da Loja Integrada.
     var first=shelves[0],second=shelves[1];
     if(first&&first.parentNode){
       var target=first;
-      [cabos,shortcut].forEach(function(node){if(node){insertAfter(target,node);target=node;}});
-    }else [cabos,shortcut].forEach(function(node){if(node)corpo.appendChild(node);});
-    if(second&&second.parentNode){
-      var next=second;
-      if(conect){insertAfter(next,conect);next=conect;}
-      if(brand){insertAfter(next,brand);}
-    }else [conect,brand].forEach(function(node){if(node)corpo.appendChild(node);});
+      [cabos,shortcut,conect].forEach(function(node){if(node){insertAfter(target,node);target=node;}});
+    }else [cabos,shortcut,conect].forEach(function(node){if(node)corpo.appendChild(node);});
+    var miniAnchor=second || (corpo.querySelector('#listagemProdutos .produtos-carrossel:last-of-type')) || first;
+    if(miniAnchor && miniAnchor.parentNode){
+      var next=miniAnchor;
+      [mini,brand].forEach(function(node){if(node){insertAfter(next,node);next=node;}});
+    }else [mini,brand].forEach(function(node){if(node)corpo.appendChild(node);});
     [inst,ig].forEach(function(node){if(node)corpo.appendChild(node);});
     corpo.classList.add('cc26-native-home');
   }
