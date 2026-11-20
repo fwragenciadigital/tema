@@ -1160,3 +1160,237 @@ body.cc26-active .cc26-footer__credit{
   body.cc26-active .cc26-footer__column:last-child{border:0!important}
   body.cc26-active .cc26-brands__brand{flex-basis:70%}
 }
+
+
+/* =====================================================================
+   CABCOM 2026 v1.4 — Prévia limpa, categorias LI e microinterações
+   Escopo: SOMENTE quando cc26-active; módulos legados SOMENTE em preview.
+   ===================================================================== */
+
+/* Fontes originais permanecem no DOM para o painel LI; ocultação apenas visual
+   após classificação segura pelo JS — nunca interfere na loja publicada. */
+body.cc26-active.cc26-preview .cc26-preview-legacy-hidden{
+  display:none!important;visibility:hidden!important;
+}
+
+/* Ícones vetoriais consistentes — sem emojis ou fontes externas. */
+body.cc26-active .cc26-icon{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:24px;height:24px;flex:0 0 auto;color:inherit;
+  vertical-align:middle;
+}
+body.cc26-active .cc26-icon svg{
+  display:block;width:100%;height:100%;
+  fill:none;stroke:currentColor;stroke-width:1.85;
+  stroke-linecap:round;stroke-linejoin:round;
+}
+body.cc26-active .cc26-benefit__icon{
+  display:grid!important;place-items:center;
+  box-shadow:0 9px 28px rgba(0,28,48,.16);
+  transition:background-color .22s ease,box-shadow .22s ease,translate .25s ease;
+}
+body.cc26-active .cc26-benefit__icon .cc26-icon{
+  width:32px!important;height:32px!important;
+}
+body.cc26-active .cc26-benefit:hover .cc26-benefit__icon{
+  translate:0 -2px;box-shadow:0 13px 31px rgba(0,28,48,.24);
+}
+body.cc26-active .cc26-site-header__action,
+body.cc26-active .cc26-site-header__search button,
+body.cc26-active .cc26-site-header__toggle,
+body.cc26-active .cc26-brands__arrow{
+  transition:color .22s ease,scale .22s ease,background-color .22s ease;
+}
+body.cc26-active .cc26-site-header__action:hover,
+body.cc26-active .cc26-site-header__search button:hover{
+  color:#e8fff6!important;scale:1.065;
+}
+body.cc26-active .cc26-site-header__search:focus-within{
+  border-color:#fff!important;
+  background:rgba(255,255,255,.15)!important;
+  box-shadow:0 0 0 3px rgba(255,255,255,.15)!important;
+}
+body.cc26-active .cc26-site-header__navitem>.cc26-site-header__navlink{
+  transition:color .2s ease;
+}
+body.cc26-active .cc26-site-header__submenu{
+  box-shadow:0 18px 34px rgba(0,24,50,.18)!important;
+}
+
+/* Atalhos: cada imagem vem diretamente de banner-central-marcas da LI.
+   O layout usa thumbnail circular com legenda no mesmo estilo do aprovado. */
+body.cc26-active .cc26-shortcuts{
+  padding:clamp(37px,4.6vw,68px) 0!important;
+  background:#fff!important;
+}
+body.cc26-active .cc26-shortcuts__grid{
+  display:grid!important;
+  grid-template-columns:repeat(5,minmax(0,1fr));
+  align-items:start;
+  justify-content:center;
+  gap:clamp(12px,2vw,35px)!important;
+  max-width:1550px!important;
+}
+body.cc26-active .cc26-shortcut{
+  display:flex!important;align-items:center;justify-content:flex-start;
+  flex-direction:column;
+  min-width:0;gap:15px!important;
+  padding:8px 5px 15px!important;
+  color:#00bd94!important;text-align:center;
+  text-decoration:none!important;
+  border-radius:18px;
+  background:transparent;
+  transition:translate .3s ease,background-color .25s ease;
+}
+body.cc26-active .cc26-shortcut__media{
+  box-sizing:border-box;
+  width:clamp(112px,11.7vw,184px);
+  height:clamp(112px,11.7vw,184px);
+  max-width:100%;
+  display:grid;place-items:center;
+  border-radius:50%;
+  background:linear-gradient(145deg,#fff,#f0f4f8);
+  overflow:hidden;
+  transition:box-shadow .25s ease,scale .32s ease;
+  box-shadow:0 0 0 1px rgba(5,82,134,.045);
+}
+body.cc26-active .cc26-shortcut__media img{
+  display:block!important;
+  width:100%!important;height:100%!important;
+  object-fit:contain!important;
+  mix-blend-mode:normal;
+}
+body.cc26-active .cc26-shortcut__label{
+  font:700 clamp(14px,1vw,20px)/1.3 var(--cc26-font-title)!important;
+  color:#00c39a!important;
+  text-align:center;white-space:normal;
+}
+body.cc26-active .cc26-shortcut:hover,
+body.cc26-active .cc26-shortcut:focus-visible{translate:0 -4px;background:#f8fdfc}
+body.cc26-active .cc26-shortcut:hover .cc26-shortcut__media{
+  scale:1.035;box-shadow:0 10px 28px rgba(0,48,91,.12);
+}
+body.cc26-active .cc26-shortcut:focus-visible,
+body.cc26-active .cc26-category-card:focus-visible,
+body.cc26-active .cc26-mini-banner:focus-visible,
+body.cc26-active .cc26-brands__brand:focus-visible{
+  outline:3px solid #006cf5!important;
+  outline-offset:4px;
+}
+body.cc26-active .cc26-shortcut img.cc26-image-loading,
+body.cc26-active .cc26-section img.cc26-image-loading{
+  opacity:.78;filter:blur(1.5px);
+}
+body.cc26-active .cc26-shortcut img.cc26-image-loaded,
+body.cc26-active .cc26-section img.cc26-image-loaded{
+  opacity:1;filter:blur(0);
+}
+body.cc26-active .cc26-shortcut img,
+body.cc26-active .cc26-section img{
+  transition:opacity .35s ease,filter .35s ease;
+}
+
+/* Fade-up progressivo. JS só habilita com IntersectionObserver.
+   A propriedade translate preserva o transform de seções full-width. */
+body.cc26-active.cc26-motion-ready .cc26-reveal{
+  opacity:0;
+  translate:0 21px;
+  transition:
+    opacity .66s cubic-bezier(.2,.75,.2,1),
+    translate .66s cubic-bezier(.2,.75,.2,1);
+  transition-delay:var(--cc26-reveal-delay,0ms);
+}
+body.cc26-active.cc26-motion-ready .cc26-reveal.cc26-inview{
+  opacity:1;
+  translate:0 0;
+}
+body.cc26-active .cc26-section .cc26-category-card,
+body.cc26-active .cc26-section .cc26-mini-banner,
+body.cc26-active .cc26-section .cc26-brands__brand{
+  backface-visibility:hidden;
+}
+body.cc26-active .cc26-section .cc26-mini-banner:hover img{
+  scale:1.02;transition:scale .4s cubic-bezier(.2,.7,.2,1);
+}
+body.cc26-active .cc26-brands__track{
+  -webkit-overflow-scrolling:touch;
+  scroll-padding-inline:8px;
+}
+body.cc26-active .cc26-brands__track .cc26-brands__brand:hover img{
+  scale:1.04;
+  transition:scale .25s ease;
+}
+body.cc26-active .cc26-footer__navlink:hover,
+body.cc26-active .cc26-footer__contact-line[href]:hover{
+  color:#006bdf!important;transition:color .2s ease;
+}
+body.cc26-active .cc26-footer__contact-line .cc26-icon{
+  width:17px;height:17px;color:#04c99d;
+}
+body.cc26-active .cc26-footer__contact-line{
+  display:flex!important;align-items:center;gap:8px;
+}
+body.cc26-active .cc26-footer__contact-line span:last-child{
+  min-width:0;overflow-wrap:anywhere;
+}
+body.cc26-active .cc26-footer__social-link{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:33px;height:33px;
+  border:1px solid #00bf98;border-radius:50%;
+  color:#00c19b!important;
+  transition:background-color .2s ease,color .2s ease;
+}
+body.cc26-active .cc26-footer__social-link:hover{
+  background:#00c19b;color:#fff!important;
+}
+body.cc26-active .cc26-footer__social-link .cc26-icon{width:19px;height:19px;}
+
+@media(max-width:900px){
+  body.cc26-active .cc26-shortcuts__grid{
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    gap:17px!important;
+  }
+  body.cc26-active .cc26-shortcut__media{
+    width:clamp(105px,18vw,160px);height:clamp(105px,18vw,160px);
+  }
+}
+@media(max-width:580px){
+  body.cc26-active .cc26-shortcuts{padding:28px 0 30px!important;}
+  body.cc26-active .cc26-shortcuts__grid{
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    gap:12px 5px!important;
+  }
+  body.cc26-active .cc26-shortcut{
+    gap:8px!important;
+    padding:4px 2px 9px!important;
+  }
+  body.cc26-active .cc26-shortcut__media{
+    width:clamp(75px,25vw,117px);height:clamp(75px,25vw,117px);
+  }
+  body.cc26-active .cc26-shortcut__label{
+    font-size:clamp(10px,2.8vw,13px)!important;
+  }
+  body.cc26-active .cc26-benefit__icon .cc26-icon{
+    width:25px!important;height:25px!important;
+  }
+}
+@media(max-width:350px){
+  body.cc26-active .cc26-shortcuts__grid{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+}
+@media(prefers-reduced-motion:reduce){
+  body.cc26-active.cc26-motion-ready .cc26-reveal,
+  body.cc26-active.cc26-motion-ready .cc26-reveal.cc26-inview{
+    opacity:1!important;translate:none!important;
+    transition:none!important;
+  }
+  body.cc26-active .cc26-shortcut,
+  body.cc26-active .cc26-shortcut__media,
+  body.cc26-active .cc26-benefit__icon,
+  body.cc26-active .cc26-section img,
+  body.cc26-active .cc26-brands__brand img{
+    scale:1!important;translate:none!important;
+    transition:none!important;
+  }
+}
