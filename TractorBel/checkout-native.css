@@ -629,8 +629,11 @@ body.pagina-carrinho.carrinho-checkout #barraTopo{
     gap:0;
   }
   body.pagina-carrinho.carrinho-checkout #corpo
-  .secao-principal>.campos-pedido>.campos-pedido
-  :is(> #formularioCheckout,> #login-content,> .checkout-alerta-seguro){
+  .secao-principal>.campos-pedido>.campos-pedido>#formularioCheckout,
+  body.pagina-carrinho.carrinho-checkout #corpo
+  .secao-principal>.campos-pedido>.campos-pedido>#login-content,
+  body.pagina-carrinho.carrinho-checkout #corpo
+  .secao-principal>.campos-pedido>.campos-pedido>.checkout-alerta-seguro{
     width:100%!important;
     max-width:100%;
   }
