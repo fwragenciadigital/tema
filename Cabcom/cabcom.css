@@ -3289,3 +3289,145 @@ body.cc26-active .cc26-mini-banners .cc26-mini-banner:hover img{
     gap:9px!important;
   }
 }
+
+
+/* Cabcom v2.0.0 — O PADRÃO APROVADO É O CARD COM 2 CTAs:
+   WhatsApp verde + Cotar por e-mail azul. O modelo 'Ver mais' está descartado. */
+body.cc26-active #corpo .cc26-card-two-cta{
+  display:flex!important;
+  flex-direction:column!important;
+  justify-content:space-between!important;
+  align-items:stretch!important;
+  background:#fff!important;
+  border:0!important;
+  border-radius:0!important;
+  box-shadow:0 5px 13px rgba(0,0,0,.13)!important;
+  padding:15px 15px 28px!important;
+  min-height:515px!important;
+  overflow:hidden!important;
+  box-sizing:border-box!important;
+}
+body.cc26-active #corpo .cc26-card-two-cta .imagem-produto{
+  box-sizing:border-box!important;
+  display:flex!important;align-items:center!important;justify-content:center!important;
+  width:100%!important;min-width:0!important;
+  height:295px!important;max-height:295px!important;
+  margin:0 auto 8px!important;padding:10px 0!important;
+  background:#fff!important;
+}
+body.cc26-active #corpo .cc26-card-two-cta .imagem-produto a{
+  display:flex!important;align-items:center!important;justify-content:center!important;
+  height:100%!important;width:100%!important;max-height:100%!important;
+}
+body.cc26-active #corpo .cc26-card-two-cta .imagem-produto img{
+  display:block!important;
+  position:static!important;
+  max-height:275px!important;max-width:100%!important;
+  width:auto!important;height:auto!important;
+  object-fit:contain!important;
+  margin:0 auto!important;
+}
+body.cc26-active #corpo .cc26-card-two-cta .info-produto{
+  flex:1 1 auto;
+  display:flex!important;flex-direction:column!important;
+  justify-content:flex-end!important;
+  align-items:stretch!important;
+  width:100%!important;min-height:0!important;
+  margin:0!important;padding:0!important;
+  background:transparent!important;
+}
+body.cc26-active #corpo .cc26-card-two-cta .nome-produto{
+  display:-webkit-box!important;
+  -webkit-box-orient:vertical!important;-webkit-line-clamp:3;
+  overflow:hidden!important;
+  min-height:56px!important;max-height:66px!important;
+  margin:0 0 19px!important;padding:0!important;
+  color:#151b24!important;
+  text-align:center!important;
+  text-transform:uppercase!important;
+  font:500 clamp(11px,.74vw,13px)/1.45 var(--cc26-font-text)!important;
+}
+body.cc26-active #corpo .cc26-card-two-cta .acoes-produto{
+  display:flex!important;
+  flex-direction:column!important;align-items:stretch!important;
+  margin-top:auto!important;padding:0!important;
+  gap:0!important;
+  position:relative!important;
+  width:100%!important;
+  background:transparent!important;
+  opacity:1!important;visibility:visible!important;
+  transform:none!important;
+}
+body.cc26-active #corpo .cc26-card-two-cta .cc26-card-legacy-action,
+body.cc26-active #corpo .cc26-card-two-cta .cc26-card-discount-legacy{
+  display:none!important;
+}
+body.cc26-active #corpo .cc26-card-two-cta .cc26-card-quote-actions{
+  display:flex!important;
+  flex-direction:column!important;align-items:center!important;
+  justify-content:center!important;
+  gap:5px!important;width:100%!important;
+  margin:0 auto!important;padding:0!important;
+  background:transparent!important;
+}
+body.cc26-active #corpo .cc26-card-two-cta .cc26-card-quote-actions :is(a,button){
+  box-sizing:border-box!important;
+  display:inline-flex!important;
+  align-items:center!important;justify-content:center!important;
+  flex:0 0 auto!important;
+  width:min(100%,205px)!important;
+  min-width:0!important;min-height:38px!important;
+  height:38px!important;
+  margin:0!important;padding:6px 12px!important;
+  border:0!important;border-radius:999px!important;
+  box-shadow:none!important;text-shadow:none!important;
+  text-decoration:none!important;
+  font:700 clamp(11px,.72vw,13px)/1.15 var(--cc26-font-text)!important;
+  color:#fff!important;white-space:nowrap!important;
+  transition:filter .2s ease,translate .2s ease!important;
+}
+body.cc26-active #corpo .cc26-card-two-cta .cc26-card-quote-actions .cc26-card-quote-actions__whatsapp{
+  background:#00c99b!important;
+  color:#fff!important;
+}
+body.cc26-active #corpo .cc26-card-two-cta .cc26-card-quote-actions .cc26-card-quote-actions__email{
+  background:#0868ff!important;
+  color:#fff!important;
+}
+body.cc26-active #corpo .cc26-card-two-cta .cc26-card-quote-actions :is(a,button):hover{
+  filter:brightness(1.07);translate:0 -1px;
+}
+body.cc26-active #corpo .cc26-card-two-cta :is(.barra-progresso,.progresso,.progress-bar,.fundo-principal.borda-principal){
+  border:0!important;
+}
+@media(max-width:1200px){
+  body.cc26-active #corpo .cc26-card-two-cta{
+    min-height:475px!important;padding:12px 10px 22px!important;
+  }
+  body.cc26-active #corpo .cc26-card-two-cta .imagem-produto{
+    height:260px!important;max-height:260px!important;
+  }
+  body.cc26-active #corpo .cc26-card-two-cta .imagem-produto img{max-height:240px!important}
+}
+@media(max-width:700px){
+  body.cc26-active #corpo .cc26-card-two-cta{
+    min-height:395px!important;padding:10px 8px 14px!important;
+  }
+  body.cc26-active #corpo .cc26-card-two-cta .imagem-produto{
+    height:188px!important;max-height:188px!important;
+  }
+  body.cc26-active #corpo .cc26-card-two-cta .imagem-produto img{max-height:173px!important}
+  body.cc26-active #corpo .cc26-card-two-cta .nome-produto{
+    min-height:51px!important;margin-bottom:12px!important;
+    font-size:10px!important;
+  }
+  body.cc26-active #corpo .cc26-card-two-cta .cc26-card-quote-actions :is(a,button){
+    width:100%!important;min-height:35px!important;height:35px!important;
+    padding:6px 4px!important;font-size:10px!important;
+  }
+}
+@media(prefers-reduced-motion:reduce){
+  body.cc26-active #corpo .cc26-card-two-cta .cc26-card-quote-actions :is(a,button){
+    transition:none!important;translate:none!important;
+  }
+}
