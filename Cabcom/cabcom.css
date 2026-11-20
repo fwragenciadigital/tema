@@ -2121,3 +2121,25 @@ body.cc26-active #corpo.cc26-native-home .cc26-enhanced-shelf .listagem-item:hov
     height:35px!important;min-height:35px!important;
   }
 }
+
+
+/* v1.7.1 — Se #listagemProdutos hospeda uma vitrine interna, evitar
+   recuo duplicado e preservar os calculos de largura do carrossel LI. */
+body.cc26-active #corpo.cc26-native-home #listagemProdutos .cc26-enhanced-shelf,
+body.cc26-active #corpo.cc26-native-home #listagemProdutos .listagem.cc26-enhanced-shelf{
+  width:100%!important;max-width:100%!important;
+  padding:0!important;
+  margin:0!important;
+}
+body.cc26-active #corpo.cc26-native-home #listagemProdutos .produtos-carrossel .slick-list,
+body.cc26-active #corpo.cc26-native-home #listagemProdutos .produtos-carrossel .owl-stage-outer{
+  max-width:100%;overflow:hidden;
+}
+body.cc26-active #corpo.cc26-native-home #listagemProdutos .produtos-carrossel .slick-slide{
+  height:auto;
+}
+@media(max-width:767px){
+  body.cc26-active #corpo.cc26-native-home #listagemProdutos .produtos-carrossel{
+    min-height:0;
+  }
+}
