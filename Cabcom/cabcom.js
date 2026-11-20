@@ -6,7 +6,7 @@
 (function (w,d) {
   'use strict';
   if(w.Cabcom2026) return;
-  var VERSION='1.0.0';
+  var VERSION='1.2.0';
   var CDN='https://cdn.awsli.com.br/80/80577/arquivos/';
   var DEFAULTS={
     geral:{ativo:true,publicarNaLoja:false,debug:false},
@@ -298,8 +298,7 @@
     heading.appendChild(el('strong','','Cabos'));
     heading.appendChild(el('span','','que ligam o mundo'));
     copy.appendChild(heading);
-    copy.appendChild(el('p','','Soluções de transmissão de energia e sinais para sistemas de rede, telecomunicações, automação industrial, áudio, vídeo e broadcast.'));
-    copy.appendChild(el('p','','Cabos e conectores para aplicações profissionais, de acordo com os requisitos técnicos de cada projeto.'));
+    copy.appendChild(el('p','','Os cabos são elementos fundamentais para a transmissão de energia elétrica e sinais de comunicação. Eles são compostos por fios condutores revestidos por um material isolante e protegidos por uma camada externa. Os cabos são usados em uma variedade de aplicações, como eletrônica, automação industrial, telecomunicações, construção e muito mais. Eles são projetados para suportar ambientes adversos e garantir uma boa condutividade elétrica e comunicação confiável. Existem vários tipos de cabos, como cabos de alimentação, cabos de dados, cabos de áudio e vídeo, cabos de automação e outros. Cada tipo é projetado para atender a necessidades específicas e requisitos técnicos.'));
     shell.appendChild(media);shell.appendChild(copy);s.appendChild(shell);return s;
   }
   function categoryGrid(type){
@@ -404,6 +403,20 @@
     media.appendChild(img('insta.png','Publicações da Cabcom no Instagram'));
     c.appendChild(media);s.appendChild(c);return s;
   }
+  function decorateNativeShelves(){
+    var listing=d.querySelector('#listagemProdutos');
+    if(!listing)return;
+    listing.classList.add('cc26-native-listing');
+    [].slice.call(listing.querySelectorAll('.titulo-categoria')).forEach(function(title){
+      title.classList.add('cc26-native-shelf-title');
+    });
+    [].slice.call(listing.querySelectorAll('.produtos-carrossel')).forEach(function(shelf){
+      shelf.classList.add('cc26-native-carousel');
+      [].slice.call(shelf.querySelectorAll('.listagem-item')).forEach(function(card){
+        card.classList.add('cc26-native-carousel-card');
+      });
+    });
+  }
   function enhanceShelves(corpo){
     var shelves=[].slice.call(corpo.querySelectorAll('.listagem, .vitrine-produtos'));
     return shelves.filter(function(sh){
@@ -448,6 +461,82 @@
     [inst,ig].forEach(function(node){if(node)corpo.appendChild(node);});
     corpo.classList.add('cc26-native-home');
   }
+  // v1.2 | Cart/quote page progressive enhancement, modeled after TractorBel.
+  // Never replace original checkout, quotation, or native cart form/handlers.
+  function enhanceCartPage(){
+    if(!/^\/carrinho(?:\/index)?\/?$/i.test(location.pathname) &&
+       !d.body.classList.contains('pagina-carrinho')) return;
+    d.body.classList.add('cc26-page-cart');
+    var scope=d.querySelector('#corpo .secao-principal')||d.querySelector('#corpo');
+    if(!scope)return;
+    var cart=scope.querySelector('.finalizar-compra');
+    var empty=scope.querySelector('.caixa-destaque');
+    if(empty && !cart){
+      d.body.classList.add('cc26-cart-empty');
+      empty.classList.add('cc26-cart-empty__panel');
+      return;
+    }
+    if(!cart)return;
+    var table=cart.querySelector('table.tabela-carrinho');
+    if(!table)return;
+    d.body.classList.add('cc26-cart-ready');
+    scope.classList.add('cc26-cart-page');
+    cart.classList.add('cc26-cart-shell');
+    table.classList.add('cc26-cart-table');
+    var nativeMain=cart.querySelector('.caixa-sombreada');
+    if(nativeMain)nativeMain.classList.add('cc26-cart-main');
+    var action=cart.querySelector('.acao-editar');
+    if(action)action.classList.add('cc26-cart-actions');
+    var nativeCheckout=[].slice.call(cart.querySelectorAll('form[action]')).find(function(f){
+      return /\/checkout\/redirect\/?(?:\?|$)/i.test(f.getAttribute('action')||'');
+    });
+    if(nativeCheckout){
+      nativeCheckout.classList.add('cc26-cart-checkout-form');
+      var holder=nativeMain || table;
+      if(holder.parentNode===cart && nativeCheckout.parentNode===cart){
+        cart.classList.add('cc26-cart-two-column');
+      }
+    }
+    var rows=[].slice.call(table.querySelectorAll('tr[data-produto-id]'));
+    rows.forEach(function(row){
+      row.classList.add('cc26-cart-item');
+      var link=row.querySelector('.produto-info > a[href]');
+      var name=link?link.textContent.replace(/\s+/g,' ').trim():'produto';
+      var controls=[
+        ['.quantidade a.icon-minus','Diminuir quantidade de '],
+        ['.quantidade a.icon-plus','Aumentar quantidade de '],
+        ['.excluir a','Remover ']
+      ];
+      controls.forEach(function(entry){
+        var ctrl=row.querySelector(entry[0]);
+        if(ctrl && !ctrl.hasAttribute('aria-label'))ctrl.setAttribute('aria-label',entry[1]+name);
+      });
+    });
+    if(!nativeCheckout)return; // Nao criar um resumo/CTA falso sem formulario oficial.
+    var summary=nativeCheckout.querySelector('.cc26-cart-summary');
+    if(!summary){
+      summary=el('section','cc26-cart-summary');
+      summary.setAttribute('aria-label','Resumo do pedido');
+      summary.appendChild(el('span','cc26-cart-summary__eyebrow','CABCOM'));
+      summary.appendChild(el('h2','cc26-cart-summary__title','Resumo do pedido'));
+      var total=el('div','cc26-cart-summary__total');
+      total.appendChild(el('span','','Total informado pela loja'));
+      total.appendChild(el('strong','cc26-cart-summary__value',''));
+      summary.appendChild(total);
+      summary.appendChild(el('p','cc26-cart-summary__note','Valores e condições finais são confirmados pela Loja Integrada.'));
+      nativeCheckout.insertBefore(summary,nativeCheckout.firstChild);
+    }
+    var value=summary.querySelector('.cc26-cart-summary__value');
+    // Reproduz somente texto monetario que a propria LI exibe, sem calculos.
+    var totalNode=cart.querySelector('.valor-total strong, .valor-total .preco, .valor-total');
+    if(value){
+      var original=totalNode?(totalNode.textContent||'').replace(/\s+/g,' ').trim():'';
+      var matched=original.match(/R\$\s*[\d.]+,\d{2}/);
+      var displayed=matched?matched[0]:'';
+      if(value.textContent!==displayed)value.textContent=displayed;
+      summary.classList.toggle('cc26-cart-summary--no-total',!displayed);
+    }
+  }
   function enhanceNative(){
     if(cfg.catalogo.ativo){
       [].slice.call(d.querySelectorAll('.listagem .listagem-item, .vitrine-produtos .produto')).forEach(function(item){
@@ -460,13 +549,15 @@
       var f=d.querySelector('#rodape');
       if(f)f.classList.add('cc26-native-footer');
     }
-    if(d.querySelector('.pagina-carrinho'))d.body.classList.add('cc26-page-cart');
+    // Mensagens/cotacoes continuam nativas; sem interceptacao de eventos.
+    enhanceCartPage();
   }
   var scheduled=false;
   function refresh(){
     scheduled=false;
     if(!d.body)return;
     if(home)enhanceShelves(d.querySelector('#corpo')||d.body);
+    decorateNativeShelves();
     enhanceNative();
   }
   function schedule(){
@@ -483,6 +574,7 @@
     if(preview)d.body.classList.add('cc26-preview');
     enableHeader();
     homeContent();
+    decorateNativeShelves();
     enhanceNative();
     var observer=new MutationObserver(schedule);
     observer.observe(d.body,{subtree:true,childList:true});
