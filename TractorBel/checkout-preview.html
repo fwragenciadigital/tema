@@ -10,6 +10,19 @@
 @media(max-width:740px){.head>div{height:69px}.shell{width:min(650px,calc(100% - 30px))}.cols{display:flex;flex-direction:column;gap:35px}.cols>*{width:100%}.back{margin-bottom:28px}.steps{margin:25px 0 33px}.summary{padding:21px}main{padding:23px 0 47px}}
 @media(max-width:430px){.brand{font-size:17px;gap:8px}.brand i{width:34px;height:34px}.secure{font-size:0}.secure:before{content:'🔒';font-size:17px}.step{font-size:9px;gap:6px}.step span{width:25px;height:25px;flex-basis:25px}.steps{gap:4px}h1{font-size:33px}.fields{gap:12px 10px}.item .thumb{width:76px;height:81px;flex-basis:76px}.trust{font-size:9px}}
 html h1,html h2,html h3,html h4,html h5,html h6,html .brand{font-family:'Michroma',Arial,sans-serif!important;letter-spacing:0;line-height:1.45}html .brand{font-size:clamp(12px,1.4vw,18px)}html h1{font-size:clamp(24px,3.2vw,40px)}html .summary h2{font-size:18px}html .group h2{font-size:15px}@media(max-width:430px){html h1{font-size:23px}html .brand{font-size:11px}}
+
+/* Referencia 2 colunas: dados à esquerda, resumo e CTA à direita */
+body{background:#f8f9fb!important}
+.cols{grid-template-columns:minmax(0,1fr) minmax(320px,.86fr);gap:clamp(20px,3.1vw,43px)}
+.group{background:#fff;border:1px solid #e7e7e9;padding:clamp(17px,2.2vw,28px);border-radius:15px;margin:0 0 20px;box-shadow:0 7px 25px #00000004}
+.summary{border-radius:16px}
+.payment-choice{padding:14px 15px;border:1px solid #e7e7e7;border-radius:9px;margin:10px 0;color:#333;font-size:12px}
+.payment-choice.active{border-color:#ffc400;background:#fffbee}
+.payment-choice small{display:block;margin:4px 0 0 21px;color:#888;font-size:10px}
+.preview-checkout-cta{background:#ffc400;border-radius:10px;margin-top:17px;padding:17px;text-align:center;font-weight:900;color:#191919;font-size:12px;cursor:not-allowed}
+.preview-checkout-back{display:block;margin-top:12px;padding:13px;border:1px solid #e7e7e7;background:#fff;border-radius:9px;color:#333;text-align:center;font-weight:700;text-decoration:none;font-size:11px}
+.preview-coupon{padding:13px 0;margin-top:18px;border-top:1px solid #eee;color:#999;font-size:11px}
+@media(max-width:767px){.cols{grid-template-columns:minmax(0,1fr)}.group{padding:18px}.summary{padding:17px}}
 </style></head><body>
 <div class="notice"><strong>CONCEITO VISUAL</strong> &nbsp;Demonstração estática. O checkout oficial não foi substituído.</div>
 <header class="head"><div class="shell"><a class="brand" href="https://www.lojatractorbel.com.br/" aria-label="Loja TractorBel"><i>T</i><span>TRACTOR<b>BEL</b></span></a><span class="secure">♙ COMPRA SEGURA</span></div></header>
@@ -20,12 +33,12 @@ html h1,html h2,html h3,html h4,html h5,html h6,html .brand{font-family:'Michrom
 <label class="wide">E-mail<input disabled placeholder="seuemail@exemplo.com"></label><label>Nome completo<input disabled placeholder="Seu nome"></label><label>CPF ou CNPJ<input disabled placeholder="Documento"></label><label>Celular<input disabled placeholder="(00) 00000-0000"></label></div></div>
 <div class="group"><h2><i>02</i> Onde entregar?</h2><p>Endereço, prazo e frete permanecem calculados pela Loja Integrada.</p><div class="fields">
 <label>CEP<input disabled placeholder="00000-000"></label><label>Estado<input disabled placeholder="UF"></label><label class="wide">Endereço<input disabled placeholder="Rua ou avenida"></label><label>Número<input disabled placeholder="Número"></label><label>Complemento<input disabled placeholder="Opcional"></label><label>Bairro<input disabled placeholder="Bairro"></label><label>Cidade<input disabled placeholder="Cidade"></label></div></div>
-<div class="group"><h2><i>03</i> Pagamento</h2><p>As formas de pagamento e todas as validações devem continuar nativas.</p><div class="native">✓ &nbsp;Esta prévia não coleta dados, não processa pedidos e não simula cobranças.</div></div>
-<div class="cta" aria-disabled="true">CONTINUAR NO CHECKOUT OFICIAL &nbsp; →</div><p class="footnote">O botão acima é apenas uma referência visual, sem ação.</p></section>
+<div class="group"><h2><i>03</i> Formas de pagamento</h2><p>As opções comerciais seguem a configuração da Loja Integrada.</p><div class="payment-choice">○ Cartão de crédito ou débito<small>Conforme operadoras disponíveis</small></div><div class="payment-choice active">● Pix<small>Regras da loja</small></div><div class="payment-choice">○ Boleto bancário<small>Se disponível</small></div><div class="native">✓ &nbsp;Esta prévia não coleta dados ou processa pagamentos.</div></div>
+</section>
 <aside><div class="summary"><span class="eyebrow">SEU PEDIDO</span><h2>Resumo da compra</h2><p class="sub">Confira os valores reais no checkout oficial.</p>
-<div class="item"><div class="thumb" aria-hidden="true">⚙</div><div><strong>Produtos da TractorBel</strong><small>Itens, variações e quantidades da plataforma<br>Preços exibidos pela Loja Integrada</small></div></div>
+<div class="item"><div class="thumb" aria-hidden="true">⚙</div><div><strong>CANTO 5/8 SF PARA 120G / 112H / 135H</strong><small>SKU: 8E5531 · Qtd.: 1</small></div></div><div class="item"><div class="thumb" aria-hidden="true">⚙</div><div><strong>LÂMINA BICO DE PATO ESPECIAL</strong><small>Ultra resistente · Qtd.: 1</small></div></div><div class="item"><div class="thumb" aria-hidden="true">⚙</div><div><strong>RODA MOTRIZ 320 - 8E9805</strong><small>SKU: 8E9805 · Qtd.: 1</small></div></div>
 <div class="line"><span>Subtotal</span><strong>Valor da plataforma</strong></div><div class="line"><span>Frete</span><strong>Calculado pelo CEP</strong></div><div class="line"><span>Descontos</span><strong>Conforme regras da loja</strong></div><div class="total"><span>Total do pedido</span><strong>Calculado no checkout</strong></div>
 <div class="pix"><small>CONDIÇÕES ESPECIAIS</small><strong>PIX OU PARCELAMENTO</strong><p>Somente conforme preços e regras oficiais.</p></div>
-<div class="trust"><div><b>♧</b>Compra segura</div><div><b>♧</b>Entrega em todo Brasil</div><div><b>▤</b>Valores transparentes</div></div></div><p class="alert">* Todos os dados e valores são ilustrativos; esta página não aceita pedidos.</p></aside></div></main>
+<div class="trust"><div><b>♧</b>Compra segura</div><div><b>♧</b>Entrega em todo Brasil</div><div><b>▤</b>Valores transparentes</div></div></div><div class="preview-coupon">Cupom promocional · Aplicação somente pelo carrinho oficial</div><div class="preview-checkout-cta" aria-disabled="true">FINALIZAR PEDIDO →</div><a class="preview-checkout-back" href="https://www.lojatractorbel.com.br/carrinho/index">← CONTINUAR COMPRANDO</a><p class="alert">* Todos os dados e valores são ilustrativos; esta página não aceita pedidos.</p></aside></div></main>
 <footer class="bottom"><div class="shell"><span>TRACTORBEL — CONCEITO DE CHECKOUT</span><span>Prévia para homologação · FWR Agência Digital</span></div></footer>
 </body></html>

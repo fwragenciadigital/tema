@@ -23,3 +23,8 @@ Status: camada CSS conservadora desenvolvida no GitHub e distribuida via Vercel.
 6. Se nao existir editor para checkout, nao realizar redirect ou checkout paralelo. Solicitar a plataforma caminho oficial.
 
 Nao confundir deploy READY na Vercel com publicacao da alteracao no checkout.
+
+
+## Checkout visual referência duas colunas (19/11/2026)
+
+Prévia visual atualizada com identificação, entrega e pagamento à esquerda; três itens ilustrativos da captura, resumo, total, cupom, segurança e CTA à direita. CSS nativo preparado com classes de checkout conhecidas, sem mudança de ordem de elementos transacionais. Checkout real ainda não conectado ao editor oficial de CSS; nenhum produto foi adicionado ou cobrança iniciada nesta sessão. Exige homologação com DOM autenticado e testes 1440, 1366, 1280, 767 (duas passagens), além de 390.
