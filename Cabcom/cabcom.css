@@ -3431,3 +3431,24 @@ body.cc26-active #corpo .cc26-card-two-cta :is(.barra-progresso,.progresso,.prog
     transition:none!important;translate:none!important;
   }
 }
+
+
+/* v2.0 — alinhamento dos ícones nos dois botões comerciais. */
+body.cc26-active #corpo .cc26-card-two-cta .cc26-card-quote-actions :is(a,button){
+  gap:6px!important;
+}
+body.cc26-active #corpo .cc26-card-two-cta .cc26-card-quote-actions .cc26-icon{
+  display:inline-grid!important;
+  place-items:center!important;
+  flex:0 0 17px!important;
+  width:17px!important;height:17px!important;
+}
+body.cc26-active #corpo .cc26-card-two-cta .cc26-card-quote-actions .cc26-icon svg{
+  display:block!important;width:17px!important;height:17px!important;
+}
+@media(max-width:700px){
+  body.cc26-active #corpo .cc26-card-two-cta .cc26-card-quote-actions .cc26-icon,
+  body.cc26-active #corpo .cc26-card-two-cta .cc26-card-quote-actions .cc26-icon svg{
+    width:14px!important;height:14px!important;
+  }
+}
