@@ -1,6 +1,6 @@
 @import url("https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Quicksand:wght@300..700&display=swap");
 /* Cabcom 2026 | FWR Agencia Digital | CSS isolado e responsivo */
-.cc26-active{--cc26-blue:#0868f8;--cc26-blue-dark:#073e99;--cc26-green:#00c99b;--cc26-navy:#001b35;--cc26-mist:#f4f6f9;--cc26-ink:#18243a;--cc26-max:1660px;--cc26-font-title:"Quicksand",Arial,Helvetica,sans-serif;--cc26-font-text:"Montserrat",Arial,Helvetica,sans-serif;color:var(--cc26-ink);overflow-x:clip}
+.cc26-active{--cc26-blue:#0868f8;--cc26-blue-dark:#073e99;--cc26-green:#00c99b;--cc26-navy:#001b35;--cc26-mist:#f4f6f9;--cc26-ink:#18243a;--cc26-max:1760px;--cc26-font-title:"Quicksand",Arial,Helvetica,sans-serif;--cc26-font-text:"Montserrat",Arial,Helvetica,sans-serif;color:var(--cc26-ink);overflow-x:clip}
 .cc26-active .cc26-section,.cc26-active .cc26-section *{box-sizing:border-box}
 .cc26-active .cc26-section{font-family:var(--cc26-font-text,"Montserrat",Arial,Helvetica,sans-serif)}
 .cc26-active .cc26-section img{max-width:100%;height:auto;display:block}
@@ -1392,5 +1392,97 @@ body.cc26-active .cc26-footer__social-link .cc26-icon{width:19px;height:19px;}
   body.cc26-active .cc26-brands__brand img{
     scale:1!important;translate:none!important;
     transition:none!important;
+  }
+}
+
+
+/* CABCOM 2026 — Ajustes aprovados de layout | 20/11/2026
+   Alvos limitados ao tema ativo para não interferir na loja original. */
+body.cc26-active #corpo .listagem .titulo,
+body.cc26-active #corpo .titulo-categoria,
+body.cc26-active #corpo .titulo-pagina,
+body.cc26-active #corpo .pagina-produto h1 {
+  background:transparent!important;
+}
+body.cc26-active #corpo .listagem .titulo-categoria strong {
+  display:flex!important;
+  align-items:center!important;
+  gap:10px!important;
+  font:700 clamp(19px,1.28vw,25px)/1.25 var(--cc26-font-title)!important;
+  color:#0767ff!important;
+  text-transform:uppercase!important;
+  letter-spacing:.01em!important;
+  white-space:normal;
+  flex-direction:row!important;
+}
+body.cc26-active #corpo #listagemProdutos .titulo-categoria {
+  flex-direction:row!important;
+  background:transparent!important;
+  height:80px!important;
+}
+body.cc26-active .cc26-mini-banners .cc26-container {
+  max-width:1740px!important;
+  padding-inline:clamp(14px,2vw,32px)!important;
+}
+body.cc26-active .cc26-benefits__grid {
+  max-width:1760px!important;
+}
+body.cc26-active .cc26-shortcut:hover,
+body.cc26-active .cc26-shortcut:focus-visible {
+  background:transparent!important;
+}
+body.cc26-active .cc26-container .cc26-shortcut__media {
+  box-sizing:border-box;
+  width:194px;
+  height:206px;
+  max-width:100%;
+  display:grid;
+  place-items:center;
+  border-radius:0!important;
+  background:transparent!important;
+  border:0!important;
+  box-shadow:none!important;
+}
+body.cc26-active .cc26-shortcuts__grid {
+  display:grid!important;
+  grid-template-columns:repeat(5,minmax(0,1fr));
+  align-items:center;
+  justify-content:center;
+  gap:0!important;
+  max-width:1820px!important;
+}
+/* Ajustes responsivos: não impor 194x206 aos cards estreitos. */
+@media(max-width:900px){
+  body.cc26-active .cc26-shortcuts__grid{
+    grid-template-columns:repeat(3,minmax(0,1fr));
+  }
+  body.cc26-active .cc26-container .cc26-shortcut__media{
+    width:min(194px,100%);
+    height:auto;
+    aspect-ratio:194/206;
+  }
+}
+@media(max-width:580px){
+  body.cc26-active #corpo .listagem .titulo-categoria strong{
+    font-size:clamp(15px,4vw,19px)!important;
+    gap:7px!important;
+  }
+  body.cc26-active #corpo #listagemProdutos .titulo-categoria{
+    height:60px!important;
+    min-height:60px!important;
+  }
+  body.cc26-active .cc26-shortcuts__grid{
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    gap:0!important;
+  }
+  body.cc26-active .cc26-container .cc26-shortcut__media{
+    width:min(117px,100%);
+    height:auto;
+    aspect-ratio:194/206;
+  }
+}
+@media(max-width:350px){
+  body.cc26-active .cc26-shortcuts__grid{
+    grid-template-columns:repeat(2,minmax(0,1fr));
   }
 }
