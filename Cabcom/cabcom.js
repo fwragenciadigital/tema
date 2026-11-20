@@ -106,7 +106,7 @@
     if (!cfg.topo.ativo || d.getElementById('cc26-new-header')) return;
     var nativeHeader=d.querySelector('#cabecalho');
     if (!nativeHeader) { warn('Cabecalho nativo nao encontrado: fallback mantido'); return; }
-    var nativeNav=nativeHeader.querySelector('.menu.superior .nivel-um, .menu.superior > ul');
+    var nativeNav=nativeHeader.querySelector('.menu.superior .nivel-um, .menu.superior > ul') || d.querySelector('.menu.superior .nivel-um, .menu.superior > ul');
     if (!nativeNav) { warn('Categorias nativas nao encontradas: fallback mantido'); return; }
     var navItems=[].slice.call(nativeNav.children).filter(function(li){
       return li.tagName==='LI' && li.querySelector('a[href]');
@@ -128,7 +128,7 @@
     logoImage.src=logoOriginal && (logoOriginal.currentSrc||logoOriginal.src) ? (logoOriginal.currentSrc||logoOriginal.src) : asset('logo.png');
     logoImage.alt=logoOriginal && logoOriginal.alt ? logoOriginal.alt : 'Cabcom';
     logo.appendChild(logoImage);
-    logo.appendChild(el('span','cc26-site-header__wordmark','Cabcom'));
+    if(!logoOriginal)logo.appendChild(el('span','cc26-site-header__wordmark','Cabcom'));
     main.appendChild(logo);
     var navigation=el('nav','cc26-site-header__nav');
     navigation.id='cc26-navigation';
@@ -182,7 +182,7 @@
     main.appendChild(navigation);
     var actions=el('div','cc26-site-header__actions');
     // Pesquisa proxied pelo formulario nativo: submete o MESMO elemento da LI.
-    var nativeForm=nativeHeader.querySelector('.busca form, form[action*="buscar"], form[action*="busca"]');
+    var nativeForm=nativeHeader.querySelector('.busca form, form[action*="buscar"], form[action*="busca"]') || d.querySelector('.busca form, form[action*="buscar"], form[action*="busca"]');
     var nativeInput=nativeForm&&nativeForm.querySelector('input[name]:not([type="hidden"])');
     if(nativeForm && nativeInput){
       var search=el('form','cc26-site-header__search');
@@ -229,6 +229,8 @@
     nativeHeader.parentNode.insertBefore(header,nativeHeader);
     nativeHeader.classList.add('cc26-native-header');
     d.body.classList.add('cc26-with-custom-header');
+    var originalMenu=d.querySelector('.menu.superior');
+    if(originalMenu)originalMenu.classList.add('cc26-original-menu');
     state.header='custom';
   }
   function hero(corpo){
