@@ -3247,3 +3247,45 @@ body.cc26-active.cc26-pdp-ready #corpo .cc26-pdp--editorial .cc26-pdp__synopsis-
     font-size:16px!important;
   }
 }
+
+
+/* Cabcom v1.9.3 — Mini Banners: quatro peças reais e imagens nítidas. */
+body.cc26-active .cc26-mini-banners .cc26-mini-banners__grid{
+  display:grid!important;
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  gap:7px!important;
+  align-items:stretch;
+}
+body.cc26-active .cc26-mini-banners .cc26-mini-banner{
+  box-sizing:border-box!important;
+  display:block!important;
+  width:100%!important;
+  min-width:0!important;
+  aspect-ratio:2.12/1!important;
+  overflow:hidden!important;
+  background:#f0f2f4;
+}
+body.cc26-active .cc26-mini-banners .cc26-mini-banner img{
+  display:block!important;
+  width:100%!important;
+  height:100%!important;
+  max-width:none!important;
+  max-height:none!important;
+  object-fit:cover!important;
+  object-position:center center!important;
+  image-rendering:auto!important;
+  filter:none!important;
+  transform:none!important;
+  backface-visibility:visible!important;
+  opacity:1!important;
+}
+body.cc26-active .cc26-mini-banners .cc26-mini-banner:hover img{
+  transform:none!important;
+  scale:1!important;
+}
+@media(max-width:600px){
+  body.cc26-active .cc26-mini-banners .cc26-mini-banners__grid{
+    grid-template-columns:1fr!important;
+    gap:9px!important;
+  }
+}
