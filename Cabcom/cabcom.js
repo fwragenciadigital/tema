@@ -6,12 +6,12 @@
 (function (w,d) {
   'use strict';
   if(w.Cabcom2026) return;
-  var VERSION='1.4.0';
+  var VERSION='1.5.0';
   var CDN='https://cdn.awsli.com.br/80/80577/arquivos/';
   var DEFAULTS={
     geral:{ativo:true,publicarNaLoja:false,debug:false},
     previsualizacao:{ocultarBlocosLegados:true},
-    efeitos:{ativo:true,fadeUp:true,imagens:true},
+    efeitos:{ativo:true,fadeUp:true,imagens:true,loader:true,navegacao:true,indicadorRolagem:true},
     imagensBase:CDN,
     topo:{ativo:true},
     home:{ativo:true,hero:true,beneficios:true,apresentacao:true,cabos:true,conectores:true,atalhos:true,miniBanners:true,marcas:true,institucional:true,instagram:true},
@@ -877,7 +877,9 @@
     var els=d.querySelectorAll(
       '.cc26-section, .cc26-section .cc26-category-card, .cc26-section .cc26-shortcut, '+
       '.cc26-section .cc26-mini-banner, .cc26-section .cc26-brands__brand, '+
-      '.cc26-footer__column, #listagemProdutos .listagem-item'
+      '.cc26-footer__column, #listagemProdutos .listagem-item, '+
+      '#listagemProdutos .titulo-categoria, .cc26-section .cc26-title, '+
+      '.cc26-benefit, .cc26-presentation__copy, .cc26-cart-main, .cc26-cart-checkout-form'
     );
     [].slice.call(els).forEach(function(node,index){
       if(node.classList.contains('cc26-reveal'))return;
@@ -940,6 +942,99 @@
     scheduled=true;
     w.requestAnimationFrame(refresh);
   }
+
+  // v1.5 | UX lifecycle: navegação nativa intacta, loader visual não bloqueante.
+  var experience={mounted:false,framePending:false,loaderDone:false,loader:null};
+  function reducedMotion(){
+    return !!(w.matchMedia && w.matchMedia('(prefers-reduced-motion: reduce)').matches);
+  }
+  function initLightLoader(){
+    if(!cfg.efeitos||cfg.efeitos.ativo===false||cfg.efeitos.loader===false||reducedMotion())return;
+    if(d.getElementById('cc26-load-indicator'))return;
+    var root=el('div','cc26-load-indicator');root.id='cc26-load-indicator';
+    root.setAttribute('aria-hidden','true');
+    var bar=el('div','cc26-load-indicator__bar');
+    var card=el('div','cc26-load-indicator__pill');
+    var pulse=el('span','cc26-load-indicator__pulse');
+    card.appendChild(pulse);
+    card.appendChild(el('span','cc26-load-indicator__text','Carregando'));
+    root.appendChild(bar);root.appendChild(card);d.body.appendChild(root);
+    experience.loader=root;
+    state.loader='iniciado';
+    var begun=Date.now();
+    function finish(){
+      if(experience.loaderDone)return;
+      experience.loaderDone=true;
+      w.setTimeout(function(){
+        if(!root.parentNode)return;
+        root.classList.add('cc26-load-indicator--done');
+        state.loader='finalizado';
+        w.setTimeout(function(){if(root.parentNode)root.parentNode.removeChild(root);},450);
+      },Math.max(0,250-(Date.now()-begun)));
+    }
+    if(d.readyState==='complete')w.setTimeout(finish,320);
+    else w.addEventListener('load',finish,{once:true});
+    // Failsafe: o carregamento nunca oculta/impede a interacao e sempre termina.
+    w.setTimeout(finish,1600);
+    w.addEventListener('pageshow',function(event){if(event.persisted)finish();},{once:true});
+  }
+  function initNavigationExperience(){
+    if(experience.mounted||!cfg.efeitos||cfg.efeitos.ativo===false||cfg.efeitos.navegacao===false)return;
+    experience.mounted=true;
+    var header=d.getElementById('cc26-new-header');
+    if(!header)return;
+    header.classList.add('cc26-nav-ready');
+    var current=location.pathname.replace(/\/+$/,'')||'/';
+    [].slice.call(header.querySelectorAll('.cc26-site-header__navlink[href]')).forEach(function(link){
+      var u;try{u=new URL(link.href,location.href)}catch(e){return}
+      var path=u.pathname.replace(/\/+$/,'')||'/';
+      if(u.origin===location.origin && path!=='/' && path===current){
+        link.setAttribute('aria-current','page');
+        link.classList.add('cc26-nav-current');
+      }
+    });
+    function update(){
+      experience.framePending=false;
+      var scrollY=w.scrollY||w.pageYOffset||0;
+      header.classList.toggle('cc26-header-scrolled',scrollY>48);
+      if(cfg.efeitos.indicadorRolagem!==false){
+        var max=(d.documentElement.scrollHeight||0)-(w.innerHeight||0);
+        var percent=max>0 ? Math.min(100,Math.max(0,scrollY/max*100)):0;
+        header.style.setProperty('--cc26-scroll-progress',percent.toFixed(2)+'%');
+      }
+    }
+    function onScroll(){
+      if(experience.framePending)return;
+      experience.framePending=true;
+      w.requestAnimationFrame(update);
+    }
+    w.addEventListener('scroll',onScroll,{passive:true});
+    w.addEventListener('resize',onScroll,{passive:true});
+    w.addEventListener('pageshow',onScroll);
+    update();
+    // Fecha apenas menu visual da Cabcom, sem cancelar cliques ou eventos nativos.
+    header.addEventListener('click',function(event){
+      var target=event.target;
+      if(!target || !target.closest)return;
+      if(target.closest('.cc26-site-header__nav a[href]')){
+        header.classList.remove('cc26-site-header--open');
+        var toggle=header.querySelector('.cc26-site-header__toggle');
+        if(toggle)toggle.setAttribute('aria-expanded','false');
+      }
+    });
+    d.addEventListener('pointerdown',function(event){
+      if(!header.contains(event.target) && header.classList.contains('cc26-site-header--open')){
+        header.classList.remove('cc26-site-header--open');
+        var toggle=header.querySelector('.cc26-site-header__toggle');
+        if(toggle)toggle.setAttribute('aria-expanded','false');
+      }
+    },{passive:true});
+    state.navigation='fluid-ativo';
+  }
+  function initExperience(){
+    initLightLoader();
+    initNavigationExperience();
+  }
   var initialized=false;
   function boot(){
     if(!active||!d.body)return;
@@ -953,6 +1048,7 @@
     enhanceNative();
     previewLegacy();
     initFade();
+    initExperience();
     var observer=new MutationObserver(schedule);
     observer.observe(d.body,{subtree:true,childList:true});
     state.initialized=true;
