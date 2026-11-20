@@ -872,15 +872,17 @@
     if(image){
       // Em browsers com lazy load, currentSrc pode ser miniatura ou placeholder.
       // Priorizar srcsets, data-original e tamanho integral publicado pela LI.
+      ['data-image-full','data-full','data-large','data-original'].forEach(function(attr){
+        add(image.getAttribute(attr));
+      });
+      add(miniBannerSrcset(image.getAttribute('data-srcset')));
+      add(miniBannerSrcset(image.getAttribute('srcset')));
       var picture=image.closest('picture');
       if(picture) [].slice.call(picture.querySelectorAll('source[srcset]')).forEach(function(s){
         add(miniBannerSrcset(s.getAttribute('srcset')));
       });
-      add(miniBannerSrcset(image.getAttribute('data-srcset')));
-      add(miniBannerSrcset(image.getAttribute('srcset')));
-      ['data-image-full','data-full','data-large','data-original','data-src','data-lazy-src'].forEach(function(attr){
-        add(image.getAttribute(attr));
-      });
+      add(image.getAttribute('data-src'));
+      add(image.getAttribute('data-lazy-src'));
       add(image.getAttribute('src'));
       add(image.currentSrc);
     }
