@@ -308,3 +308,17 @@ A integração em `INTEGRACAO-LOJA-INTEGRADA.html` foi preparada com `publicarNa
 - Aplica uma unica vez os ajustes de company, footer, intro, marcas, CTA e titulo total do carrinho. Em mobile, altura de 820px do contato nao e aplicada para evitar vazio excessivo.
 - Parcelamento lido prioritariamente do bloco nativo `tr.tb26-cart__total-row .valores-descontos` ou `.valores-descontos`, como no print. Busca em elementos do carrinho e do formulario, preserva expressão com `ou em até`, juros e valor da Loja Integrada. Sem dados oficiais, usa fallback informativo; validacao de centavos quando `sem juros`.
 - Nenhuma alteracao no metodo de pagamento, carrinho transacional, endpoints ou descontos.
+
+
+## v1.25.1 — Gutter, categorias e faixas responsivas (20/11/2026)
+
+- `.tb26-container` passa a ter `padding: 0 15px !important` no tema ativo, preservando a largura-base `--tb26-width:1760px`.
+
+- `.tb26-categories__grid`: `gap:0`.
+
+- Cabeçalho entre 1280 e 1650 px: altura 70px, min-height 69px e padding-bottom 10px; imagem institucional `::before` ocupa 77% da largura.
+
+- Faixa de menu mobile muda de `max-width:1320px` para `max-width:1279px`; o padding-top da home associado ao menu mobile muda no mesmo breakpoint, evitando espaço em 1280–1320.
+
+- Mesma lógica e mesmos seletores do CSS enviado, com quatro faixas desktop idênticas consolidadas numa única media query. Nenhuma alteração em JS, checkout ou dados dos produtos.
+

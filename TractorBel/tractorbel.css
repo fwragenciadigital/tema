@@ -240,7 +240,7 @@
  .tb26-nav__group>.tb26-nav__link{font-size:clamp(10px,.72vw,13px)}
  .tb26-header__wrap{gap:clamp(10px,1.7vw,34px)}
 }
-@media(max-width:1320px){
+@media(max-width:1279px){
  .tb26-header,.tb26-header__wrap{min-height:85px}
  .tb26-header__wrap{height:85px}
  .tb26-logo{flex-basis:195px}
@@ -2217,7 +2217,7 @@ html body.tb26-active.tb26-with-header:not(.tb26-with-home) #tb26-header {
 html body.tb26-active.tb26-with-home #tb26-home>.tb26-intro {
   padding-top:118px;
 }
-@media(max-width:1320px){
+@media(max-width:1279px){
   html body.tb26-active.tb26-with-home #tb26-home>.tb26-intro {padding-top:85px;}
 }
 @media(max-width:767px){
@@ -2809,5 +2809,28 @@ body.tb26-active.tb26-with-cart #corpo .tb26-cart__summary-total-value {
   body.tb26-active .tb26-company::before {
     top:6%!important;
     bottom:10%!important;
+  }
+}
+
+/* ================================================================
+   TractorBel | Ajustes de layout e breakpoints — 20/11/2026
+   Unifica as quatro faixas desktop equivalentes de 1280 a 1650px.
+   Menu mobile passa a iniciar somente em 1279px (bloco existente).
+   ================================================================ */
+body.tb26-active .tb26-container {
+  padding:0 15px!important;
+}
+body.tb26-active .tb26-categories__grid {
+  gap:0!important;
+}
+@media only screen and (min-width:1280px) and (max-width:1650px) {
+  body.tb26-active .tb26-header__wrap,
+  body.tb26-active .tb26-header {
+    height:70px;
+    min-height:69px;
+    padding-bottom:10px;
+  }
+  body.tb26-active .tb26-company::before {
+    width:77%!important;
   }
 }
