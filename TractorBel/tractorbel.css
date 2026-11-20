@@ -398,7 +398,7 @@ body.tb26-with-header #full-page-loading{display:none!important}
 /* === TractorBel v1.8: pagina de produto premium sem substituir os controles LI === */
 .tb26-with-pdp{--tb26-pdp-line:#eceae5;--tb26-pdp-bg:#f6f5f2;--tb26-pdp-accent:#ffbf00}
 .tb26-with-pdp #corpo{background:#fff!important;color:#252525;overflow:visible}
-.tb26-with-pdp #corpo>.conteiner{width:min(100%,1520px)!important;max-width:1520px!important;box-sizing:border-box;padding:30px clamp(16px,3.5vw,50px) 90px!important;margin:0 auto!important}
+.tb26-with-pdp #corpo>.conteiner{width:min(100%,1760px)!important;max-width:1760px!important;box-sizing:border-box;padding:30px clamp(16px,3.5vw,50px) 90px!important;margin:0 auto!important}
 .tb26-with-pdp #corpo .secao-principal{margin:0!important}
 .tb26-with-pdp #corpo .tb26-pdp{width:100%!important;max-width:none!important;min-width:0;float:none!important;margin:0!important}
 .tb26-with-pdp .tb26-pdp__breadcrumbs{margin:0 0 26px!important;padding:0!important;width:100%;background:none!important;border:0!important;float:none!important;font:500 13px/1.4 'Montserrat',Arial,sans-serif}
