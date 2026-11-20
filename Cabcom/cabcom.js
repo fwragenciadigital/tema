@@ -6,7 +6,7 @@
 (function (w,d) {
   'use strict';
   if(w.Cabcom2026) return;
-  var VERSION='1.9.1';
+  var VERSION='1.9.2';
   var CDN='https://cdn.awsli.com.br/80/80577/arquivos/';
   var DEFAULTS={
     geral:{ativo:true,publicarNaLoja:false,debug:false},
@@ -1323,9 +1323,26 @@
     info.classList.add('cc26-pdp__details');
     var stage=media.querySelector('.conteiner-imagem');
     if(stage)stage.classList.add('cc26-pdp__image-stage');
-    var thumbs=media.querySelector('.produto-thumbs');
-    if(thumbs)thumbs.classList.add('cc26-pdp__thumbs');
-    var galleryLinks=[].slice.call(media.querySelectorAll('.produto-thumbs .miniaturas a'));
+    // O tema Cabcom utiliza .thumbs-vertical, não apenas .produto-thumbs.
+    // Movemos o mesmo elemento nativo (sem cloná-lo) abaixo da foto;
+    // os handlers de imagem/zoom e a escolha de miniatura continuam na LI.
+    var thumbs=media.querySelector('.thumbs-vertical, .produto-thumbs')||
+               root.querySelector('.thumbs-vertical, .produto-thumbs');
+    if(thumbs){
+      thumbs.classList.add('cc26-pdp__thumbs');
+      var imageBlock=stage && directChild(media,stage);
+      var thumbBlock=directChild(media,thumbs);
+      if(imageBlock && thumbBlock && imageBlock!==thumbBlock){
+        if(thumbBlock!==imageBlock.nextElementSibling)media.insertBefore(thumbBlock,imageBlock.nextSibling);
+      }else if(imageBlock && imageBlock.contains(thumbs)){
+        media.insertBefore(thumbs,imageBlock.nextSibling);
+      }else if(imageBlock && !media.contains(thumbs) && !thumbs.contains(media)){
+        media.insertBefore(thumbs,imageBlock.nextSibling);
+      }
+      state.productGallery={source:thumbs.classList.contains('thumbs-vertical')?'thumbs-vertical':'produto-thumbs',movedBelowImage:true};
+    }
+    var galleryLinks=thumbs?[].slice.call(thumbs.querySelectorAll('a[href],a[data-imagem-grande]'))
+      .filter(function(link){return !!link.querySelector('img');}):[];
     galleryLinks.forEach(function(link,index){
       if(!link.hasAttribute('aria-label'))link.setAttribute('aria-label','Ver imagem '+(index+1)+' do produto');
       if(index===0)link.classList.add('cc26-pdp__thumb-selected');
@@ -1389,6 +1406,43 @@
     assistance.appendChild(steps);
     if(controls && controls.parentNode)controls.parentNode.insertBefore(assistance,controls.nextSibling);
     else info.appendChild(assistance);
+
+    // Breve descrição técnica a partir do conteúdo real cadastrado na LI.
+    // Não acrescentar características ou promessas que não estejam na página.
+    function productSummaryText(){
+      var candidates=[
+        description,
+        d.querySelector('#descricao .tab-pane.active, #descricao .tab-pane, #descricao .texto'),
+        d.querySelector('#corpo .produto-descricao, #corpo .descricao-produto, #corpo .tab-content .active'),
+        d.querySelector('#corpo .aba-descricao .tab-pane, #corpo [itemprop="description"]')
+      ];
+      for(var j=0;j<candidates.length;j++){
+        var candidate=candidates[j];
+        if(!candidate || info.contains(candidate))continue;
+        var paragraphs=[].slice.call(candidate.querySelectorAll('p')).map(function(n){
+          return (n.textContent||'').replace(/\s+/g,' ').trim();
+        }).filter(function(x){return x.length>=55;});
+        var raw=paragraphs.length?paragraphs.join(' '):(candidate.textContent||'').replace(/\s+/g,' ').trim();
+        raw=raw.replace(/^(?:Descrição(?: do produto)?|Detalhes(?: do produto)?)\s*[:\-–]?\s*/i,'').trim();
+        if(raw.length<65)continue;
+        if(raw.length<=290)return raw;
+        var snippet=raw.slice(0,290);
+        var lastStop=snippet.lastIndexOf('. ');
+        if(lastStop>=125)return snippet.slice(0,lastStop+1);
+        var lastSpace=snippet.lastIndexOf(' ');
+        return snippet.slice(0,lastSpace>150?lastSpace:285).trim().replace(/[,;:]$/,'')+'…';
+      }
+      return '';
+    }
+    var summaryText=productSummaryText();
+    if(summaryText){
+      var synopsis=el('section','cc26-pdp__synopsis');
+      synopsis.setAttribute('aria-label','Resumo do produto');
+      synopsis.appendChild(el('h2','cc26-pdp__synopsis-title','Sobre este produto'));
+      synopsis.appendChild(el('p','cc26-pdp__synopsis-text',summaryText));
+      assistance.parentNode.insertBefore(synopsis,assistance.nextSibling);
+      state.productSummary={source:'descrição nativa LI',characters:summaryText.length};
+    }else warn('PDP: sem descrição técnica legível para resumir; descrição original preservada.');
 
     // Acoes no mobile encaminham o clique para o botao nativo real.
     if(whatsapp || quote){
