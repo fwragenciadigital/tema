@@ -6,7 +6,7 @@
 (function (w,d) {
   'use strict';
   if(w.Cabcom2026) return;
-  var VERSION='1.8.0';
+  var VERSION='1.9.0';
   var CDN='https://cdn.awsli.com.br/80/80577/arquivos/';
   var DEFAULTS={
     geral:{ativo:true,publicarNaLoja:false,debug:false},
@@ -1295,7 +1295,7 @@
       whatsapp=whatsapp||extra.find(containsWhatsapp);
       quote=quote||extra.find(containsQuote);
     }
-    root.classList.add('cc26-pdp');
+    root.classList.add('cc26-pdp','cc26-pdp--editorial');
     grid.classList.add('cc26-pdp__grid');
     media.classList.add('cc26-pdp__media');
     info.classList.add('cc26-pdp__details');
@@ -1306,6 +1306,11 @@
     var galleryLinks=[].slice.call(media.querySelectorAll('.produto-thumbs .miniaturas a'));
     galleryLinks.forEach(function(link,index){
       if(!link.hasAttribute('aria-label'))link.setAttribute('aria-label','Ver imagem '+(index+1)+' do produto');
+      if(index===0)link.classList.add('cc26-pdp__thumb-selected');
+      link.addEventListener('click',function(){
+        galleryLinks.forEach(function(item){item.classList.remove('cc26-pdp__thumb-selected');});
+        link.classList.add('cc26-pdp__thumb-selected');
+      });
     });
     var heading=info.querySelector('.info-principal-produto');
     heading.classList.add('cc26-pdp__heading');
@@ -1313,7 +1318,7 @@
       name.classList.add('cc26-pdp__name');
       var eyebrow=el('div','cc26-pdp__eyebrow');
       eyebrow.appendChild(inlineIcon('shield'));
-      eyebrow.appendChild(el('span','','SOLUÇÕES CABCOM'));
+      eyebrow.appendChild(el('span','','CABCOM'));
       name.parentNode.insertBefore(eyebrow,name);
     }
     var price=info.querySelector('.preco-produto');
@@ -1329,6 +1334,12 @@
     if(quote){
       quote.classList.add('cc26-pdp__cta','cc26-pdp__cta--quote');
       if(!quote.getAttribute('aria-label'))quote.setAttribute('aria-label','Adicionar à lista de orçamento por e-mail');
+    }
+    if(quote){
+      // Mantém o botão real da LI; apenas orienta o contato por orçamento.
+      var hint=el('p','cc26-pdp__quote-hint','Solicite valores e condições para este produto.');
+      var container=quote.closest('.comprar')||quote.parentElement;
+      if(container && container.parentNode)container.parentNode.insertBefore(hint,container);
     }
     var code=info.querySelector('.codigo-produto');
     if(code)code.classList.add('cc26-pdp__code');
@@ -1389,7 +1400,7 @@
       }else bar.classList.add('cc26-pdp__mobile-bar--visible');
     }
     d.body.classList.add('cc26-pdp-ready');
-    state.product={active:true,source:'PDP nativa LI',whatsapp:!!whatsapp,quote:!!quote};
+    state.product={active:true,visual:'editorial-minimal',source:'PDP nativa LI',whatsapp:!!whatsapp,quote:!!quote};
   }
   function enhanceNative(){
     if(cfg.catalogo.ativo){
