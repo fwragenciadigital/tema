@@ -6,7 +6,7 @@
 (function (w,d) {
   'use strict';
   if(w.Cabcom2026) return;
-  var VERSION='2.0.0';
+  var VERSION='2.1.0';
   var CDN='https://cdn.awsli.com.br/80/80577/arquivos/';
   var DEFAULTS={
     geral:{ativo:true,publicarNaLoja:false,debug:false},
@@ -1076,35 +1076,61 @@
   }
   // Card de catálogo aprovado: duas ações de contato, nunca "Ver mais" sozinho.
   // Preserve o link/ação nativa quando existir; os outros só usam dados reais LI.
+  // Card de cotação: estrutura idêntica à referência, SEM "Ver mais" e
+  // sem selos de desconto que a LI gera mesmo em produtos sem preço.
+  // Os links reais do produto e do carrinho permanecem acessíveis.
   function decorateQuoteCards(){
     if(!home || !cfg.catalogo.ativo)return;
     var scope=d.querySelector('#corpo');
     if(!scope)return;
-    var cards=[].slice.call(scope.querySelectorAll(
+    var nodes=[].slice.call(scope.querySelectorAll(
       '#listagemProdutos .listagem-item, #listagemProdutos li.produto, '+
       '.cc26-enhanced-shelf .listagem-item, .cc26-enhanced-shelf li.produto'
     ));
-    cards.forEach(function(card){
-      if(card.classList.contains('cc26-card-two-cta'))return;
-      var productLink=card.querySelector('.nome-produto a[href], a.nome-produto[href], .imagem-produto a[href]');
+    function isMore(node){
+      var label=normalized(node.textContent||node.value||node.getAttribute('aria-label')||'').trim();
+      return /^(VER MAIS|SAIBA MAIS|VER PRODUTO|VER DETALHES)$/i.test(label);
+    }
+    function hideLegacy(card){
+      [].slice.call(card.querySelectorAll('a,button,input[type="button"],input[type="submit"]'))
+        .forEach(function(node){
+          if(isMore(node))node.classList.add('cc26-card-legacy-action');
+        });
+      // A barra azul e o badge porcentual pertencem ao card legado, não ao
+      // padrão com cotação. Nada é removido do DOM ou das ações nativas.
+      [].slice.call(card.querySelectorAll(
+        '.barra-progresso,.barra-de-progresso,.progress-bar,.progresso,'+
+        '.fundo-principal.borda-principal,.desconto,.desconto-produto,'+
+        '.selo-desconto,.tag-desconto,.desconto-porcentagem'
+      )).forEach(function(node){node.classList.add('cc26-card-legacy-visual');});
+    }
+    var completed=0;
+    nodes.forEach(function(card){
+      if(card.classList.contains('cc26-card-two-cta')){
+        hideLegacy(card);
+        return;
+      }
+      var productLink=card.querySelector(
+        '.nome-produto a[href],a.nome-produto[href],.imagem-produto a[href]'
+      );
       if(!productLink)return;
-      var href;
+      var productURL,href;
       try{
-        var productURL=new URL(productLink.getAttribute('href'),location.href);
+        productURL=new URL(productLink.getAttribute('href'),location.href);
         if(productURL.origin!==location.origin || !/^https?:$/.test(productURL.protocol))return;
+        if(preview && !productURL.searchParams.has('cabcom_preview'))
+          productURL.searchParams.set('cabcom_preview','1');
         href=productURL.href;
-        if(preview && !productURL.searchParams.has('cabcom_preview')){
-          productURL.searchParams.set('cabcom_preview','1');href=productURL.href;
-        }
       }catch(e){return;}
-      var labelNode=card.querySelector('.nome-produto, .produto-nome');
-      var productName=(labelNode?labelNode.textContent:productLink.textContent||'').replace(/\s+/g,' ').trim();
+      var labelNode=card.querySelector('.nome-produto,.produto-nome');
+      var productName=(labelNode?labelNode.textContent:productLink.textContent||'')
+        .replace(/\s+/g,' ').trim();
       if(!productName)return;
       var actions=card.querySelector('.acoes-produto');
       if(!actions)return;
       var existing=[].slice.call(actions.querySelectorAll('a[href]'));
       var whatsExisting=existing.find(function(anchor){
-        return /WHATSAPP/.test(normalized(anchor.textContent||anchor.getAttribute('aria-label'))) ||
+        return /WHATSAPP/.test(normalized(anchor.textContent||anchor.getAttribute('aria-label')||'')) ||
           /wa\.me|api\.whatsapp\.com/i.test(anchor.href||'');
       });
       var emailExisting=existing.find(function(anchor){
@@ -1112,53 +1138,54 @@
           normalized(anchor.textContent||anchor.getAttribute('aria-label')||''));
       });
       var addExisting=existing.find(function(anchor){
-        try {return /^\/carrinho\/produto\/\d+\/adicionar\/?$/i.test(new URL(anchor.href).pathname);}
-        catch(e){return false;}
+        try {
+          var u=new URL(anchor.href,location.href);
+          return u.origin===location.origin &&
+            /^\/carrinho\/produto\/\d+\/adicionar\/?$/i.test(u.pathname);
+        }catch(e){return false;}
       });
-      var newActions=el('div','cc26-card-quote-actions');
-      var whats;
-      if(whatsExisting){
-        whats=whatsExisting;
-      }else{
+      var whats=whatsExisting;
+      if(!whats){
         var phone=String(cfg.conteudo.contato||'').replace(/\D/g,'');
-        if(phone.length!==10 && phone.length!==11)return;
-        var target='https://wa.me/55'+phone+'?text='+
+        if(!/^\d{10,11}$/.test(phone))return;
+        var url='https://wa.me/55'+phone+'?text='+
           encodeURIComponent('Olá! Gostaria de cotar o produto: '+productName+' — '+href);
-        whats=a(target,'cc26-card-quote-actions__whatsapp','Cotar por WhatsApp');
+        whats=a(url,'cc26-card-quote-actions__whatsapp','');
         whats.target='_blank';whats.rel='noopener noreferrer';
       }
       var email=emailExisting||addExisting;
       if(!email){
         var id=card.getAttribute('data-produto-id')||card.getAttribute('data-product-id')||
-          card.getAttribute('data-id')||card.querySelector('[data-produto-id]')?.getAttribute('data-produto-id')||'';
+          card.getAttribute('data-id')||
+          card.querySelector('[data-produto-id]')?.getAttribute('data-produto-id')||'';
         if(/^\d+$/.test(id)){
-          email=a('/carrinho/produto/'+id+'/adicionar','cc26-card-quote-actions__email','Cotar por e-mail');
+          email=a('/carrinho/produto/'+id+'/adicionar','cc26-card-quote-actions__email','');
         }else{
-          // Sem ID real ou endpoint oficial, encaminhar ao produto para cotar.
-          email=a(href,'cc26-card-quote-actions__email','Cotar por e-mail');
+          email=a(href,'cc26-card-quote-actions__email','');
           email.dataset.cc26QuoteFallback='pdp';
         }
       }
-      // Transferir botões nativos para o mesmo rodapé preserva handlers originais.
+      var newActions=el('div','cc26-card-quote-actions');
       whats.classList.add('cc26-card-quote-actions__whatsapp');
       email.classList.add('cc26-card-quote-actions__email');
-      // Legendas iguais às do layout aprovado, inclusive quando o tema
-      // fornece um botão genérico 'Ver mais'. O elemento/link nativo é mantido.
-      whats.textContent='';whats.appendChild(inlineIcon('phone'));
-      whats.appendChild(el('span','','Cotar por WhatsApp'));
-      email.textContent='';email.appendChild(inlineIcon('mail'));
-      email.appendChild(el('span','','Cotar por e-mail'));
+      // Manter o anchor real preserva handlers LI; só atualiza o rótulo visual.
+      // Para anchors criados localmente, texto/ícone são montados do zero.
+      whats.replaceChildren(inlineIcon('phone'),el('span','','Cotar por WhatsApp'));
+      email.replaceChildren(inlineIcon('mail'),el('span','','Cotar por e-mail'));
       whats.setAttribute('aria-label','Cotar por WhatsApp');
       email.setAttribute('aria-label','Cotar por e-mail');
-      newActions.appendChild(whats);newActions.appendChild(email);
-      existing.forEach(function(anchor){
-        if(anchor!==whats&&anchor!==email)anchor.classList.add('cc26-card-legacy-action');
+      newActions.appendChild(whats);
+      newActions.appendChild(email);
+      // Esconder os controles duplicados de dentro e fora do .acoes-produto.
+      existing.forEach(function(node){
+        if(node!==whats && node!==email)node.classList.add('cc26-card-legacy-action');
       });
       actions.appendChild(newActions);
       card.classList.add('cc26-card-two-cta');
-      var badge=card.querySelector('.desconto, .desconto-produto');
-      if(badge)badge.classList.add('cc26-card-discount-legacy');
+      hideLegacy(card);
+      completed++;
     });
+    state.catalogCards={visual:'dois-ctas',created:completed,requested:2};
   }
   function decorateNativeShelves(){
     var listing=d.querySelector('#listagemProdutos');
