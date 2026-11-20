@@ -1,3 +1,4 @@
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Quicksand:wght@300..700&display=swap");
 /* Cabcom 2026 | FWR Agencia Digital | CSS isolado e responsivo */
 .cc26-active{--cc26-blue:#0868f8;--cc26-blue-dark:#073e99;--cc26-green:#00c99b;--cc26-navy:#001b35;--cc26-mist:#f4f6f9;--cc26-ink:#18243a;--cc26-max:1660px;--cc26-font-title:"Quicksand",Arial,Helvetica,sans-serif;--cc26-font-text:"Montserrat",Arial,Helvetica,sans-serif;color:var(--cc26-ink);overflow-x:clip}
 .cc26-active .cc26-section,.cc26-active .cc26-section *{box-sizing:border-box}
