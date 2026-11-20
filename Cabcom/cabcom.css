@@ -3022,3 +3022,45 @@ body.cc26-active.cc26-pdp-ready #corpo .cc26-pdp--editorial .cc26-pdp__descripti
     background:#008e70!important;
   }
 }
+
+
+/* Cabcom 2026 v1.9.1 — compatibilidade com colunas variáveis na PDP LI.
+   Preserva a grade e o layout editorial já definidos na v1.9. */
+body.cc26-active.cc26-pdp-ready #corpo .cc26-pdp__grid > .cc26-pdp__media,
+body.cc26-active.cc26-pdp-ready #corpo .cc26-pdp__grid > .cc26-pdp__details {
+  display:flex!important;
+  box-sizing:border-box!important;
+  flex-direction:column;
+  width:100%!important;
+  max-width:100%!important;
+  min-width:0!important;
+  float:none!important;
+  clear:none!important;
+  margin:0!important;
+}
+body.cc26-active.cc26-pdp-ready #corpo .cc26-pdp__grid > .cc26-pdp__media {
+  gap:14px!important;
+}
+body.cc26-active.cc26-pdp-ready #corpo .cc26-pdp__grid > .cc26-pdp__details {
+  align-self:stretch!important;
+}
+body.cc26-active.cc26-pdp-ready #corpo .cc26-pdp__grid > .cc26-pdp__details > .cc26-pdp__heading {
+  width:100%;
+}
+/* Fallback defensivo: se o tema não expuser as duas colunas como esperado,
+   as regras mais básicas ainda melhoram a leitura sem esconder controles. */
+body.cc26-active.cc26-page-product:not(.cc26-pdp-ready) #corpo #imagemProduto {
+  max-width:100%!important;
+  max-height:580px!important;
+  width:auto!important;
+  height:auto!important;
+  object-fit:contain!important;
+}
+body.cc26-active.cc26-page-product:not(.cc26-pdp-ready) #corpo .info-principal-produto h1.nome-produto {
+  font:700 clamp(25px,2.1vw,35px)/1.2 var(--cc26-font-title)!important;
+  color:#14191d!important;
+}
+body.cc26-active.cc26-page-product:not(.cc26-pdp-ready) #corpo .produto-thumbs .miniaturas {
+  display:flex!important;align-items:center;
+  flex-wrap:wrap;gap:9px;
+}
