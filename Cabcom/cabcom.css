@@ -1,7 +1,7 @@
 /* Cabcom 2026 | FWR Agencia Digital | CSS isolado e responsivo */
-.cc26-active{--cc26-blue:#0868f8;--cc26-blue-dark:#073e99;--cc26-green:#00c99b;--cc26-navy:#001b35;--cc26-mist:#f4f6f9;--cc26-ink:#18243a;--cc26-max:1660px;color:var(--cc26-ink);overflow-x:clip}
+.cc26-active{--cc26-blue:#0868f8;--cc26-blue-dark:#073e99;--cc26-green:#00c99b;--cc26-navy:#001b35;--cc26-mist:#f4f6f9;--cc26-ink:#18243a;--cc26-max:1660px;--cc26-font-title:"Quicksand",Arial,Helvetica,sans-serif;--cc26-font-text:"Montserrat",Arial,Helvetica,sans-serif;color:var(--cc26-ink);overflow-x:clip}
 .cc26-active .cc26-section,.cc26-active .cc26-section *{box-sizing:border-box}
-.cc26-active .cc26-section{font-family:Arial,Helvetica,sans-serif}
+.cc26-active .cc26-section{font-family:var(--cc26-font-text,"Montserrat",Arial,Helvetica,sans-serif)}
 .cc26-active .cc26-section img{max-width:100%;height:auto;display:block}
 .cc26-container{max-width:calc(var(--cc26-max) + 64px);padding:0 32px;margin:0 auto}
 .cc26-active .cc26-section a:focus-visible,.cc26-active #cabecalho a:focus-visible{outline:3px solid var(--cc26-green);outline-offset:3px}
@@ -158,7 +158,7 @@
 .cc26-active .cc26-site-header,.cc26-active .cc26-site-header *{box-sizing:border-box}
 .cc26-active .cc26-site-header{
   position:sticky;top:0;z-index:2000;color:#fff;
-  font-family:Arial,Helvetica,sans-serif;
+  font-family:var(--cc26-font-text,"Montserrat",Arial,Helvetica,sans-serif);
   background:linear-gradient(105deg,#0876f2 8%,#069edb 37%,#00c59b 100%);
   box-shadow:0 6px 25px #00264a24
 }
@@ -310,9 +310,32 @@ body.cc26-active.cc26-preview::after{
   position:fixed;right:14px;bottom:14px;z-index:2147483000;
   display:block;background:#001b35;color:#fff;padding:8px 12px;
   border:1px solid #00c99b;border-radius:6px;box-shadow:0 4px 15px #001b3555;
-  font:700 11px/1.3 Arial,sans-serif;letter-spacing:.035em;
+  font:700 11px/1.3 "Montserrat",Arial,sans-serif;letter-spacing:.035em;
   pointer-events:none
 }
 @media(max-width:767px){
   body.cc26-active.cc26-preview::after{right:8px;bottom:8px;font-size:9px;padding:6px 9px}
+}
+
+
+/* Cabcom 2026 — Sistema tipografico oficial
+   Titulos: Quicksand 300–700 | Texto geral: Montserrat 100–900.
+   Webfonts carregadas no HTML de integracao; fallback local para evitar layout quebrado. */
+body.cc26-active,
+body.cc26-active #corpo,
+body.cc26-active #rodape,
+body.cc26-active .cc26-section,
+body.cc26-active .cc26-site-header {
+  font-family:var(--cc26-font-text,"Montserrat",Arial,Helvetica,sans-serif);
+}
+body.cc26-active :is(#corpo,#rodape,.cc26-site-header,.cc26-section) :is(h1,h2,h3,h4,h5,h6),
+body.cc26-active :is(.cc26-title,.cc26-category-grid__intro h2,.cc26-institutional h2,.cc26-presentation__copy h2,.cc26-site-header__wordmark),
+body.cc26-active #corpo :is(.listagem .titulo,.titulo-categoria,.titulo-pagina,.pagina-produto h1) {
+  font-family:var(--cc26-font-title,"Quicksand",Arial,Helvetica,sans-serif)!important;
+  font-weight:700;
+}
+body.cc26-active .cc26-section :is(p,small,li,button,input,label,.cc26-category-card strong,.cc26-benefit strong,.cc26-benefit small,.cc26-brands__brand,.cc26-shortcut strong),
+body.cc26-active .cc26-site-header :is(a,span,li,input,button),
+body.cc26-active #corpo :is(.nome-produto,.preco-produto,.acoes-produto,.botao) {
+  font-family:var(--cc26-font-text,"Montserrat",Arial,Helvetica,sans-serif);
 }
