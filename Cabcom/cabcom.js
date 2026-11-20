@@ -6,7 +6,7 @@
 (function (w,d) {
   'use strict';
   if(w.Cabcom2026) return;
-  var VERSION='1.9.0';
+  var VERSION='1.9.1';
   var CDN='https://cdn.awsli.com.br/80/80577/arquivos/';
   var DEFAULTS={
     geral:{ativo:true,publicarNaLoja:false,debug:false},
@@ -1259,20 +1259,42 @@
   // Produto Cabcom | conversao para orcamento sem alterar o HTML comercial LI.
   function enhanceProductPage(){
     if(!cfg.produto || cfg.produto.ativo===false || !d.body)return;
-    if(!d.body.classList.contains('pagina-produto') && !d.querySelector('#corpo #imagemProduto'))return;
+    var mainPicture=d.querySelector('#corpo #imagemProduto');
+    if(!d.body.classList.contains('pagina-produto') && !mainPicture)return;
     if(d.body.classList.contains('cc26-pdp-ready'))return;
-    var root=d.querySelector('#corpo .secao-principal .produto') ||
-             d.querySelector('#corpo #produto .produto');
-    if(!root)return;
-    var grid=root.querySelector(':scope > .row-fluid')||root.querySelector('.row-fluid');
-    if(!grid)return;
-    var columns=[].slice.call(grid.children).filter(function(n){return n.nodeType===1&&n.classList.contains('span6')});
-    if(columns.length!==2 || !columns[0].querySelector('#imagemProduto') ||
-       !columns[1].querySelector('.info-principal-produto')) {
-      warn('PDP: markup nativo diferente do esperado. Layout original preservado.');
+    var titleSource=d.querySelector('#corpo .info-principal-produto') ||
+                    d.querySelector('#corpo .principal h1.nome-produto') ||
+                    d.querySelector('#corpo h1.nome-produto');
+    if(!mainPicture || !titleSource){
+      state.product={active:false,reason:'imagem ou bloco de informações não localizado'};
       return;
     }
-    var media=columns[0],info=columns[1];
+    function directChild(container,target){
+      var node=target;
+      while(node && node.parentElement!==container)node=node.parentElement;
+      return node&&node.parentElement===container?node:null;
+    }
+    // Busca o menor container comum de foto e informações.
+    // Aceita colunas span5/span7, span6, bootstrap ou tema customizado.
+    var layout=null;
+    for(var ancestor=mainPicture.parentElement;ancestor && ancestor!==d.body;ancestor=ancestor.parentElement){
+      if(!ancestor.contains(titleSource))continue;
+      var left=directChild(ancestor,mainPicture);
+      var right=directChild(ancestor,titleSource);
+      if(left && right && left!==right) {
+        layout={grid:ancestor,media:left,info:right};
+        break;
+      }
+    }
+    if(!layout || !d.querySelector('#corpo').contains(layout.grid)){
+      state.product={active:false,reason:'colunas da página não reconhecidas'};
+      warn('PDP: colunas não reconhecidas; mantendo os controles nativos.');
+      return;
+    }
+    var grid=layout.grid,media=layout.media,info=layout.info;
+    var root=grid.closest('.produto, #produto')||grid.parentElement;
+    if(!root || root===d.body)root=grid;
+    state.product={active:false,reason:'estrutura reconhecida',gridClass:grid.className||'',mediaClass:media.className||'',detailsClass:info.className||''};
     var name=info.querySelector('.info-principal-produto h1, h1.nome-produto') ||
              root.querySelector('h1.nome-produto');
     var description=root.querySelector('.produto-descricao, .tab-content, #descricao, .descricao') ||
@@ -1312,7 +1334,7 @@
         link.classList.add('cc26-pdp__thumb-selected');
       });
     });
-    var heading=info.querySelector('.info-principal-produto');
+    var heading=info.querySelector('.info-principal-produto') || titleSource;
     heading.classList.add('cc26-pdp__heading');
     if(name){
       name.classList.add('cc26-pdp__name');
@@ -1409,7 +1431,7 @@
         // Acoes originais da LI nunca sao removidas ou substituidas.
       });
     }
-    if(cfg.produto.ativo&&d.querySelector('.pagina-produto,#produto,#imagemProduto'))d.body.classList.add('cc26-page-product');
+    if(cfg.produto.ativo&&(d.body.classList.contains('pagina-produto')||d.querySelector('#corpo #imagemProduto')))d.body.classList.add('cc26-page-product');
     enhanceProductPage();
     if(cfg.rodape.ativo){
       var f=d.querySelector('#rodape');
