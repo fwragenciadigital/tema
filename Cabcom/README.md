@@ -36,6 +36,30 @@ A URL \`?cabcom_preview=1\` **não injeta** JS/CSS por conta própria. O código
 - `window.Cabcom2026.state.shortcuts` informa a origem e a quantidade de atalhos, e `state.previewHidden` quantifica contêineres ocultados em modo de prévia.
 - **Atenção:** publicação na Vercel não significa que os recursos já foram homologados no DOM real; comparar desktop/mobile e checar navegação/ação dos atalhos antes de ativar produção.
 
+## Experiência de navegação v1.5.0
+
+- **Fade-up progressivo** em seções, títulos, vitrines e elementos editoriais, disparado por `IntersectionObserver`.
+- **Loader não bloqueante** (barra superior + estado Carregando): encerra após `load` ou timeout de segurança de 1,6s. Não intercepta cliques, formulários ou checkout.
+- **Menu** com entrada suave dos submenus, marcação de categoria atual, fechamento do menu mobile ao selecionar link ou clicar fora, feedback de foco e sombra do cabeçalho durante a rolagem.
+- **Progresso de leitura** discreto na borda inferior do cabeçalho.
+- `prefers-reduced-motion` desabilita as animações; ausência de APIs de animação não bloqueia conteúdo.
+- Exclusivo da camada Cabcom ativa; links, busca, formulários, orçamento e checkout continuam nativos.
+
+Configuração opcional do bloco `window.CabcomSettings` no HTML da loja:
+
+```js
+efeitos: {
+  ativo: true,
+  fadeUp: true,
+  imagens: true,
+  loader: true,
+  navegacao: true,
+  indicadorRolagem: true
+}
+```
+
+Para desligar somente o loader: `efeitos: { loader: false }`. `publicarNaLoja:false` permanece necessário até homologação. Recarregar com `?cabcom_preview=1` para testar.
+
 ## Links permanentes
 - JS: https://cabcom-2026.vercel.app/cabcom.js
 - CSS: https://cabcom-2026.vercel.app/cabcom.css
