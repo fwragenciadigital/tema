@@ -6,7 +6,7 @@
 (function (w,d) {
   'use strict';
   if(w.Cabcom2026) return;
-  var VERSION='1.9.3';
+  var VERSION='2.0.0';
   var CDN='https://cdn.awsli.com.br/80/80577/arquivos/';
   var DEFAULTS={
     geral:{ativo:true,publicarNaLoja:false,debug:false},
@@ -1074,11 +1074,92 @@
         candidate.classList.add('cc26-shelf-block--'+type);
     });
   }
+  // Card de catálogo aprovado: duas ações de contato, nunca "Ver mais" sozinho.
+  // Preserve o link/ação nativa quando existir; os outros só usam dados reais LI.
+  function decorateQuoteCards(){
+    if(!home || !cfg.catalogo.ativo)return;
+    var scope=d.querySelector('#corpo');
+    if(!scope)return;
+    var cards=[].slice.call(scope.querySelectorAll(
+      '#listagemProdutos .listagem-item, #listagemProdutos li.produto, '+
+      '.cc26-enhanced-shelf .listagem-item, .cc26-enhanced-shelf li.produto'
+    ));
+    cards.forEach(function(card){
+      if(card.classList.contains('cc26-card-two-cta'))return;
+      var productLink=card.querySelector('.nome-produto a[href], a.nome-produto[href], .imagem-produto a[href]');
+      if(!productLink)return;
+      var href;
+      try{
+        var productURL=new URL(productLink.getAttribute('href'),location.href);
+        if(productURL.origin!==location.origin || !/^https?:$/.test(productURL.protocol))return;
+        href=productURL.href;
+        if(preview && !productURL.searchParams.has('cabcom_preview')){
+          productURL.searchParams.set('cabcom_preview','1');href=productURL.href;
+        }
+      }catch(e){return;}
+      var labelNode=card.querySelector('.nome-produto, .produto-nome');
+      var productName=(labelNode?labelNode.textContent:productLink.textContent||'').replace(/\s+/g,' ').trim();
+      if(!productName)return;
+      var actions=card.querySelector('.acoes-produto');
+      if(!actions)return;
+      var existing=[].slice.call(actions.querySelectorAll('a[href]'));
+      var whatsExisting=existing.find(function(anchor){
+        return /WHATSAPP/.test(normalized(anchor.textContent||anchor.getAttribute('aria-label'))) ||
+          /wa\.me|api\.whatsapp\.com/i.test(anchor.href||'');
+      });
+      var emailExisting=existing.find(function(anchor){
+        return /COTAR\s+POR\s+E.?MAIL|COTAR\s+E.?MAIL|LISTA.*ORCAMENTO/.test(
+          normalized(anchor.textContent||anchor.getAttribute('aria-label')||''));
+      });
+      var addExisting=existing.find(function(anchor){
+        try {return /^\/carrinho\/produto\/\d+\/adicionar\/?$/i.test(new URL(anchor.href).pathname);}
+        catch(e){return false;}
+      });
+      var newActions=el('div','cc26-card-quote-actions');
+      var whats;
+      if(whatsExisting){
+        whats=whatsExisting;
+      }else{
+        var phone=String(cfg.conteudo.contato||'').replace(/\D/g,'');
+        if(phone.length!==10 && phone.length!==11)return;
+        var target='https://wa.me/55'+phone+'?text='+
+          encodeURIComponent('Olá! Gostaria de cotar o produto: '+productName+' — '+href);
+        whats=a(target,'cc26-card-quote-actions__whatsapp','Cotar por WhatsApp');
+        whats.target='_blank';whats.rel='noopener noreferrer';
+      }
+      var email=emailExisting||addExisting;
+      if(!email){
+        var id=card.getAttribute('data-produto-id')||card.getAttribute('data-product-id')||
+          card.getAttribute('data-id')||card.querySelector('[data-produto-id]')?.getAttribute('data-produto-id')||'';
+        if(/^\d+$/.test(id)){
+          email=a('/carrinho/produto/'+id+'/adicionar','cc26-card-quote-actions__email','Cotar por e-mail');
+        }else{
+          // Sem ID real ou endpoint oficial, encaminhar ao produto para cotar.
+          email=a(href,'cc26-card-quote-actions__email','Cotar por e-mail');
+          email.dataset.cc26QuoteFallback='pdp';
+        }
+      }
+      // Transferir botões nativos para o mesmo rodapé preserva handlers originais.
+      whats.classList.add('cc26-card-quote-actions__whatsapp');
+      email.classList.add('cc26-card-quote-actions__email');
+      if(!whats.textContent.trim())whats.textContent='Cotar por WhatsApp';
+      if(!email.textContent.trim())email.textContent='Cotar por e-mail';
+      newActions.appendChild(whats);newActions.appendChild(email);
+      existing.forEach(function(anchor){
+        if(anchor!==whats&&anchor!==email)anchor.classList.add('cc26-card-legacy-action');
+      });
+      actions.appendChild(newActions);
+      card.classList.add('cc26-card-two-cta');
+      var badge=card.querySelector('.desconto, .desconto-produto');
+      if(badge)badge.classList.add('cc26-card-discount-legacy');
+    });
+  }
   function decorateNativeShelves(){
     var listing=d.querySelector('#listagemProdutos');
     if(!listing)return;
     listing.classList.add('cc26-native-listing');
     labelHomeShelves(listing);
+    decorateQuoteCards();
     [].slice.call(listing.querySelectorAll('.titulo-categoria')).forEach(function(title){
       title.classList.add('cc26-native-shelf-title');
     });
