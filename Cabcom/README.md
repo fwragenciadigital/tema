@@ -2,6 +2,31 @@
 
 Este projeto utiliza o mesmo modelo operacional da TractorBel: camada JS/CSS externa, arquivos versionados no GitHub e publicados via Vercel, com configuração no HTML da Loja Integrada.
 
+## Diagnóstico de ativação da prévia — 20/11/2026
+
+A URL \`?cabcom_preview=1\` **não injeta** JS/CSS por conta própria. O código \`INTEGRACAO-LOJA-INTEGRADA.html\` deve estar salvo no HTML personalizado da Cabcom e a página deve fazer as requisições \`https://cabcom-2026.vercel.app/cabcom.js\` e \`https://cabcom-2026.vercel.app/cabcom.css\`.
+
+**Teste visual imediato:** com os arquivos carregados e a flag de prévia ativa, aparece o selo **CABCOM 2026 · PRÉVIA ATIVA** no canto inferior direito. Se o selo não aparecer, verificar o HTML injetado no painel e a aba Network do navegador (não há razão para continuar comparando o layout antes de resolver o carregamento).
+
+**Teste técnico no console do navegador:**
+\`\`\`js
+({
+  script: !!window.Cabcom2026,
+  active: window.Cabcom2026?.state?.active,
+  preview: window.Cabcom2026?.state?.preview,
+  header: window.Cabcom2026?.state?.header,
+  sections: window.Cabcom2026?.state?.sections,
+  warnings: window.Cabcom2026?.state?.warnings
+})
+\`\`\`
+
+**Atualizações v1.1:** novo cabeçalho com as categorias oficiais capturadas no menu nativo, logo do painel, busca submetida pelo formulário original, acesso a conta e link ao carrinho de orçamento. O cabeçalho da LI permanece no DOM, mas é retirado do fluxo visual apenas durante a prévia. As seções customizadas passam a ter largura total da viewport.
+
+**Banner:** em prévia, tenta usar \`fullbanner.jpg\` no CDN informado. Se a imagem carregar, oculta somente o banner visual anterior; se faltar, não oculta o banner do painel. Em publicação, continua prioritário o banner gerenciado pela Loja Integrada. Para fidelidade final, o cliente deve cadastrar o banner aprovado na posição nativa do painel.
+
+**Arquivos gráficos:** o arquivo \`Fatiado.rar\` não equivale a upload para a CDN. Enquanto os arquivos não estiverem acessíveis nas URLs da LI, os módulos gráficos exclusivos não terão fidelidade ao layout. Não afirmar que imagens foram publicadas só porque foram descompactadas.
+
+
 ## Links permanentes
 - JS: https://cabcom-2026.vercel.app/cabcom.js
 - CSS: https://cabcom-2026.vercel.app/cabcom.css
