@@ -6,7 +6,7 @@
 (function (w,d) {
   'use strict';
   if(w.Cabcom2026) return;
-  var VERSION='1.6.0';
+  var VERSION='1.7.0';
   var CDN='https://cdn.awsli.com.br/80/80577/arquivos/';
   var DEFAULTS={
     geral:{ativo:true,publicarNaLoja:false,debug:false},
@@ -498,7 +498,8 @@
           var parsed=new DOMParser().parseFromString(html,'text/html');
           var official=parseSource(parsed,'carrinho');
           if(official.items.length){
-            official.count=existing?existing.count:null;
+            var q=official.items.every(function(it){return Number.isInteger(it.quantity)&&it.quantity>0;});
+            official.count=q?official.items.reduce(function(acc,it){return acc+it.quantity;},0):(existing?existing.count:null);
             show(official,'items');
           }else if(official.empty || existing&&existing.count===0)show({items:[],count:0,source:'carrinho'},'empty');
           else if(existing&&existing.items.length){
@@ -558,6 +559,43 @@
       if(ev.shiftKey&&d.activeElement===firstNode){ev.preventDefault();last.focus();}
       else if(!ev.shiftKey&&d.activeElement===last){ev.preventDefault();firstNode.focus();}
     }
+    // Cotar por E-mail na LI usa a rota oficial /carrinho/produto/ID/adicionar.
+    // O clique faz a mesma operação nativa, depois abre/atualiza o sidebar.
+    // Em caso de falha, usa o link original para não bloquear a cotação.
+    function handleNativeEmailQuote(event){
+      if(!active || !cartSidebarApi || !w.fetch || event.defaultPrevented)return;
+      if(typeof event.button==='number' && event.button!==0)return;
+      if(event.metaKey||event.ctrlKey||event.altKey||event.shiftKey)return;
+      var clicked=event.target&&event.target.closest&&event.target.closest('a[href]');
+      if(!clicked || clicked.closest('#cc26-cart-sidebar') || clicked.closest('#cc26-new-header'))return;
+      var caption=normalized(clicked.textContent||clicked.getAttribute('aria-label')||'');
+      if(!/COTAR\s+POR\s+E.?MAIL|COTAR\s+E.?MAIL/.test(caption) &&
+         !clicked.matches('.cotar-email,.botao-cotar-email,[data-cc26-cotar-email]'))return;
+      var action;
+      try{action=new URL(clicked.href,location.href);}catch(e){return;}
+      if(action.origin!==location.origin ||
+         !/^\/carrinho\/produto\/\d+\/adicionar\/?$/i.test(action.pathname))return;
+      event.preventDefault();event.stopImmediatePropagation();
+      // O servidor LI é a única fonte de verdade: nenhum preço ou item fictício.
+      cartSidebarApi.open();
+      clicked.classList.add('cc26-quote-adding');
+      clicked.setAttribute('aria-busy','true');
+      w.fetch(action.href,{
+        method:'GET',credentials:'same-origin',cache:'no-store',redirect:'follow',
+        headers:{Accept:'text/html'}
+      }).then(function(response){
+        if(!response.ok || !response.url ||
+           new URL(response.url,location.href).origin!==location.origin)throw Error('Erro ao adicionar');
+        cartSidebarApi.refresh();
+      }).catch(function(){
+        // Fluxo nativo de adicionar como fallback confiável.
+        w.location.assign(action.href);
+      }).finally(function(){
+        clicked.classList.remove('cc26-quote-adding');
+        clicked.removeAttribute('aria-busy');
+      });
+    }
+    d.addEventListener('click',handleNativeEmailQuote,true);
     trigger.addEventListener('click',openSidebar);
     overlay.addEventListener('click',closeSidebar);
     close.addEventListener('click',closeSidebar);
@@ -867,10 +905,30 @@
     media.appendChild(img('insta.png','Publicações da Cabcom no Instagram'));
     c.appendChild(media);s.appendChild(c);return s;
   }
+  // Normalização visual progressiva das vitrines sem clonar produtos nem slider LI.
+  function labelHomeShelves(listing){
+    [].slice.call(listing.querySelectorAll('.titulo-categoria')).forEach(function(heading){
+      var label=normalized(heading.textContent||'');
+      var type=/LANCAMENTO|NOVIDADE/.test(label)?'launches':(/MAIS VENDIDOS|DESTAQUE|BEST/.test(label)?'bestsellers':'');
+      if(!type)return;
+      heading.classList.add('cc26-shelf-heading--'+type);
+      var candidate=heading.closest('.listagem, .vitrine-produtos, .listagem-linha, .listagem-item');
+      if(!candidate || candidate===listing || candidate.querySelectorAll('.titulo-categoria').length>1){
+        candidate=heading.parentElement;
+        while(candidate && candidate!==listing &&
+              !candidate.querySelector('.produtos-carrossel,.listagem-linha,.listagem-item')){
+          candidate=candidate.parentElement;
+        }
+      }
+      if(candidate && candidate!==listing && candidate.querySelectorAll('.titulo-categoria').length===1)
+        candidate.classList.add('cc26-shelf-block--'+type);
+    });
+  }
   function decorateNativeShelves(){
     var listing=d.querySelector('#listagemProdutos');
     if(!listing)return;
     listing.classList.add('cc26-native-listing');
+    labelHomeShelves(listing);
     [].slice.call(listing.querySelectorAll('.titulo-categoria')).forEach(function(title){
       title.classList.add('cc26-native-shelf-title');
     });
