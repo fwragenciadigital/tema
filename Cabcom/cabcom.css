@@ -340,3 +340,361 @@ body.cc26-active .cc26-site-header :is(a,span,li,input,button),
 body.cc26-active #corpo :is(.nome-produto,.preco-produto,.acoes-produto,.botao) {
   font-family:var(--cc26-font-text,"Montserrat",Arial,Helvetica,sans-serif);
 }
+
+
+/* ===============================================================
+   Cabcom 2026 v1.2: fidelidade ao layout aprovado (20/11/2026)
+   Apenas no modo cc26-active. Nao substitui carrinho/checkout LI.
+   =============================================================== */
+
+/* Background original da faixa de navegacao. A arte e gerida na CDN LI. */
+body.cc26-active .cc26-site-header {
+  background: #087df1 url("https://cdn.awsli.com.br/80/80577/arquivos/bg-topo.png") center center/100% 100% no-repeat!important;
+}
+@media(max-width:1120px){
+  body.cc26-active .cc26-site-header{
+    background:linear-gradient(105deg,#0876f2 8%,#069edb 37%,#00c59b 100%)!important;
+  }
+}
+
+/* Beneficios — unica faixa de identidade, divisoria fina e titulo editorial abaixo. */
+body.cc26-active .cc26-benefits{
+  position:relative;
+  z-index:1;
+  min-height:174px;
+  padding:18px 0 35px!important;
+  background:
+    linear-gradient(180deg,rgba(0,179,143,.92),rgba(0,98,94,.78) 64%,rgba(0,13,25,.97)),
+    url("https://cdn.awsli.com.br/80/80577/arquivos/cabos.jpg") center 18%/cover no-repeat!important;
+}
+body.cc26-active .cc26-benefits::after{
+  content:"";
+  position:absolute;
+  left:max(20px,7%);right:max(20px,7%);bottom:0;
+  height:2px;background:#00c9b9;
+}
+body.cc26-active .cc26-benefits__grid{
+  max-width:1710px;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  column-gap:clamp(18px,3vw,65px);
+  row-gap:12px;
+}
+body.cc26-active .cc26-benefit{gap:13px;align-items:center}
+body.cc26-active .cc26-benefit__icon{
+  flex:0 0 68px;width:68px;height:68px;
+  background:linear-gradient(155deg,#006d6e,#00a489);color:#fff;
+  border-radius:50%;font-size:30px;
+}
+body.cc26-active .cc26-benefit strong{
+  color:#fff;font-family:var(--cc26-font-title)!important;
+  font-size:clamp(14px,1.2vw,21px);font-weight:700;line-height:1.16;
+}
+body.cc26-active .cc26-benefit small{
+  color:#fff;font-family:var(--cc26-font-text)!important;
+  font-size:clamp(11px,.75vw,14px);font-weight:450;line-height:1.35;margin-top:3px;
+}
+
+/* Apresentacao aprovada: imagem panoramica COMPLETA da Cabcom, em vez
+   de recorte fotografico na coluna esquerda. Texto sobre a parte escura. */
+body.cc26-active .cc26-presentation{
+  width:100vw!important;
+  min-height:clamp(520px,38vw,750px);
+  padding:0!important;
+  background:
+    linear-gradient(90deg,rgba(0,8,22,0) 0%,rgba(0,8,22,0) 41%,rgba(0,8,22,.42) 58%,rgba(0,5,17,.72) 100%),
+    url("https://cdn.awsli.com.br/80/80577/arquivos/cabos.jpg") center center/cover no-repeat!important;
+  color:white;
+}
+body.cc26-active .cc26-presentation__layout{
+  display:flex!important;justify-content:flex-end;align-items:center;
+  max-width:1760px!important;
+  margin:0 auto;padding:40px clamp(24px,3.8vw,72px)!important;
+  min-height:clamp(520px,38vw,750px);
+  gap:0;
+}
+body.cc26-active .cc26-presentation__image{display:none!important}
+body.cc26-active .cc26-presentation__copy{
+  width:min(48%,790px)!important;max-width:none!important;
+  margin:0 0 0 auto!important;
+  padding:28px 0 35px clamp(15px,1.4vw,28px)!important;
+  text-shadow:0 1px 3px #00152860;
+}
+body.cc26-active .cc26-presentation__copy h2{
+  font-family:var(--cc26-font-title)!important;
+  font-size:clamp(42px,3.75vw,68px)!important;
+  line-height:1.02!important;
+  letter-spacing:-.04em!important;
+  margin:0 0 26px!important;
+}
+body.cc26-active .cc26-presentation__copy h2 strong{color:#0c70ff;font-weight:700}
+body.cc26-active .cc26-presentation__copy h2 span{
+  color:#00d1a0;font-size:.55em!important;font-weight:650;
+  margin-top:1px;
+}
+body.cc26-active .cc26-presentation__copy p{
+  color:#f2f6fb!important;
+  font-family:var(--cc26-font-text)!important;
+  font-size:clamp(12px,.82vw,15px)!important;
+  line-height:1.8!important;
+  margin:0!important;
+  max-width:780px!important;
+}
+
+/* Vitrines da loja: nao destruir wrappers de Flickity, Slick, Owl ou Swiper.
+   Somente a apresentacao dos itens e titulo e customizada. */
+body.cc26-active #listagemProdutos .titulo-categoria{
+  display:flex!important;
+  align-items:center;
+  gap:12px;
+  max-width:100%;
+  min-height:66px;
+  margin:0 0 22px!important;
+  padding:0!important;
+  border:0!important;
+  font:700 clamp(18px,1.3vw,24px)/1.2 var(--cc26-font-title)!important;
+  color:#0568ff!important;
+  text-transform:uppercase;
+}
+body.cc26-active #listagemProdutos .titulo-categoria::before{
+  content:"";
+  flex:0 0 49px;width:49px;height:68px;
+  display:block;
+  background:url("https://cdn.awsli.com.br/80/80577/arquivos/logo.png") center/contain no-repeat;
+}
+body.cc26-active #listagemProdutos .titulo-categoria::after{
+  content:"";flex:1;min-width:20px;
+  height:2px;background:#0868ff;
+  align-self:center;
+}
+body.cc26-active #listagemProdutos .produtos-carrossel{
+  position:relative;max-width:100%;overflow:visible;
+}
+body.cc26-active #listagemProdutos .produtos-carrossel .listagem-item,
+body.cc26-active #listagemProdutos .produtos-carrossel > .produto{
+  box-sizing:border-box!important;
+  display:flex!important;
+  flex-direction:column!important;
+  justify-content:flex-start!important;
+  min-height:510px!important;
+  height:100%!important;
+  padding:16px 16px 22px!important;
+  background:#fff!important;
+  border:1px solid #eceef2!important;
+  border-radius:0!important;
+  box-shadow:0 6px 15px #00000012!important;
+  transition:box-shadow .2s ease,transform .2s ease;
+  text-align:center;
+}
+body.cc26-active #listagemProdutos .produtos-carrossel .listagem-item:hover,
+body.cc26-active #listagemProdutos .produtos-carrossel > .produto:hover{
+  transform:translateY(-3px);
+  box-shadow:0 12px 26px #0000001c!important;
+}
+body.cc26-active #listagemProdutos .produtos-carrossel :is(.imagem-produto,.imagem-produto a){
+  display:flex;align-items:center;justify-content:center;min-height:238px;
+  max-height:290px;overflow:hidden;
+}
+body.cc26-active #listagemProdutos .produtos-carrossel .imagem-produto img{
+  display:block;max-height:240px!important;max-width:100%!important;
+  width:auto!important;height:auto!important;object-fit:contain!important;
+  margin:0 auto;
+}
+body.cc26-active #listagemProdutos .produtos-carrossel .nome-produto{
+  display:-webkit-box!important;
+  -webkit-box-orient:vertical;-webkit-line-clamp:3;
+  overflow:hidden;
+  width:100%;
+  min-height:60px!important;max-height:70px;
+  margin:9px 0 18px!important;
+  color:#21242e!important;
+  text-transform:uppercase;
+  text-align:center;
+  font:500 clamp(11px,.78vw,14px)/1.45 var(--cc26-font-text)!important;
+}
+body.cc26-active #listagemProdutos .produtos-carrossel .acoes-produto{
+  display:flex!important;flex-direction:column!important;
+  align-items:stretch!important;justify-content:flex-end;
+  gap:7px!important;margin-top:auto!important;
+  padding:0 4px!important;
+}
+body.cc26-active #listagemProdutos .produtos-carrossel .acoes-produto :is(a.botao,button.botao){
+  box-sizing:border-box!important;
+  display:inline-flex!important;align-items:center;justify-content:center;
+  width:100%;min-height:38px!important;
+  border:0!important;border-radius:999px!important;
+  box-shadow:none!important;text-shadow:none!important;
+  padding:8px 14px!important;
+  font:700 clamp(11px,.76vw,14px)/1.2 var(--cc26-font-text)!important;
+  color:#fff!important;
+}
+body.cc26-active #listagemProdutos .produtos-carrossel .acoes-produto :is(a[href*="whatsapp"],a[href*="wa.me"],.whatsapp){
+  background:#00c99b!important;
+  color:#fff!important;
+}
+body.cc26-active #listagemProdutos .produtos-carrossel .acoes-produto :is(a[href^="mailto:"],.email,.e-mail){
+  background:#0868ff!important;color:#fff!important;
+}
+body.cc26-active #listagemProdutos .produtos-carrossel :is(.slick-prev,.slick-next,.owl-prev,.owl-next){
+  border:0!important;border-radius:50%!important;
+  background:#d3d3d3!important;color:#777!important;
+  width:30px;height:30px;
+  box-shadow:none!important;
+}
+
+/* Carrinho/Orcamento — progressivo e restrito a /carrinho.
+   O mesmo DOM, links, inputs, eventos e forms continuam sendo LI. */
+body.cc26-active.cc26-page-cart #corpo{
+  background:#f3f5f8;
+  padding-block:30px 65px;
+  color:#1d293a;
+  font-family:var(--cc26-font-text);
+}
+body.cc26-active.cc26-page-cart #corpo .conteiner{
+  max-width:1540px;
+  padding-inline:clamp(14px,3vw,40px);
+}
+body.cc26-active.cc26-cart-ready #corpo .cc26-cart-shell{box-sizing:border-box;min-width:0}
+body.cc26-active.cc26-cart-ready #corpo .cc26-cart-shell.cc26-cart-two-column{
+  display:grid;grid-template-columns:minmax(0,1.8fr) minmax(325px,.85fr);
+  gap:26px;align-items:start;
+}
+body.cc26-active.cc26-cart-ready #corpo .cc26-cart-main,
+body.cc26-active.cc26-cart-ready #corpo .cc26-cart-checkout-form{
+  box-sizing:border-box;max-width:100%;min-width:0;
+  background:#fff!important;
+  border:1px solid #e2e8f0!important;
+  border-radius:15px!important;
+  padding:clamp(14px,2vw,26px)!important;
+  box-shadow:0 10px 30px #09264a0c!important;
+}
+body.cc26-active.cc26-cart-ready #corpo .cc26-cart-two-column .cc26-cart-main{
+  grid-column:1;
+}
+body.cc26-active.cc26-cart-ready #corpo .cc26-cart-two-column .cc26-cart-checkout-form{
+  grid-column:2;position:sticky;top:120px;
+}
+body.cc26-active.cc26-cart-ready #corpo .cc26-cart-table{
+  width:100%;border-collapse:separate;border-spacing:0;
+  color:#283449;background:#fff;max-width:100%;
+}
+body.cc26-active.cc26-cart-ready #corpo .cc26-cart-table th{
+  padding:14px 12px;border-bottom:1px solid #e4ecf4;
+  color:#0868ff;font:700 13px/1.35 var(--cc26-font-title);
+  text-transform:uppercase;letter-spacing:.025em;
+}
+body.cc26-active.cc26-cart-ready #corpo .cc26-cart-table td{
+  padding:15px 10px;vertical-align:middle;border-bottom:1px solid #edf1f5;
+  color:#27364a;font-family:var(--cc26-font-text);font-size:13px;
+}
+body.cc26-active.cc26-cart-ready #corpo .cc26-cart-table :is(.produto-info a,.nome-produto){
+  color:#1d293a;font-weight:600;font-family:var(--cc26-font-text);
+}
+body.cc26-active.cc26-cart-ready #corpo .cc26-cart-table .quantidade input{
+  border:1px solid #d7dfeb!important;border-radius:8px;min-height:39px;
+  text-align:center;box-shadow:none;
+}
+body.cc26-active.cc26-cart-ready #corpo :is(#formCalcularFrete,#usarCupom){
+  box-sizing:border-box;max-width:100%;
+}
+body.cc26-active.cc26-cart-ready #corpo :is(input[type="text"],input[type="tel"],input[type="number"],select){
+  max-width:100%;border-radius:8px;border-color:#d7e1ed;
+}
+body.cc26-active.cc26-cart-ready #corpo .cc26-cart-summary{
+  padding:0 0 17px;margin:0 0 17px;
+  border-bottom:1px solid #edf0f5;
+}
+body.cc26-active.cc26-cart-ready #corpo .cc26-cart-summary__eyebrow{
+  display:block;font:700 10px/1.4 var(--cc26-font-text);
+  letter-spacing:.22em;color:#00ae94;margin-bottom:8px;
+}
+body.cc26-active.cc26-cart-ready #corpo .cc26-cart-summary__title{
+  font:700 24px/1.25 var(--cc26-font-title)!important;
+  color:#0c397e!important;margin:0 0 22px!important;
+}
+body.cc26-active.cc26-cart-ready #corpo .cc26-cart-summary__total{
+  display:flex;align-items:baseline;justify-content:space-between;
+  gap:12px;margin:10px 0;padding:0 0 8px;
+}
+body.cc26-active.cc26-cart-ready #corpo .cc26-cart-summary__total span{
+  font:550 12px/1.35 var(--cc26-font-text);
+}
+body.cc26-active.cc26-cart-ready #corpo .cc26-cart-summary__value{
+  font:800 clamp(20px,1.8vw,28px)/1.2 var(--cc26-font-text);
+  color:#0868ff;
+}
+body.cc26-active.cc26-cart-ready #corpo .cc26-cart-summary--no-total .cc26-cart-summary__total{display:none}
+body.cc26-active.cc26-cart-ready #corpo .cc26-cart-summary__note{
+  font:400 11px/1.55 var(--cc26-font-text);color:#64748b;margin:0;
+}
+body.cc26-active.cc26-cart-ready #corpo :is(.acao-editar .botao.principal,.cc26-cart-checkout-form button.botao.principal,.cc26-cart-checkout-form a.botao.principal){
+  display:inline-flex;align-items:center;justify-content:center;
+  min-height:48px;padding:12px 20px!important;border:0!important;
+  border-radius:999px!important;background:linear-gradient(90deg,#0868ff,#00c99b)!important;
+  color:#fff!important;font:750 14px/1.4 var(--cc26-font-text)!important;
+  text-shadow:none!important;box-shadow:none!important;
+}
+body.cc26-active.cc26-cart-empty #corpo .cc26-cart-empty__panel{
+  max-width:800px;margin:30px auto;padding:55px 30px!important;
+  background:#fff;border:1px solid #e7edf5;border-radius:15px;
+  text-align:center;box-shadow:0 10px 30px #001a3512;
+}
+body.cc26-active.cc26-cart-empty #corpo .cc26-cart-empty__panel h1{
+  color:#0b61e8;font:700 clamp(24px,3vw,40px)/1.2 var(--cc26-font-title);
+}
+
+@media(max-width:1199px){
+  body.cc26-active .cc26-benefits__grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  body.cc26-active.cc26-cart-ready #corpo .cc26-cart-shell.cc26-cart-two-column{
+    grid-template-columns:minmax(0,1fr);
+  }
+  body.cc26-active.cc26-cart-ready #corpo .cc26-cart-two-column .cc26-cart-checkout-form{
+    grid-column:1;position:static;top:auto;
+  }
+  body.cc26-active .cc26-presentation__layout{min-height:580px}
+  body.cc26-active .cc26-presentation__copy{width:min(54%,670px)!important}
+}
+@media(max-width:767px){
+  body.cc26-active .cc26-benefits{padding:20px 0 25px!important}
+  body.cc26-active .cc26-benefits__grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:15px 10px}
+  body.cc26-active .cc26-benefit__icon{flex:0 0 45px;width:45px;height:45px;font-size:21px}
+  body.cc26-active .cc26-benefit{gap:8px}
+  body.cc26-active .cc26-benefit strong{font-size:12px}
+  body.cc26-active .cc26-benefit small{font-size:10px}
+  body.cc26-active .cc26-presentation{
+    background:linear-gradient(180deg,rgba(0,8,22,.01) 0%,rgba(0,8,22,.08) 47%,#000817 61%),url("https://cdn.awsli.com.br/80/80577/arquivos/cabos.jpg") left top/auto 330px no-repeat!important;
+    min-height:0;
+  }
+  body.cc26-active .cc26-presentation__layout{
+    display:block!important;min-height:0!important;
+    padding:285px 18px 34px!important;
+  }
+  body.cc26-active .cc26-presentation__copy{
+    width:100%!important;
+    padding:5px 0 0!important;
+    margin:0!important;
+  }
+  body.cc26-active .cc26-presentation__copy h2{font-size:42px!important;margin-bottom:17px!important}
+  body.cc26-active .cc26-presentation__copy p{font-size:13px!important;line-height:1.7!important}
+  body.cc26-active #listagemProdutos .titulo-categoria{font-size:17px!important;min-height:47px;margin-bottom:14px!important}
+  body.cc26-active #listagemProdutos .titulo-categoria::before{flex-basis:34px;width:34px;height:47px}
+  body.cc26-active #listagemProdutos .produtos-carrossel .listagem-item{
+    min-height:420px!important;padding:12px 9px 16px!important;
+  }
+  body.cc26-active #listagemProdutos .produtos-carrossel :is(.imagem-produto,.imagem-produto a){min-height:180px;max-height:210px}
+  body.cc26-active #listagemProdutos .produtos-carrossel .imagem-produto img{max-height:170px!important}
+  body.cc26-active #listagemProdutos .produtos-carrossel .nome-produto{
+    min-height:63px!important;margin:8px 0 12px!important;
+    font-size:11px!important;
+  }
+  body.cc26-active #listagemProdutos .produtos-carrossel .acoes-produto :is(a.botao,button.botao){
+    min-height:35px!important;font-size:10px!important;padding:7px 8px!important;
+  }
+  body.cc26-active.cc26-cart-ready #corpo .cc26-cart-table td{padding:9px 5px;font-size:11px}
+  body.cc26-active.cc26-cart-ready #corpo .cc26-cart-shell{overflow-x:auto}
+  body.cc26-active.cc26-cart-ready #corpo .cc26-cart-main,
+  body.cc26-active.cc26-cart-ready #corpo .cc26-cart-checkout-form{padding:13px!important}
+  body.cc26-active.cc26-cart-ready #corpo .cc26-cart-summary__title{font-size:22px!important}
+}
+@media(prefers-reduced-motion:reduce){
+  body.cc26-active #listagemProdutos .produtos-carrossel .listagem-item{transition:none!important;transform:none!important}
+}
