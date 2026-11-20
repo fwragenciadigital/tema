@@ -2603,3 +2603,422 @@ body.cc26-active .cc26-pdp__mobile-bar{
     transition:none!important;translate:none!important;
   }
 }
+
+
+/* ========================================================================
+   CABCOM PDP 2026 v1.9 — Visual editorial inspirado na referência aprovada
+   Foto grande à esquerda, miniaturas embaixo, informações à direita.
+   Nenhuma avaliação, preço, variação ou oferta fictícia é adicionada.
+   ======================================================================== */
+body.cc26-active.cc26-pdp-ready{
+  background:#ededed;
+}
+body.cc26-active.cc26-pdp-ready #corpo{
+  background:#ededed!important;color:#141b27!important;
+}
+body.cc26-active.cc26-pdp-ready #corpo>.conteiner{
+  max-width:1760px!important;
+  margin:0 auto!important;
+  padding:clamp(22px,3.3vw,55px) clamp(16px,3.1vw,56px) 80px!important;
+}
+body.cc26-active.cc26-pdp-ready #corpo .cc26-pdp.cc26-pdp--editorial{
+  box-sizing:border-box;
+  width:100%!important;
+  max-width:1660px!important;
+  margin:0 auto!important;
+  padding:clamp(22px,3vw,54px)!important;
+  border-radius:22px!important;
+  background:#fff!important;
+  border:1px solid #e9e9e9!important;
+  box-shadow:0 18px 54px rgba(13,23,41,.045)!important;
+}
+body.cc26-active.cc26-pdp-ready #corpo .cc26-pdp--editorial .cc26-pdp__grid{
+  grid-template-columns:minmax(0,1.02fr) minmax(0,.98fr)!important;
+  gap:clamp(28px,4.2vw,72px)!important;
+  align-items:start!important;
+}
+body.cc26-active.cc26-pdp-ready #corpo .cc26-pdp--editorial .cc26-pdp__breadcrumbs{
+  margin:0 0 clamp(24px,2.5vw,40px)!important;
+  font:500 12px/1.5 var(--cc26-font-text)!important;
+  color:#89939e!important;
+}
+/* Foto técnica da LI, com escala contida e área em tom off-white. */
+body.cc26-active.cc26-pdp-ready #corpo .cc26-pdp--editorial .cc26-pdp__media{
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:stretch!important;
+  gap:15px!important;
+  width:100%!important;
+  min-width:0!important;
+}
+body.cc26-active.cc26-pdp-ready #corpo .cc26-pdp--editorial .cc26-pdp__image-stage{
+  order:0!important;
+  position:relative!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  box-sizing:border-box!important;
+  width:100%!important;
+  height:clamp(380px,34vw,630px)!important;
+  min-height:0!important;
+  max-height:none!important;
+  padding:clamp(26px,3vw,60px)!important;
+  margin:0!important;
+  background:#f6f6f4!important;
+  border:0!important;
+  border-radius:12px!important;
+  box-shadow:none!important;
+  overflow:hidden!important;
+}
+body.cc26-active.cc26-pdp-ready #corpo .cc26-pdp--editorial .cc26-pdp__image-stage>div{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  width:100%!important;
+  height:100%!important;
+  min-width:0!important;
+  overflow:hidden!important;
+}
+body.cc26-active.cc26-pdp-ready #corpo .cc26-pdp--editorial .cc26-pdp__image-stage #imagemProduto{
+  position:static!important;
+  display:block!important;
+  inset:auto!important;
+  width:100%!important;
+  height:100%!important;
+  min-height:0!important;
+  max-height:100%!important;
+  max-width:100%!important;
+  object-fit:contain!important;
+  object-position:center!important;
+  mix-blend-mode:multiply;
+  transform:none!important;
+  border:0!important;
+  box-shadow:none!important;
+  background:transparent!important;
+  opacity:1!important;visibility:visible!important;
+}
+body.cc26-active.cc26-pdp-ready #corpo .cc26-pdp--editorial .cc26-pdp__thumbs{
+  order:1!important;
+  box-sizing:border-box!important;
+  display:block!important;
+  grid-column:auto!important;
+  grid-row:auto!important;
+  width:100%!important;
+  max-width:100%!important;
+  min-width:0!important;
+  margin:0!important;padding:0!important;
+  background:transparent!important;border:0!important;
+}
+body.cc26-active.cc26-pdp-ready #corpo .cc26-pdp--editorial .cc26-pdp__thumbs .miniaturas{
+  display:flex!important;
+  flex-direction:row!important;
+  flex-wrap:nowrap!important;
+  align-items:stretch!important;
+  gap:10px!important;
+  width:100%!important;
+  max-height:none!important;
+  margin:0!important;
+  padding:3px 1px 8px!important;
+  overflow-x:auto!important;
+  overflow-y:hidden!important;
+  scroll-snap-type:x proximity;
+  scrollbar-width:thin;
+}
+body.cc26-active.cc26-pdp-ready #corpo .cc26-pdp--editorial .cc26-pdp__thumbs .miniaturas>li{
+  float:none!important;
+  width:clamp(74px,7.8vw,105px)!important;
+  height:clamp(74px,7.8vw,105px)!important;
+  flex:0 0 clamp(74px,7.8vw,105px)!important;
+  min-width:0!important;
+  margin:0!important;
+  padding:0!important;
+  list-style:none!important;
+  scroll-snap-align:start;
+}
+body.cc26-active.cc26-pdp-ready #corpo .cc26-pdp--editorial .cc26-pdp__thumbs .miniaturas a{
+  display:flex!important;
+  justify-content:center!important;
+  align-items:center!important;
+  width:100%!important;
+  height:100%!important;
+  padding:8px!important;
+  background:#f5f5f3!important;
+  border:1px solid transparent!important;
+  border-radius:8px!important;
+  box-shadow:none!important;
+  transition:border-color .2s ease,background .2s ease;
+}
+body.cc26-active.cc26-pdp-ready #corpo .cc26-pdp--editorial .cc26-pdp__thumbs .miniaturas a:hover,
+body.cc26-active.cc26-pdp-ready #corpo .cc26-pdp--editorial .cc26-pdp__thumbs .miniaturas a.cc26-pdp__thumb-selected,
+body.cc26-active.cc26-pdp-ready #corpo .cc26-pdp--editorial .cc26-pdp__thumbs .miniaturas a:focus-visible{
+  background:#fff!important;
+  border-color:#24282c!important;
+}
+body.cc26-active.cc26-pdp-ready #corpo .cc26-pdp--editorial .cc26-pdp__thumbs .miniaturas img{
+  width:100%!important;height:100%!important;
+  max-width:100%!important;max-height:100%!important;
+  display:block!important;
+  object-fit:contain!important;
+}
+body.cc26-active.cc26-pdp-ready #corpo .cc26-pdp--editorial .cc26-pdp__share{
+  order:2!important;
+  margin:0!important;
+  padding:9px 0 0!important;
+  color:#8c97a2;
+  font-size:12px;
+  opacity:.88;
+}
+
+/* Informações com estética limpa, sem cartão interno nem sombras adicionais. */
+body.cc26-active.cc26-pdp-ready #corpo .cc26-pdp--editorial .cc26-pdp__details{
+  position:static!important;
+  top:auto!important;
+  width:100%!important;
+  max-width:none!important;
+  margin:0!important;
+  padding:clamp(8px,1.4vw,20px) 0 0!important;
+  background:transparent!important;
+  border:0!important;
+  border-radius:0!important;
+  box-shadow:none!important;
+  color:#1d2025;
+}
+body.cc26-active.cc26-pdp-ready #corpo .cc26-pdp--editorial .cc26-pdp__heading{
+  margin:0 0 24px!important;
+  padding:0!important;
+  border:0!important;
+}
+body.cc26-active.cc26-pdp-ready #corpo .cc26-pdp--editorial .cc26-pdp__eyebrow{
+  display:inline-flex!important;align-items:center;gap:10px;
+  margin:0 0 15px!important;
+  color:#32363a!important;
+  letter-spacing:.06em!important;
+  font:750 12px/1.3 var(--cc26-font-text)!important;
+}
+body.cc26-active.cc26-pdp-ready #corpo .cc26-pdp--editorial .cc26-pdp__eyebrow .cc26-icon{
+  width:29px;height:29px;
+  padding:5px;box-sizing:border-box;
+  border-radius:50%;
+  color:#00b992!important;
+  background:#e6f9f3!important;
+}
+body.cc26-active.cc26-pdp-ready #corpo .cc26-pdp--editorial .cc26-pdp__name{
+  max-width:32ch;
+  margin:0 0 10px!important;
+  padding:0!important;
+  color:#13161a!important;
+  text-transform:none!important;
+  font:700 clamp(25px,2.05vw,35px)/1.19 var(--cc26-font-title)!important;
+  letter-spacing:-.035em!important;
+}
+body.cc26-active.cc26-pdp-ready #corpo .cc26-pdp--editorial .cc26-pdp__code{
+  padding:0!important;margin:0!important;
+  color:#91979e!important;
+  font:450 11px/1.5 var(--cc26-font-text)!important;
+}
+body.cc26-active.cc26-pdp-ready #corpo .cc26-pdp--editorial .cc26-pdp__purchase{
+  padding:0!important;margin:0!important;
+  border:0!important;background:transparent!important;
+  box-shadow:none!important;
+}
+body.cc26-active.cc26-pdp-ready #corpo .cc26-pdp--editorial .cc26-pdp__native-price{
+  border:0!important;
+  border-bottom:1px solid #f0f0f0!important;
+  margin:0 0 23px!important;
+  padding:0 0 22px!important;
+  background:transparent!important;
+}
+body.cc26-active.cc26-pdp-ready #corpo .cc26-pdp--editorial .cc26-pdp__native-price :is(strong,.preco-promocional){
+  color:#16181c!important;
+  font-family:var(--cc26-font-text)!important;
+}
+body.cc26-active.cc26-pdp-ready #corpo .cc26-pdp--editorial .cc26-pdp__quote-hint{
+  margin:20px 0 13px!important;
+  color:#747d89!important;
+  font:450 12px/1.55 var(--cc26-font-text)!important;
+}
+body.cc26-active.cc26-pdp-ready #corpo .cc26-pdp--editorial .cc26-pdp__native-actions{
+  display:block;
+  padding:0!important;margin:0!important;
+  background:transparent!important;
+  box-shadow:none!important;border:0!important;
+}
+body.cc26-active.cc26-pdp-ready #corpo .cc26-pdp--editorial .comprar{
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:stretch!important;
+  gap:10px!important;
+  padding:0!important;
+  margin:0!important;
+  width:100%!important;
+}
+/* CTA principal escuro seguindo a referência, WhatsApp como segunda opção. */
+body.cc26-active.cc26-pdp-ready #corpo .cc26-pdp--editorial .comprar .cc26-pdp__cta--quote{
+  order:0!important;
+  display:flex!important;align-items:center!important;justify-content:center!important;
+  gap:12px!important;
+  width:100%!important;
+  max-width:none!important;
+  min-height:58px!important;
+  border:1px solid #11161b!important;
+  border-radius:10px!important;
+  padding:13px 20px!important;
+  background:#15191f!important;
+  color:#fff!important;
+  font:750 15px/1.3 var(--cc26-font-text)!important;
+  box-shadow:none!important;
+  text-decoration:none!important;
+}
+body.cc26-active.cc26-pdp-ready #corpo .cc26-pdp--editorial .comprar .cc26-pdp__cta--whatsapp{
+  order:1!important;
+  display:flex!important;align-items:center!important;justify-content:center!important;
+  gap:10px!important;
+  width:100%!important;
+  max-width:none!important;
+  min-height:51px!important;
+  padding:12px 20px!important;
+  border:1px solid #bdded4!important;
+  border-radius:10px!important;
+  background:#f5fcf9!important;
+  color:#007d61!important;
+  font:700 14px/1.35 var(--cc26-font-text)!important;
+  box-shadow:none!important;
+  text-decoration:none!important;
+}
+body.cc26-active.cc26-pdp-ready #corpo .cc26-pdp--editorial .comprar .cc26-pdp__cta:hover{
+  filter:none!important;
+  translate:0 -2px;
+  box-shadow:0 8px 21px rgba(15,25,36,.1)!important;
+}
+body.cc26-active.cc26-pdp-ready #corpo .cc26-pdp--editorial .cc26-pdp__stock{
+  margin:17px 0!important;
+  color:#677381!important;
+  font:500 12px/1.45 var(--cc26-font-text)!important;
+}
+body.cc26-active.cc26-pdp-ready #corpo .cc26-pdp--editorial .cc26-pdp__assistance{
+  margin:26px 0 0!important;
+  padding:22px 0 0!important;
+  border:0!important;
+  border-top:1px solid #e9ebef!important;
+  border-radius:0!important;
+  background:transparent!important;
+}
+body.cc26-active.cc26-pdp-ready #corpo .cc26-pdp--editorial .cc26-pdp__assistance-heading{
+  color:#1b2228!important;
+  font:700 17px/1.25 var(--cc26-font-title)!important;
+}
+body.cc26-active.cc26-pdp-ready #corpo .cc26-pdp--editorial .cc26-pdp__assistance p{
+  margin:0 0 14px!important;color:#747f8c!important;
+}
+body.cc26-active.cc26-pdp-ready #corpo .cc26-pdp--editorial .cc26-pdp__steps{
+  gap:12px!important;
+}
+body.cc26-active.cc26-pdp-ready #corpo .cc26-pdp--editorial .cc26-pdp__step{
+  font-size:11px!important;
+  color:#536274!important;
+}
+body.cc26-active.cc26-pdp-ready #corpo .cc26-pdp--editorial .cc26-pdp__step b{
+  background:#18232e!important;
+}
+/* Descrição abaixo do conjunto principal, mantendo todas as especificações LI. */
+body.cc26-active.cc26-pdp-ready #corpo .cc26-pdp--editorial .cc26-pdp__description{
+  margin:38px 0 0!important;
+  padding:30px 0 0!important;
+  background:#fff!important;
+  border:0!important;
+  border-top:1px solid #eff1f3!important;
+  border-radius:0!important;
+  box-shadow:none!important;
+}
+
+/* Responsividade preservando o grid nativo e evitando cortes de imagem. */
+@media(max-width:1020px){
+  body.cc26-active.cc26-pdp-ready #corpo .cc26-pdp.cc26-pdp--editorial{
+    padding:24px!important;
+  }
+  body.cc26-active.cc26-pdp-ready #corpo .cc26-pdp--editorial .cc26-pdp__grid{
+    gap:25px!important;
+  }
+  body.cc26-active.cc26-pdp-ready #corpo .cc26-pdp--editorial .cc26-pdp__image-stage{
+    height:clamp(320px,44vw,490px)!important;
+    padding:24px!important;
+  }
+  body.cc26-active.cc26-pdp-ready #corpo .cc26-pdp--editorial .cc26-pdp__thumbs .miniaturas>li{
+    flex-basis:76px!important;
+    width:76px!important;height:76px!important;
+  }
+}
+@media(max-width:850px){
+  body.cc26-active.cc26-pdp-ready #corpo>.conteiner{
+    padding:14px 14px 95px!important;
+  }
+  body.cc26-active.cc26-pdp-ready #corpo .cc26-pdp.cc26-pdp--editorial{
+    padding:22px!important;
+    border-radius:17px!important;
+  }
+  body.cc26-active.cc26-pdp-ready #corpo .cc26-pdp--editorial .cc26-pdp__grid{
+    display:flex!important;
+    flex-direction:column!important;
+    gap:24px!important;
+  }
+  body.cc26-active.cc26-pdp-ready #corpo .cc26-pdp--editorial .cc26-pdp__media{
+    display:flex!important;flex-direction:column!important;
+    width:100%!important;gap:12px!important;
+  }
+  body.cc26-active.cc26-pdp-ready #corpo .cc26-pdp--editorial .cc26-pdp__image-stage{
+    order:0!important;
+    height:min(75vw,500px)!important;
+    min-height:290px!important;
+    max-height:500px!important;
+    padding:20px!important;
+  }
+  body.cc26-active.cc26-pdp-ready #corpo .cc26-pdp--editorial .cc26-pdp__thumbs{
+    order:1!important;display:block!important;
+  }
+  body.cc26-active.cc26-pdp-ready #corpo .cc26-pdp--editorial .cc26-pdp__thumbs .miniaturas{
+    display:flex!important;flex-direction:row!important;
+    overflow-x:auto!important;
+    overflow-y:hidden!important;
+  }
+  body.cc26-active.cc26-pdp-ready #corpo .cc26-pdp--editorial .cc26-pdp__details{
+    padding:0!important;width:100%!important;
+  }
+  body.cc26-active.cc26-pdp-ready #corpo .cc26-pdp--editorial .cc26-pdp__name{
+    max-width:100%;
+  }
+}
+@media(max-width:600px){
+  body.cc26-active.cc26-pdp-ready #corpo>.conteiner{
+    padding:9px 9px 120px!important;
+  }
+  body.cc26-active.cc26-pdp-ready #corpo .cc26-pdp.cc26-pdp--editorial{
+    padding:15px!important;
+    border-radius:12px!important;
+  }
+  body.cc26-active.cc26-pdp-ready #corpo .cc26-pdp--editorial .cc26-pdp__image-stage{
+    min-height:260px!important;
+    height:68vw!important;
+    padding:15px!important;
+  }
+  body.cc26-active.cc26-pdp-ready #corpo .cc26-pdp--editorial .cc26-pdp__thumbs .miniaturas>li{
+    flex-basis:65px!important;width:65px!important;height:65px!important;
+  }
+  body.cc26-active.cc26-pdp-ready #corpo .cc26-pdp--editorial .cc26-pdp__name{
+    font-size:24px!important;
+  }
+  body.cc26-active.cc26-pdp-ready #corpo .cc26-pdp--editorial .cc26-pdp__steps{
+    grid-template-columns:1fr!important;gap:8px!important;
+  }
+  body.cc26-active.cc26-pdp-ready #corpo .cc26-pdp--editorial .comprar .cc26-pdp__cta--quote{
+    min-height:52px!important;font-size:13px!important;
+  }
+  body.cc26-active.cc26-pdp-ready #corpo .cc26-pdp--editorial .comprar .cc26-pdp__cta--whatsapp{
+    min-height:47px!important;font-size:13px!important;
+  }
+  body.cc26-active.cc26-pdp-ready .cc26-pdp__mobile-buttons .cc26-pdp__mobile-quote{
+    background:#15191f!important;
+  }
+  body.cc26-active.cc26-pdp-ready .cc26-pdp__mobile-buttons .cc26-pdp__mobile-whatsapp{
+    background:#008e70!important;
+  }
+}
