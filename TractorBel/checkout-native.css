@@ -740,3 +740,66 @@ body.pagina-carrinho.carrinho-checkout #barraTopo{
   body.pagina-carrinho.carrinho-checkout #corpo #formularioCheckout
   :is(input,select,textarea,button,a){transition:none!important;}
 }
+
+
+/* ==========================================================
+   TractorBel checkout v1.25.2 | Campos opacos e legiveis
+   Corrige backgrounds transparentes herdados do tema/Bootstrap.
+   Nao altera tipos, valores, validacoes, disabled ou gateways.
+   ========================================================== */
+body.pagina-carrinho.carrinho-checkout #corpo #formularioCheckout
+:is(
+  input:not([type="hidden"]):not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="submit"]):not([type="button"]):not([type="range"]):not([type="color"]),
+  select,
+  textarea
+) {
+  background-color:#fff!important;
+  background-image:none!important;
+  color:#252525!important;
+  border-color:#d6d9de!important;
+  -webkit-text-fill-color:#252525;
+}
+/* Estado de foco: mantem a indicacao visual e o fundo branco. */
+body.pagina-carrinho.carrinho-checkout #corpo #formularioCheckout
+:is(input,select,textarea):focus:not([type="checkbox"]):not([type="radio"]){
+  background-color:#fff!important;
+  border-color:#ae8500!important;
+}
+/* Inputs desabilitados ou somente leitura continuam identificaveis,
+   sem aparentar um campo editavel ou perder o estado funcional. */
+body.pagina-carrinho.carrinho-checkout #corpo #formularioCheckout
+:is(input,select,textarea):disabled,
+body.pagina-carrinho.carrinho-checkout #corpo #formularioCheckout
+:is(input,textarea)[readonly]{
+  background-color:#f2f3f5!important;
+  background-image:none!important;
+}
+/* Preenchimento automatico de Chrome/Safari não deixa fundo transparente. */
+body.pagina-carrinho.carrinho-checkout #corpo #formularioCheckout
+input:-webkit-autofill,
+body.pagina-carrinho.carrinho-checkout #corpo #formularioCheckout
+input:-webkit-autofill:hover,
+body.pagina-carrinho.carrinho-checkout #corpo #formularioCheckout
+input:-webkit-autofill:focus {
+  -webkit-box-shadow:0 0 0 1000px #fff inset!important;
+  box-shadow:0 0 0 1000px #fff inset!important;
+  -webkit-text-fill-color:#252525!important;
+  caret-color:#252525;
+}
+body.pagina-carrinho.carrinho-checkout #corpo #formularioCheckout
+:is(input,textarea)::placeholder{
+  color:#81858b!important;
+  opacity:1;
+}
+body.pagina-carrinho.carrinho-checkout #corpo #formularioCheckout
+select option{
+  background-color:#fff;
+  color:#252525;
+}
+/* Validacoes nativas continuam visiveis mesmo com borda padronizada. */
+body.pagina-carrinho.carrinho-checkout #corpo #formularioCheckout
+.control-group.error :is(input,select,textarea),
+body.pagina-carrinho.carrinho-checkout #corpo #formularioCheckout
+:is(input,select,textarea)[aria-invalid="true"]{
+  border-color:#c83030!important;
+}
