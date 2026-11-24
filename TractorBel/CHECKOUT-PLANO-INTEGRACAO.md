@@ -65,3 +65,14 @@ A amostra original do lojista (arquivo boxx.html) foi lida integralmente **somen
 - Nao adicionar `checkout-native.css` ao `tractorbel.css` geral esperando que passe a valer no checkout. Nao usar injetor externo nao autorizado, iframe, DOM clonado, endpoint de pagamento proprio ou alteracao dos formularios nativos.
 
 **QA pendente de homologacao na Loja Integrada (nao certificado por snapshot HTML):** teste no browser com 1440/1366/1280/767 viewport/767 emulacao mobile/390, telefone, CPF/PJ, CEP, opcoes frete, cartao, Pix, boleto, alteracao de pagamento, mensagens de erro, botao disabled/ativo, selo SSL, cupons, sem concluir pagamento real. Aplicar somente apos confirmar que o CSS de checkout pode ser carregado sem afetar conversao.
+
+
+## v1.27.0 — Pedido finalizado / Pagali Pix (24/11/2026)
+
+- O usuário forneceu uma amostra HTML da rota com `body.pagina-pedido-finalizado`. **Não armazenar o HTML**, que contém dados de pedido, cliente, QR e Pix de sessão.
+- A origem da estilização é `pedido-finalizado.css`; o mesmo CSS está incorporado ao final de `checkout-native.css` para quem instala um só arquivo de personalização financeira.
+- CSS-only: não altera payload do QR, destinatário, timer, botão de copiar, valores, eventos, iframe-boleto ou o estado das caixas de pagamento. Sem regras para forçar `display:block` em alertas ou status ocultos.
+- Na confirmação, a primeira região exibe status/número e pagamento em duas colunas; detalhes e resumo continuam no bloco inferior com duas colunas. Em até 991px as seções viram uma coluna; em até 430px as instruções Pix empilham.
+- O Bootstrap insere pseudo-elementos ::before/::after nos `.row-fluid`; no layout grid/flex eles viravam colunas fantasmas. O CSS neutraliza apenas os pseudoelementos destes wrappers específicos.
+- **Instalação:** normal `Incluir código HTML` da LI **não carrega** nesta etapa segundo a documentação oficial (https://ajuda.lojaintegrada.com.br/pt-BR/articles/911875-como-inserir-um-codigo-html-e-javascript). Somente aplicar no recurso de CSS do tema/checkout que realmente alcance a página `pedido-finalizado`, se disponível. Nenhuma instalação no painel da LI foi executada neste commit.
+- QA obrigatório antes de declarar entregue: layout em 1440, 1366, 1280, 767 duas passagens, 390, 360; verificar QR válido, timer, botão copiar Pix, mudança de status e boleto, total e frete. Testes locais sanitizados não substituem verificação de pagamento real.
