@@ -322,3 +322,25 @@ A integração em `INTEGRACAO-LOJA-INTEGRADA.html` foi preparada com `publicarNa
 
 - Mesma lógica e mesmos seletores do CSS enviado, com quatro faixas desktop idênticas consolidadas numa única media query. Nenhuma alteração em JS, checkout ou dados dos produtos.
 
+
+
+## v1.26.0 — Correção de Font Awesome e logo na área do cliente (24/11/2026)
+
+A auditoria do arquivo backup `legacy/loja-css-original-20261119.css` detectou **10 pseudo-elementos** com códigos hexadecimais de ícones escritos literalmente (ex.: `content:"f007"`), fazendo o navegador imprimir o texto em vez do ícone. Todos receberam sobrescrita escopada no CSS principal, preservando o backup legado.
+
+| Seletor | Glifo correto | Fonte |
+|---|---|---|
+| `.icon-user::before` | `\f007` | Font Awesome 5 Free 900 |
+| `.icon-bold::before` | `\f1ea` | Font Awesome 5 Free 900 |
+| `.fa-skype::before` | `\f17e` | Font Awesome 5 Brands 400 |
+| `.icon-google-plus::before` | `\f0d5` | Font Awesome 5 Brands 400 |
+| `.icon-twitter::before` | `\f099` | Font Awesome 5 Brands 400 |
+| `.icon-youtube::before` | `\f167` | Font Awesome 5 Brands 400 |
+| `.icon-instagram::before` | `\f16d` | Font Awesome 5 Brands 400 |
+| `.icon-pinterest::before` | `\f231` | Font Awesome 5 Brands 400 |
+| `.smarthint .listagem .slick-prev::before` | `\f053` | FontAwesome 900 |
+| `.smarthint .listagem .slick-next::before` | `\f054` | FontAwesome 900 |
+
+- Os ícones Font Awesome 5 Free Solid usam peso 900; os Brands usam peso 400.
+- Em `tb26-inner__banner-decor`, o “T” foi substituído pela logo oficial obtida do cabeçalho da LI (`state.logo.src`), com fallback `logo-top.png` via CDN e texto apenas se ambas falharem. A logo é exibida em versão reduzida também no mobile.
+- Formulários e autenticação não foram alterados. Validar visualmente login, cadastro, conta, pedidos e elementos antigos com Font Awesome, pois a disponibilidade efetiva da fonte depende das folhas carregadas pelo tema.

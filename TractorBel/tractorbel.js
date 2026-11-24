@@ -1,12 +1,12 @@
 /*
- * TractorBel 2026 - FWR Agencia Digital - v1.25.0
+ * TractorBel 2026 - FWR Agencia Digital - v1.26.0
  * Camada visual da Loja Integrada. Sem checkout ou precificacao paralela.
  * Editavel por window.TractorBelSettings no HTML da LI.
  */
 (function (win, doc) {
   'use strict';
   if (win.TractorBel2026) return;
-  var VERSION = '1.25.0';
+  var VERSION = '1.26.0';
   // Assets oficiais da TractorBel, ja hospedados na Loja Integrada.
   // Manter os nomes e extensoes ORIGINAIS, sem converter .jpg/.png para .webp.
   // O nome logico pode continuar .webp para compatibilidade com os componentes existentes.
@@ -2232,7 +2232,22 @@
     append(textBox,e('span','tb26-inner__eyebrow',item[0]),e('div','tb26-inner__banner-title',item[1]),e('p','tb26-inner__banner-desc',item[2]));
     var decor=e('div','tb26-inner__banner-decor');
     decor.setAttribute('aria-hidden','true');
-    append(decor,e('span','tb26-inner__banner-mark','T'),e('span','tb26-inner__banner-since','DESDE 1983'));
+    // Usa a logo do painel da LI (mesma do header); fallback no CDN da TractorBel.
+    var bannerLogo=e('img','tb26-inner__banner-logo');
+    bannerLogo.src=(state.logo && state.logo.src) || asset('logo-top.webp');
+    bannerLogo.alt='';
+    bannerLogo.width=320;
+    bannerLogo.height=96;
+    bannerLogo.loading='lazy';
+    bannerLogo.decoding='async';
+    var secondaryLogoAttempted=false;
+    bannerLogo.addEventListener('error',function(){
+      if(!secondaryLogoAttempted){
+        secondaryLogoAttempted=true;
+        bannerLogo.src=asset('logo-top.webp');
+      }else bannerLogo.replaceWith(e('span','tb26-inner__banner-fallback','TRACTORBEL'));
+    });
+    decor.appendChild(bannerLogo);
     append(banner,textBox,decor);
     target.insertBefore(banner,target.firstChild);
     // Nao mover titulo/h1, validacoes, formularios ou blocos de pedido.

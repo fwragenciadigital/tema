@@ -2834,3 +2834,76 @@ body.tb26-active .tb26-categories__grid {
     width:77%!important;
   }
 }
+
+/* TractorBel v1.26.0: reparar códigos de glifos literais no CSS legado,
+   corrigir login, conta e ícones auxiliares nas páginas do tema. */
+
+body.tb26-active .icon-user::before { font-family:'Font Awesome 5 Free',FontAwesome!important; font-weight:900!important; font-style:normal!important; content:"\f007"!important; }
+body.tb26-active .icon-bold::before { font-family:'Font Awesome 5 Free',FontAwesome!important; font-weight:900!important; font-style:normal!important; content:"\f1ea"!important; }
+body.tb26-active .fa-skype::before { font-family:'Font Awesome 5 Brands',FontAwesome!important; font-weight:400!important; font-style:normal!important; content:"\f17e"!important; }
+body.tb26-active .icon-google-plus::before { font-family:'Font Awesome 5 Brands',FontAwesome!important; font-weight:400!important; font-style:normal!important; content:"\f0d5"!important; }
+body.tb26-active .icon-twitter::before { font-family:'Font Awesome 5 Brands',FontAwesome!important; font-weight:400!important; font-style:normal!important; content:"\f099"!important; }
+body.tb26-active .icon-youtube::before { font-family:'Font Awesome 5 Brands',FontAwesome!important; font-weight:400!important; font-style:normal!important; content:"\f167"!important; }
+body.tb26-active .icon-instagram::before { font-family:'Font Awesome 5 Brands',FontAwesome!important; font-weight:400!important; font-style:normal!important; content:"\f16d"!important; }
+body.tb26-active .icon-pinterest::before { font-family:'Font Awesome 5 Brands',FontAwesome!important; font-weight:400!important; font-style:normal!important; content:"\f231"!important; }
+body.tb26-active .smarthint .listagem .slick-prev::before { font-family:'FontAwesome',FontAwesome!important; font-weight:900!important; font-style:normal!important; content:"\f053"!important; }
+body.tb26-active .smarthint .listagem .slick-next::before { font-family:'FontAwesome',FontAwesome!important; font-weight:900!important; font-style:normal!important; content:"\f054"!important; }
+
+/* Banner das paginas internas: logo da própria loja no lugar do T. */
+body.tb26-active.tb26-inner-ready .tb26-inner__banner{
+  grid-template-columns:minmax(0,1fr) minmax(160px,290px);
+}
+body.tb26-active.tb26-inner-ready .tb26-inner__banner-decor{
+  display:flex!important;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  position:relative;
+  width:min(100%,290px)!important;
+  height:auto!important;
+  min-height:90px;
+  margin-left:auto;
+  padding:0!important;
+  border:0!important;
+  border-radius:0;
+  background:transparent!important;
+  box-shadow:none!important;
+  transform:none!important;
+}
+body.tb26-active.tb26-inner-ready .tb26-inner__banner-logo{
+  display:block;
+  width:100%;
+  max-width:290px;
+  max-height:122px;
+  height:auto;
+  object-fit:contain;
+  object-position:center;
+}
+body.tb26-active.tb26-inner-ready .tb26-inner__banner-fallback{
+  color:#ffc400;
+  font:750 clamp(16px,2vw,23px)/1.4 'Montserrat',Arial,sans-serif!important;
+}
+@media(max-width:860px){
+  body.tb26-active.tb26-inner-ready .tb26-inner__banner{
+    grid-template-columns:minmax(0,1fr) minmax(120px,190px);
+  }
+  body.tb26-active.tb26-inner-ready .tb26-inner__banner-decor{
+    width:min(100%,190px)!important;
+    height:auto!important;
+  }
+}
+@media(max-width:600px){
+  body.tb26-active.tb26-inner-ready .tb26-inner__banner{
+    grid-template-columns:minmax(0,1fr);
+  }
+  body.tb26-active.tb26-inner-ready .tb26-inner__banner-decor{
+    display:flex!important;
+    width:min(100%,195px)!important;
+    min-height:50px!important;
+    margin:14px auto 0 0!important;
+  }
+  body.tb26-active.tb26-inner-ready .tb26-inner__banner-logo{
+    max-width:195px;
+    max-height:65px;
+  }
+}
