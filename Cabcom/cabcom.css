@@ -438,6 +438,28 @@ body.cc26-active .cc26-benefit small{
   color:#fff;font-family:var(--cc26-font-text)!important;
   font-size:clamp(11px,.75vw,14px);font-weight:450;line-height:1.35;margin-top:3px;
 }
+body.cc26-active .cc26-benefits__controls{display:none}
+@media(max-width:767px){
+  body.cc26-active .cc26-benefits .cc26-benefits__grid{
+    box-sizing:border-box!important;display:grid!important;grid-template-columns:none!important;
+    grid-auto-flow:column;grid-auto-columns:100%;gap:0!important;
+    width:calc(100% - 32px)!important;max-width:none!important;padding:0!important;
+    margin:0 auto!important;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;
+    scrollbar-width:none;overscroll-behavior-x:contain;
+  }
+  body.cc26-active .cc26-benefits .cc26-benefits__grid::-webkit-scrollbar{display:none}
+  body.cc26-active .cc26-benefits .cc26-benefit{
+    box-sizing:border-box;min-width:0;justify-content:center;scroll-snap-align:start;padding:5px 10px;
+    opacity:1!important;translate:none!important;transform:none!important;
+  }
+  body.cc26-active .cc26-benefits__controls{display:flex;justify-content:center;align-items:center;gap:12px;margin-top:6px}
+  body.cc26-active .cc26-benefits__controls button{display:grid;place-items:center;width:34px;height:34px;border:0;border-radius:50%;background:#ffffff20;color:#fff;cursor:pointer;padding:0}
+  body.cc26-active .cc26-benefits__controls button:disabled{opacity:.35}
+  body.cc26-active .cc26-benefits__prev .cc26-icon{rotate:180deg}
+  body.cc26-active .cc26-benefits__controls .cc26-icon{width:18px;height:18px}
+  body.cc26-active .cc26-benefits__status{color:white;font:600 11px/1 var(--cc26-font-text)}
+}
+
 
 /* Apresentacao aprovada: imagem panoramica COMPLETA da Cabcom, em vez
    de recorte fotografico na coluna esquerda. Texto sobre a parte escura. */
@@ -764,6 +786,30 @@ body.cc26-active .cc26-site-header__count{
 }
 body.cc26-active .cc26-site-header__toggle{display:none}
 body.cc26-active .cc26-site-header__more .cc26-site-header__navlink{letter-spacing:.12em!important}
+/* Menu nativo, subcategorias em todos os níveis e interação touch. */
+body.cc26-active .cc26-menu-expand{display:none;border:0;background:none;color:inherit;cursor:pointer;padding:0}
+body.cc26-active .cc26-more-toggle{border:0;background:transparent;cursor:pointer}
+body.cc26-active .cc26-menu-expanded>.cc26-site-header__submenu{display:block}
+body.cc26-active .cc26-site-header__submenu :is(.cc26-site-header__subitem,.cc26-site-header__navitem){position:relative}
+body.cc26-active .cc26-site-header__submenu .cc26-site-header__submenu{position:static;min-width:0;max-height:none;box-shadow:none;border:0;padding-left:14px}
+body.cc26-active .cc26-site-header__submenu :is(.cc26-site-header__subitem,.cc26-site-header__navitem):hover>.cc26-site-header__submenu,
+body.cc26-active .cc26-site-header__submenu :is(.cc26-site-header__subitem,.cc26-site-header__navitem):focus-within>.cc26-site-header__submenu{display:block}
+@media(max-width:1120px){
+  body.cc26-active .cc26-site-header__nav .cc26-site-header__navlink{color:#fff!important;white-space:normal}
+  body.cc26-active .cc26-site-header__nav :is(.cc26-site-header__navitem,.cc26-site-header__subitem):has(>.cc26-menu-expand){position:relative;padding-right:44px}
+  body.cc26-active .cc26-menu-expand{display:grid;place-items:center;position:absolute;top:0;right:0;width:44px;height:44px;color:#fff!important}
+  body.cc26-active .cc26-menu-expand .cc26-icon{width:18px;height:18px;transition:rotate .2s}
+  body.cc26-active .cc26-menu-expanded>.cc26-menu-expand .cc26-icon{rotate:90deg}
+  body.cc26-active .cc26-site-header__nav :is(.cc26-site-header__navitem,.cc26-site-header__subitem)>.cc26-site-header__submenu{display:none!important;animation:none!important}
+  body.cc26-active .cc26-site-header__nav .cc26-menu-expanded>.cc26-site-header__submenu{display:block!important}
+  body.cc26-active .cc26-site-header__nav .cc26-site-header__submenu{background:#07374f;color:#fff;border-top:0;border-radius:6px;padding:5px 0 8px}
+  body.cc26-active .cc26-site-header__nav .cc26-site-header__submenu a{color:#fff!important;white-space:normal;overflow-wrap:anywhere}
+  body.cc26-active .cc26-site-header__nav .cc26-site-header__submenu a:hover{background:#124960}
+  body.cc26-active .cc26-site-header__nav .cc26-site-header__more{display:contents}
+  body.cc26-active .cc26-site-header__nav .cc26-site-header__more>.cc26-more-toggle{display:none!important}
+  body.cc26-active .cc26-site-header__nav .cc26-site-header__more>.cc26-site-header__submenu{display:contents!important}
+}
+
 body.cc26-active .cc26-site-header__submenu{
   border-top:3px solid #00c5a1;
   background:#fff;color:#152741;border-radius:0 0 8px 8px;
@@ -901,6 +947,15 @@ body.cc26-active .cc26-footer__column{
   color:#1a2738;
 }
 body.cc26-active .cc26-footer__column:first-child{border-left:0}
+body.cc26-active .cc26-footer__toggle{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;
+  border:0;background:none;padding:0;text-align:left;color:inherit;font:inherit;
+  cursor:pointer;box-shadow:none;
+}
+body.cc26-active .cc26-footer__toggle:disabled{opacity:1;cursor:default;color:inherit}
+body.cc26-active .cc26-footer__toggle>.cc26-icon{display:none}
+body.cc26-active .cc26-footer__column-content[hidden]{display:none!important}
+
 body.cc26-active .cc26-footer__column h3{
   display:block;
   margin:0 0 28px!important;
@@ -1441,6 +1496,66 @@ body.cc26-active .cc26-shortcuts__grid {
   }
 }
 
+/* Mobile — navegação em duas linhas, atalhos 3 por linha e rodapé acordeão. */
+@media(max-width:767px){
+  body.cc26-active #cc26-new-header .cc26-site-header__inner{
+    position:static!important;padding:0 16px!important;
+  }
+  body.cc26-active #cc26-new-header .cc26-site-header__main{
+    position:static!important;isolation:auto;min-height:64px!important;
+    display:flex!important;justify-content:space-between;gap:12px!important;
+  }
+  body.cc26-active #cc26-new-header .cc26-site-header__main::before{
+    display:none!important;
+  }
+  body.cc26-active #cc26-new-header .cc26-site-header__brand{
+    box-sizing:border-box;flex:0 1 190px!important;min-height:54px;max-width:190px!important;
+    background:#fff!important;border-radius:0 0 12px 12px;padding:7px 12px!important;
+  }
+  body.cc26-active #cc26-new-header .cc26-site-header__brand img{
+    max-width:min(166px,46vw)!important;max-height:43px!important;
+  }
+  body.cc26-active #cc26-new-header > .cc26-site-header__actions{
+    box-sizing:border-box;display:flex!important;align-items:center;justify-content:space-between;
+    gap:10px!important;width:100%!important;max-width:none!important;
+    margin:0!important;padding:5px 16px 12px!important;
+  }
+  body.cc26-active #cc26-new-header .cc26-site-header__search{
+    flex:1 1 0!important;max-width:none!important;width:auto!important;min-width:0!important;
+    height:42px!important;min-height:42px!important;padding:0 7px 0 13px!important;
+  }
+  body.cc26-active #cc26-new-header .cc26-site-header__search input{font-size:13px!important;height:35px!important}
+  body.cc26-active #cc26-new-header .cc26-site-header__action{flex:0 0 40px;width:40px!important;height:42px!important}
+  body.cc26-active #cc26-new-header .cc26-site-header__action .cc26-icon{width:24px;height:24px}
+  body.cc26-active #cc26-new-header .cc26-site-header__toggle{flex:0 0 44px;width:44px;height:44px}
+  body.cc26-active #cc26-new-header .cc26-site-header__nav{
+    top:100%!important;left:0!important;right:0!important;max-height:calc(100dvh - 150px)!important;
+  }
+  body.cc26-active .cc26-shortcuts .cc26-shortcuts__grid{
+    box-sizing:border-box;grid-template-columns:repeat(6,minmax(0,1fr))!important;
+    gap:14px 8px!important;align-items:start;padding-inline:12px!important;
+  }
+  body.cc26-active .cc26-shortcuts .cc26-shortcut{grid-column:span 2;min-width:0}
+  body.cc26-active .cc26-shortcuts .cc26-shortcut:nth-child(3n+1):nth-last-child(2){grid-column:2/span 2}
+  body.cc26-active .cc26-shortcuts .cc26-shortcut:nth-child(3n+1):last-child{grid-column:3/span 2}
+  body.cc26-active .cc26-shortcuts .cc26-shortcut__media{width:min(112px,100%);height:auto;aspect-ratio:1}
+  body.cc26-active .cc26-shortcuts .cc26-shortcut__label{line-height:1.3;text-align:center;overflow-wrap:anywhere}
+  body.cc26-active #cc26-footer .cc26-footer__main{padding:16px 0 22px!important}
+  body.cc26-active #cc26-footer .cc26-footer__grid{display:block!important;padding-inline:16px!important}
+  body.cc26-active #cc26-footer .cc26-footer__column{min-height:0!important;border:0!important;border-bottom:1px solid #e1e8f0!important;padding:0!important}
+  body.cc26-active #cc26-footer .cc26-footer__column:last-child{border-bottom:0!important}
+  body.cc26-active #cc26-footer .cc26-footer__column > h3{margin:0!important;padding:0!important}
+  body.cc26-active #cc26-footer .cc26-footer__toggle{min-height:56px;font:700 17px/1.3 var(--cc26-font-title)!important}
+  body.cc26-active #cc26-footer .cc26-footer__toggle>.cc26-icon{display:inline-grid;width:19px;height:19px;rotate:90deg;transition:rotate .25s ease}
+  body.cc26-active #cc26-footer .cc26-footer--expanded .cc26-footer__toggle>.cc26-icon{rotate:-90deg}
+  body.cc26-active #cc26-footer .cc26-footer__column-content{padding:2px 0 16px}
+  body.cc26-active #cc26-footer .cc26-footer__column-content :is(.cc26-footer__navlink,.cc26-footer__contact-line){font-size:13px!important}
+  body.cc26-active #corpo .cc26-native-carousel .cc26-catalog-slide{padding-inline:5px!important}
+}
+/* A visibilidade dos slides é controlada pelo carrossel, não pelo fade-up. */
+body.cc26-active #corpo .produtos-carrossel .listagem-item.cc26-reveal{
+  opacity:1!important;translate:none!important;transform:none!important;
+}
 /* Cabcom 2026 — largura geral aprovada */
 body.cc26-active .conteiner {
   max-width:1760px!important;
