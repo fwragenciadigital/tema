@@ -1786,13 +1786,26 @@ body.cc26-active #corpo.cc26-native-home .cc26-instagram{
   margin:0!important;
 }
 /* Galeria original permanece controlada por Slick/Owl/Swiper. */
-body.cc26-active #corpo.cc26-native-home #listagemProdutos,
-body.cc26-active #corpo.cc26-native-home .cc26-enhanced-shelf{
+body.cc26-active #corpo.cc26-native-home #listagemProdutos:not(.cc26-home-ordered-listing),
+body.cc26-active #corpo.cc26-native-home .cc26-enhanced-shelf:not(.cc26-home-ordered-listing),
+body.cc26-active #corpo.cc26-native-home #listagemProdutos > .cc26-home-shelf{
   box-sizing:border-box;
   width:100%;max-width:1760px!important;
   margin:0 auto!important;
-  padding:clamp(38px,3.1vw,60px) 32px clamp(39px,3.15vw,63px)!important;
+  padding:clamp(38px,3.1vw,60px) clamp(16px,1.8vw,32px) clamp(39px,3.15vw,63px)!important;
   background:#ededed!important;
+}
+body.cc26-active #corpo.cc26-native-home #listagemProdutos.cc26-home-ordered-listing{
+  box-sizing:border-box!important;
+  display:block!important;
+  width:100%!important;max-width:none!important;
+  margin:0!important;padding:0!important;
+  border:0!important;float:none!important;
+  background:transparent!important;
+}
+body.cc26-active #corpo.cc26-native-home #listagemProdutos.cc26-home-ordered-listing > .cc26-section{
+  width:100%!important;max-width:none!important;
+  float:none!important;
 }
 body.cc26-active #corpo.cc26-native-home #listagemProdutos .listagem,
 body.cc26-active #corpo.cc26-native-home #listagemProdutos .listagem-linha,
