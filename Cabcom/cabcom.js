@@ -1105,7 +1105,7 @@
       // A barra azul e o badge porcentual pertencem ao card legado, não ao
       // padrão com cotação. Nada é removido do DOM ou das ações nativas.
       [].slice.call(card.querySelectorAll(
-        '.barra-progresso,.barra-de-progresso,.progress-bar,.progresso,'+
+        '.acoes-produto-responsiva,.barra-progresso,.barra-de-progresso,.progress-bar,.progresso,'+
         '.fundo-principal.borda-principal,.desconto,.desconto-produto,'+
         '.selo-desconto,.tag-desconto,.desconto-porcentagem'
       )).forEach(function(node){node.classList.add('cc26-card-legacy-visual');});
@@ -1236,6 +1236,39 @@
         !!list.querySelector('.slick-track,.owl-stage,.swiper-wrapper,.bx-viewport');
       if(isSlider){
         list.classList.remove('cc26-catalog-grid');
+        // HTML real Cabcom: ul.produtos-carrossel[data-produtos-linha="4"]
+        // > li.listagem-linha.flexslider. API nativa jQuery FlexSlider.
+        if(list.matches('.produtos-carrossel') && w.jQuery){
+          var columns=w.innerWidth>=1360?5:w.innerWidth>=1100?4:w.innerWidth>=850?3:2;
+          var $list=w.jQuery(list);
+          if(list.getAttribute('data-produtos-linha')!==String(columns)){
+            list.setAttribute('data-produtos-linha',String(columns));
+            $list.data('produtos-linha',columns);
+          }
+          [].slice.call(list.querySelectorAll('.listagem-linha.flexslider')).forEach(function(sliderNode){
+            var instance=w.jQuery(sliderNode).data('flexslider');
+            if(!instance||!instance.vars||!instance.doMath||!instance.slides||instance.animating)return;
+            var width=instance.viewport?instance.viewport.width():w.jQuery(sliderNode).width();
+            if(!width)return;
+            var n=Math.min(columns,instance.count||columns);
+            var signature=n+':'+Math.round(width);
+            if(sliderNode.dataset.cc26FlexSignature===signature)return;
+            try{
+              instance.vars.minItems=n;
+              instance.vars.maxItems=n;
+              instance.vars.itemMargin=0;
+              instance.vars.itemWidth=Math.floor(width/n);
+              instance.vars.move=1;
+              instance.doMath();
+              instance.slides.width(instance.computedW);
+              instance.currentSlide=Math.min(instance.currentSlide,Math.max(0,instance.last));
+              instance.animatingTo=instance.currentSlide;
+              instance.update(instance.pagingCount);
+              instance.setProps();
+              sliderNode.dataset.cc26FlexSignature=signature;
+            }catch(err){warn('Vitrine FlexSlider: '+err.message);}
+          });
+        }
         // Quando a LI usa Slick, configura cinco cards em telas largas pelo
         // próprio plugin (sem reescrever track ou clonar produtos).
         var slider=list.matches('.slick-initialized')?list:list.querySelector('.slick-initialized');
@@ -1999,6 +2032,7 @@
       w.addEventListener('load',schedule,{once:true});
       [600,1800].forEach(function(ms){w.setTimeout(schedule,ms);});
     }
+    w.addEventListener('resize',schedule,{passive:true});
     var observer=new MutationObserver(schedule);
     observer.observe(d.body,{subtree:true,childList:true,attributes:true,attributeFilter:['src','srcset','data-src','data-original','data-srcset']});
     state.initialized=true;
