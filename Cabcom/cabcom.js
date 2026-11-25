@@ -2097,7 +2097,7 @@
     }
     w.addEventListener('resize',schedule,{passive:true});
     var observer=new MutationObserver(schedule);
-    observer.observe(d.body,{subtree:true,childList:true,attributes:true,attributeFilter:['src','srcset','data-src','data-original','data-srcset']});
+    observer.observe(d.body,{subtree:true,childList:true,attributes:true,attributeFilter:['src','srcset','data-src','data-original','data-srcset','data-produtos-linha']});
     state.initialized=true;
     log('ativo',state);
   }
