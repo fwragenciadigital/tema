@@ -6,7 +6,7 @@
 (function (w,d) {
   'use strict';
   if(w.Cabcom2026) return;
-  var VERSION='2.2.9';
+  var VERSION='2.2.10';
   var CDN='https://cdn.awsli.com.br/80/80577/arquivos/';
   var DEFAULTS={
     geral:{ativo:true,publicarNaLoja:false,debug:false},
@@ -1702,10 +1702,78 @@
       summary.classList.toggle('cc26-cart-summary--no-total',!displayed);
     }
   }
+  // Lê exclusivamente dados da loja: imagens e sprites reais de pagamento.
+  function syncFooterCommerce(native,f){
+    var payPattern=/VISA|MASTER|AMERICAN|ELO\b|DINERS|HIPER|BOLETO|AURA\b|CARTAO|PIX\b|PAGSEGURO|MERCADO PAGO|PAYPAL/;
+    var securePattern=/SEGURO|SEGURANCA|SSL|CERTIFIC|NORTON|VERISIGN|TRUST|GOOGLE/;
+    var paymentScope='.formas-pagamento,.meios-pagamento,.bandeiras-pagamento,.pagamento,.bandeiras,.pagamento-selos .pagamento';
+    var securityScope='.selos,.seguranca,.selos-seguranca,.selo-ssl';
+    function read(selector,pattern,security){
+      var result=[],seen=new Set();
+      function add(entry,key){if(!seen.has(key)){seen.add(key);result.push(entry);}}
+      [].slice.call(native.querySelectorAll(selector)).forEach(function(group){
+        [].slice.call(group.querySelectorAll('img,i,span[class],li[class]')).forEach(function(node){
+          var img=node.matches('img');
+          var label=(node.getAttribute('alt')||node.getAttribute('title')||node.getAttribute('aria-label')||'').trim();
+          if(!label&&!img)label=(node.textContent||'').trim();
+          var raw=img?(node.getAttribute('data-original')||node.getAttribute('data-src')||node.currentSrc||node.getAttribute('src')||''):'';
+          var key=normalized(label+' '+(node.className||'')+' '+raw);
+          if(security?!pattern.test(key):(!pattern.test(key)||securePattern.test(key)))return;
+          if(img&&raw){
+            try{var u=new URL(raw,location.href);if(!/^https?:$/.test(u.protocol))return;raw=u.href;}catch(e){return;}
+            add({url:raw,label:label|| (security?'Selo de segurança':'Forma de pagamento')},raw);
+          }else if(!img&&!node.querySelector('img,i,span[class]')){
+            var cs=w.getComputedStyle(node),bg=cs.backgroundImage;
+            var width=parseFloat(cs.width),height=parseFloat(cs.height);
+            if(bg&&bg!=='none'&&width>=10&&width<=300&&height>=10&&height<=100){
+              add({sprite:bg,position:cs.backgroundPosition,size:cs.backgroundSize,width:width,height:height,label:label||node.className},bg+'|'+cs.backgroundPosition);
+            }else if(label&&label.length<=45&&pattern.test(normalized(label))){
+              add({label:label},'label:'+normalized(label));
+            }
+          }
+        });
+      });
+      return result.slice(0,18);
+    }
+    function render(target,entries,empty){
+      if(!target)return;
+      var signature=JSON.stringify(entries);
+      if(target.dataset.cc26SourceSignature===signature)return;
+      target.dataset.cc26SourceSignature=signature;
+      var children=entries.map(function(item){
+        if(item.url){var image=el('img');image.src=item.url;image.alt=item.label;image.loading='lazy';return image;}
+        if(item.sprite){
+          var icon=el('span','cc26-footer__payment-sprite');
+          icon.setAttribute('role','img');icon.setAttribute('aria-label',item.label);
+          icon.style.backgroundImage=item.sprite;icon.style.backgroundPosition=item.position;
+          icon.style.backgroundSize=item.size;icon.style.width=item.width+'px';icon.style.height=item.height+'px';
+          return icon;
+        }
+        return el('span','cc26-footer__payment-label',item.label);
+      });
+      if(!children.length&&empty)children.push(el('p','cc26-footer__payment-note',empty));
+      target.replaceChildren.apply(target,children);
+    }
+    var payments=read(paymentScope,payPattern,false),seals=read(securityScope,securePattern,true);
+    render(f.querySelector('.cc26-footer__badges'),payments,'Consulte as condições de pagamento na cotação.');
+    render(f.querySelector('.cc26-footer__seals'),seals,'');
+    // A LI fornece o copyright em um <p> sem classe: manter o texto integral,
+    // inclusive razão social, CNPJ, pontuação e ano, sem cortar no primeiro ponto.
+    var legal=[].slice.call(native.querySelectorAll('p,.direitos-reservados,.copyright,.direitos')).find(function(n){
+      return /TODOS OS DIREITOS RESERVADOS|COPYRIGHT/.test(normalized(n.textContent||''));
+    });
+    var legalText=legal?(legal.textContent||'').replace(/\s+/g,' ').trim():'';
+    var target=f.querySelector('.cc26-footer__legal');
+    if(target&&target.textContent!==legalText)target.textContent=legalText;
+    state.footer={origin:'Loja Integrada',paymentLogos:payments.length,securityLogos:seals.length,
+      copyright:!!legalText,credit:'FWR'};
+  }
   function footer(){
-    if(!cfg.rodape.ativo || d.getElementById('cc26-footer'))return;
+    if(!cfg.rodape.ativo)return;
     var native=d.querySelector('#rodape');
     if(!native)return;
+    var existing=d.getElementById('cc26-footer');
+    if(existing){syncFooterCommerce(native,existing);return;}
     // Conteudo derivado do rodape nativo; alteracoes no painel LI reaparecem no proximo carregamento.
     var sourceLinks=[].slice.call(native.querySelectorAll('a[href]'));
     function matchingLink(expression){
@@ -1786,64 +1854,26 @@
       [/POLITICA DE PRIVACIDADE/,'Política de Privacidade'],
       [/PROGRAMA DE INTEGRIDADE/,'Programa de Integridade']
     ].forEach(function(item){var link=originalLink(item[0],item[1]);if(link)institutional.appendChild(link);});
-    // Preservar links nativos e nao exibir Selos ou bandeiras inventados.
-    function logoNodes(selectors,kind){
-      var set=[],seen={};
-      [].slice.call(native.querySelectorAll(selectors)).forEach(function(node){
-        [].slice.call(node.querySelectorAll('img')).forEach(function(im){
-          var url=im.currentSrc||im.getAttribute('src')||im.getAttribute('data-src');
-          if(!url)return;
-          try {url=new URL(url,location.href).href;}catch(e){return;}
-          if(seen[url])return;
-          var key=normalized((im.alt||'')+' '+(im.getAttribute('title')||'')+' '+url+' '+(node.className||''));
-          var pay=/(VISA|MASTER|AMERICAN|ELO|DINERS|HIPER|BOLETO|PAGAMENTO|BANDEIRA|AURA|CARTAO)/.test(key);
-          var secure=/(SEGURO|SEGURANCA|SSL|CERTIFIC|NORTON|VERISIGN|GOOGLE|SITE PROTEGIDO|TRUST)/.test(key);
-          if(kind==='pay'&&!pay&&!/pagamento|bandeira/i.test(String(node.className)))return;
-          if(kind==='secure'&&!secure&&!/selos|seguranca/i.test(String(node.className)))return;
-          seen[url]=true;set.push({url:url,alt:im.alt||''});
-        });
-      });
-      return set.slice(0,15);
-    }
-    var paymentSources='#rodape .pagamento-selos, #rodape .bandeiras, #rodape .bandeiras-pagamento, #rodape .meios-pagamento, #rodape .formas-pagamento, #rodape .pagamento';
-    var securitySources='#rodape .seguranca, #rodape .selos, #rodape .selo-ssl, #rodape .pagamento-selos, #rodape .selos-seguranca';
-    var payments=logoNodes(paymentSources,'pay');
-    var seals=logoNodes(securitySources,'secure');
     var final=footerColumn('Pagamento','cc26-footer__payment');
-    if(payments.length){
-      var badges=el('div','cc26-footer__badges');
-      payments.forEach(function(it){
-        var i=el('img');i.src=it.url;i.alt=it.alt||'Forma de pagamento';i.loading='lazy';
-        badges.appendChild(i);
-      });
-      final.appendChild(badges);
-    }
+    final.appendChild(el('div','cc26-footer__badges'));
     final.appendChild(el('h3','cc26-footer__security-title','Segurança'));
-    if(seals.length){
-      var sealsGrid=el('div','cc26-footer__seals');
-      seals.forEach(function(it){var i=el('img');i.src=it.url;i.alt=it.alt||'Selo de segurança';i.loading='lazy';sealsGrid.appendChild(i);});
-      final.appendChild(sealsGrid);
-    }
+    final.appendChild(el('div','cc26-footer__seals'));
     grid.appendChild(contact);grid.appendChild(account);grid.appendChild(institutional);grid.appendChild(final);
     main.appendChild(grid);f.appendChild(main);
     var bottom=el('div','cc26-footer__bottom');
     var bottomInner=wrap();bottomInner.classList.add('cc26-footer__bottom-inner');
-    // Informacoes fiscais originais da LI prevalecem sobre a arte de 2025.
-    var legal=native.querySelector('.direitos, .direitos-reservados, .copyright, .rodape-inferior, .credito, .institucional .copyright');
-    var legalText=legal?(legal.textContent||'').replace(/\s+/g,' ').trim():'';
-    if(!legalText){
-      var matched=(native.textContent||'').replace(/\s+/g,' ').match(/(?:SA Digital[^.]{5,180}|(?:©|Todos os direitos reservados)[^.]{3,150})/i);
-      if(matched)legalText=matched[0];
-    }
-    bottomInner.appendChild(el('small','cc26-footer__legal',legalText||'Cabcom — Todos os direitos reservados.'));
-    var creditSource=sourceLinks.find(function(l){return /fwr|desenvolvimento/i.test((l.textContent||'')+' '+(l.href||''));});
-    var brandCredit=creditSource&&hrefOf(creditSource)?a(hrefOf(creditSource),'cc26-footer__credit','FWR'):el('span','cc26-footer__credit','FWR');
-    brandCredit.setAttribute('aria-label','Desenvolvimento FWR');
+    bottomInner.appendChild(el('small','cc26-footer__legal'));
+    var brandCredit=a('https://fwragenciadigital.com.br/','cc26-footer__credit');
+    brandCredit.setAttribute('aria-label','Desenvolvimento FWR Agência Digital');
+    brandCredit.target='_blank';brandCredit.rel='noopener noreferrer';
+    var creditLogo=el('img');creditLogo.src=asset('fwr.png');creditLogo.alt='FWR Agência Digital';
+    creditLogo.width=43;creditLogo.height=16;
+    brandCredit.appendChild(creditLogo);
     bottomInner.appendChild(brandCredit);
     bottom.appendChild(bottomInner);f.appendChild(bottom);
     native.parentNode.insertBefore(f,native);
     native.classList.add('cc26-footer-source-hidden');
-    state.footer={origin:'Links, contato, logos e dados nativos LI',paymentLogos:payments.length,securityLogos:seals.length};
+    syncFooterCommerce(native,f);
   }
   function previewLegacy(){
     if(!preview||!home || cfg.previsualizacao.ocultarBlocosLegados===false)return;
