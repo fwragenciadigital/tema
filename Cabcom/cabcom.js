@@ -6,7 +6,7 @@
 (function (w,d) {
   'use strict';
   if(w.Cabcom2026) return;
-  var VERSION='2.1.0';
+  var VERSION='2.2.0';
   var CDN='https://cdn.awsli.com.br/80/80577/arquivos/';
   var DEFAULTS={
     geral:{ativo:true,publicarNaLoja:false,debug:false},
@@ -1080,13 +1080,19 @@
   // sem selos de desconto que a LI gera mesmo em produtos sem preço.
   // Os links reais do produto e do carrinho permanecem acessíveis.
   function decorateQuoteCards(){
-    if(!home || !cfg.catalogo.ativo)return;
+    if(!cfg.catalogo.ativo)return;
     var scope=d.querySelector('#corpo');
     if(!scope)return;
     var nodes=[].slice.call(scope.querySelectorAll(
-      '#listagemProdutos .listagem-item, #listagemProdutos li.produto, '+
-      '.cc26-enhanced-shelf .listagem-item, .cc26-enhanced-shelf li.produto'
-    ));
+      '.listagem-item, .listagem li.produto, .vitrine-produtos .produto, '+
+      '.produtos-carrossel li.produto, .produtos-relacionados .produto, '+
+      '.aproveite-tambem .produto, #aproveite-tambem .produto'
+    )).filter(function(card){
+      // Nunca aplicar o card à ficha PDP, carrinho ou a um wrapper de outros cards.
+      if(card.closest('.cc26-cart-sidebar,.tabela-carrinho,.cc26-pdp__grid'))return false;
+      if(card.querySelector('.listagem-item'))return false;
+      return !!card.querySelector('.imagem-produto img') && !!card.querySelector('.nome-produto,.produto-nome');
+    });
     function isMore(node){
       var label=normalized(node.textContent||node.value||node.getAttribute('aria-label')||'').trim();
       return /^(VER MAIS|SAIBA MAIS|VER PRODUTO|VER DETALHES)$/i.test(label);
@@ -1106,12 +1112,14 @@
     }
     var completed=0;
     nodes.forEach(function(card){
-      if(card.classList.contains('cc26-card-two-cta')){
+      if(card.classList.contains('cc26-card-two-cta') &&
+         card.querySelector('.cc26-card-quote-actions')){
         hideLegacy(card);
+        completed++;
         return;
       }
       var productLink=card.querySelector(
-        '.nome-produto a[href],a.nome-produto[href],.imagem-produto a[href]'
+        '.nome-produto a[href],a.nome-produto[href],.imagem-produto a[href],a.imagem-produto[href],a.produto-nome[href]'
       );
       if(!productLink)return;
       var productURL,href;
@@ -1127,8 +1135,7 @@
         .replace(/\s+/g,' ').trim();
       if(!productName)return;
       var actions=card.querySelector('.acoes-produto');
-      if(!actions)return;
-      var existing=[].slice.call(actions.querySelectorAll('a[href]'));
+      var existing=[].slice.call(card.querySelectorAll('a[href]'));
       var whatsExisting=existing.find(function(anchor){
         return /WHATSAPP/.test(normalized(anchor.textContent||anchor.getAttribute('aria-label')||'')) ||
           /wa\.me|api\.whatsapp\.com/i.test(anchor.href||'');
@@ -1165,6 +1172,10 @@
           email.dataset.cc26QuoteFallback='pdp';
         }
       }
+      if(!actions){
+        actions=el('div','acoes-produto');
+        card.appendChild(actions);
+      }
       var newActions=el('div','cc26-card-quote-actions');
       whats.classList.add('cc26-card-quote-actions__whatsapp');
       email.classList.add('cc26-card-quote-actions__email');
@@ -1178,21 +1189,54 @@
       newActions.appendChild(email);
       // Esconder os controles duplicados de dentro e fora do .acoes-produto.
       existing.forEach(function(node){
-        if(node!==whats && node!==email)node.classList.add('cc26-card-legacy-action');
+        if(node!==whats && node!==email &&
+           (actions.contains(node)||isMore(node)))node.classList.add('cc26-card-legacy-action');
       });
+      // Composição fixa: foto, título, dois CTAs. Ações ficam no rodapé
+      // sem depender de .info-produto ou do posicionamento legado.
+      var photo=card.querySelector('.imagem-produto');
+      var title=card.querySelector('.nome-produto,.produto-nome');
+      if(photo)photo.classList.add('cc26-card-photo');
+      if(title)title.classList.add('cc26-card-name');
+      var info=card.querySelector('.info-produto');
+      if(info)info.classList.add('cc26-card-info');
       actions.appendChild(newActions);
+      if(actions.parentElement!==card)card.appendChild(actions);
       card.classList.add('cc26-card-two-cta');
+      // Mantém elementos LI no DOM; não deixa preços/selos ocupar o card de cotação.
+      [].slice.call(card.querySelectorAll('.preco-produto,.bandeiras-produto,.bandeiras,.bandeira-promocao,.produto-selo,.produto-bandeiras,.avaliacao,.avaliacoes,.produto-avaliacoes')).forEach(function(node){
+        if(!node.contains(newActions))node.classList.add('cc26-card-legacy-visual');
+      });
       hideLegacy(card);
       completed++;
     });
-    state.catalogCards={visual:'dois-ctas',created:completed,requested:2};
+    state.catalogCards={visual:'dois-ctas',total:nodes.length,decorated:completed,requested:2};
+    // Uma mesma grade para resultados, categorias, home e relacionados.
+    // Carrosséis existentes mantêm seus controles e cálculos nativos.
+    var lists=scope.querySelectorAll('.listagem-linha>ul, .produtos-carrossel, .vitrine-produtos>ul');
+    [].slice.call(lists).forEach(function(list){
+      if(!list.querySelector('.cc26-card-two-cta'))return;
+      var isSlider=list.matches('.produtos-carrossel,.slick-slider,.slick-initialized,.owl-carousel,.swiper-wrapper,.slides') ||
+        !!list.closest('.slick-slider,.slick-initialized,.owl-carousel,.swiper,.flexslider,.bx-wrapper') ||
+        !!list.querySelector('.slick-track,.owl-stage,.swiper-wrapper,.bx-viewport');
+      if(isSlider){
+        list.classList.remove('cc26-catalog-grid');
+        [].slice.call(list.querySelectorAll('.slick-slide,.owl-item,.swiper-slide,.slides>li')).forEach(function(slide){
+          if(!slide.matches('.cc26-card-two-cta')&&slide.querySelector('.cc26-card-two-cta'))slide.classList.add('cc26-catalog-slide');
+        });
+      }else if([].slice.call(list.children).some(function(child){
+        return child.matches('.cc26-card-two-cta') || !!child.querySelector('.cc26-card-two-cta');
+      })){
+        list.classList.add('cc26-catalog-grid');
+      }
+    });
   }
   function decorateNativeShelves(){
+    decorateQuoteCards();
     var listing=d.querySelector('#listagemProdutos');
     if(!listing)return;
     listing.classList.add('cc26-native-listing');
-    labelHomeShelves(listing);
-    decorateQuoteCards();
+    if(home)labelHomeShelves(listing);
     [].slice.call(listing.querySelectorAll('.titulo-categoria')).forEach(function(title){
       title.classList.add('cc26-native-shelf-title');
     });
