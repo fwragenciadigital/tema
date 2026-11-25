@@ -6,7 +6,7 @@
 (function (w,d) {
   'use strict';
   if(w.Cabcom2026) return;
-  var VERSION='2.2.11';
+  var VERSION='2.2.12';
   var CDN='https://cdn.awsli.com.br/80/80577/arquivos/';
   var DEFAULTS={
     geral:{ativo:true,publicarNaLoja:false,debug:false},
@@ -171,50 +171,48 @@
     navigation.id='cc26-navigation';
     navigation.setAttribute('aria-label','Categorias');
     var navList=el('ul','cc26-site-header__list');
-    var preferred=['ACESSÓRIOS','ANTENAS','CABOS','CONECTORES','FERRAMENTAS','ISOLANTES','RADIOS'];
-    var mainNodes=[];
-    preferred.forEach(function(name){
-      var node=navItems.find(function(li){
-        var anchor=li.querySelector(':scope > a[href]');
-        return anchor && normalized(anchor.textContent)===normalized(name);
-      });
-      if(node)mainNodes.push(node);
-    });
-    // Outras categorias nativas continuam acessiveis; nenhuma e fabricada.
-    var remaining=navItems.filter(function(li){return mainNodes.indexOf(li)<0;});
-    function menuItem(li){
+    // Ordem e níveis do painel: nenhum nome ou ordenação fixa.
+    function menuItem(li,depth){
       var original=li.querySelector(':scope > a[href]');
       if(!original)return null;
-      var row=el('li','cc26-site-header__navitem');
-      var item=a(original.href,'cc26-site-header__navlink',original.textContent.trim());
+      var row=el('li',depth?'cc26-site-header__subitem':'cc26-site-header__navitem');
+      var label=(original.querySelector('.titulo')||original).textContent.trim();
+      var item=a(original.href,depth?'':'cc26-site-header__navlink',label);
       row.appendChild(item);
       var childList=li.querySelector(':scope > ul');
       if(childList){
         var sub=el('ul','cc26-site-header__submenu');
-        var childAnchors=[].slice.call(childList.querySelectorAll('a[href]')).slice(0,45);
-        childAnchors.forEach(function(c){
-          var child=el('li');
-          child.appendChild(a(c.href,'',c.textContent.trim()));
-          sub.appendChild(child);
+        [].slice.call(childList.children).forEach(function(child){
+          var nested=menuItem(child,depth+1);if(nested)sub.appendChild(nested);
         });
-        if(sub.children.length)row.appendChild(sub);
+        if(sub.children.length){
+          var toggle=el('button','cc26-menu-expand');
+          toggle.type='button';toggle.setAttribute('aria-label','Expandir '+label);
+          toggle.setAttribute('aria-expanded','false');toggle.appendChild(inlineIcon('arrow'));
+          toggle.addEventListener('click',function(){
+            var expanded=row.classList.toggle('cc26-menu-expanded');
+            toggle.setAttribute('aria-expanded',String(expanded));
+            toggle.setAttribute('aria-label',(expanded?'Recolher ':'Expandir ')+label);
+          });
+          row.appendChild(toggle);row.appendChild(sub);
+        }
       }
       return row;
     }
-    mainNodes.forEach(function(li){var row=menuItem(li);if(row)navList.appendChild(row);});
+    // Se necessário, agrupa somente o final da sequência; mobile exibe
+    // todas as categorias de primeiro nível, na ordem do painel.
+    var mainNodes=navItems.slice(0,7),remaining=navItems.slice(7);
+    mainNodes.forEach(function(li){var row=menuItem(li,0);if(row)navList.appendChild(row);});
     if(remaining.length){
       var more=el('li','cc26-site-header__navitem cc26-site-header__more');
-      var text=el('span','cc26-site-header__navlink','MAIS');
-      more.appendChild(text);
+      var toggle=el('button','cc26-site-header__navlink cc26-more-toggle','MAIS');
+      toggle.type='button';toggle.setAttribute('aria-expanded','false');
       var sub=el('ul','cc26-site-header__submenu');
-      remaining.forEach(function(li){
-        var anchor=li.querySelector(':scope > a[href]');
-        if(!anchor)return;
-        var item=el('li');item.appendChild(a(anchor.href,'',anchor.textContent.trim()));sub.appendChild(item);
-      });
-      if(sub.children.length)more.appendChild(sub);
-      navList.appendChild(more);
+      remaining.forEach(function(li){var row=menuItem(li,0);if(row)sub.appendChild(row);});
+      toggle.addEventListener('click',function(){var open=more.classList.toggle('cc26-menu-expanded');toggle.setAttribute('aria-expanded',String(open));});
+      more.appendChild(toggle);more.appendChild(sub);navList.appendChild(more);
     }
+    state.menuOrder=navItems.map(function(li){var a=li.querySelector(':scope > a[href]');return a?(a.querySelector('.titulo')||a).textContent.trim():'';}).filter(Boolean);
     navigation.appendChild(navList);
     main.appendChild(navigation);
     var actions=el('div','cc26-site-header__actions');
@@ -1329,12 +1327,14 @@
       var desktop=Number(key)>=1024;
       set(responsive[key],timing(desktop));
       if(desktop)set(responsive[key],{items:5,slideBy:5});
+      else if(Number(key)<850)set(responsive[key],{items:2,slideBy:1});
     });
     if(!responsive[1024]){responsive[1024]={};changed=true;}
     set(responsive[1024],Object.assign(timing(true),{items:5,slideBy:5}));
     owl.options.responsive=responsive;
     var expected=timing(w.innerWidth>=1024);
     if(w.innerWidth>=1024){expected.items=5;expected.slideBy=5;}
+    else if(w.innerWidth<850){expected.items=2;expected.slideBy=1;}
     if(owl.settings&&Object.keys(expected).some(function(key){return owl.settings[key]!==expected[key];}))changed=true;
     if(changed){
       owl.invalidate('settings');
@@ -1631,7 +1631,16 @@
         list.classList.add('cc26-catalog-grid');
       }
     });
-    state.carouselAudit={version:'2.2.9',source:'Loja Integrada',desktopProducts:5,
+    if(d.body.matches('.pagina-categoria,.pagina-busca')){
+      var listing=scope.querySelector('#listagemProdutos');
+      if(listing){
+        listing.classList.add('cc26-static-catalog');
+        [].slice.call(listing.querySelectorAll(':scope > ul:not(.produtos-carrossel) > .listagem-linha > ul')).forEach(function(row){
+          row.classList.add('cc26-catalog-grid');
+        });
+      }
+    }
+    state.carouselAudit={version:'2.2.12',source:'Loja Integrada',desktopProducts:5,
       mounted:mountedCarousels,windowWidth:w.innerWidth};
   }
   function decorateNativeShelves(){
