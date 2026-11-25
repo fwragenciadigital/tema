@@ -734,6 +734,35 @@ body.cc26-active .cc26-site-header__count{
 }
 body.cc26-active .cc26-site-header__toggle{display:none}
 body.cc26-active .cc26-site-header__more .cc26-site-header__navlink{letter-spacing:.12em!important}
+body.cc26-active .cc26-menu-expand{
+  display:none;border:0;background:transparent;color:inherit;
+  padding:0;cursor:pointer;
+}
+body.cc26-active .cc26-more-toggle{border:0;background:transparent;cursor:pointer}
+body.cc26-active .cc26-menu-expanded>.cc26-site-header__submenu{display:block}
+body.cc26-active .cc26-site-header__submenu .cc26-site-header__subitem,
+body.cc26-active .cc26-site-header__submenu .cc26-site-header__navitem{position:relative}
+body.cc26-active .cc26-site-header__submenu .cc26-site-header__submenu{
+  position:static;min-width:0;max-height:none;box-shadow:none;border:0;padding-left:12px;
+}
+body.cc26-active .cc26-site-header__submenu :is(.cc26-site-header__subitem,.cc26-site-header__navitem):hover>.cc26-site-header__submenu,
+body.cc26-active .cc26-site-header__submenu :is(.cc26-site-header__subitem,.cc26-site-header__navitem):focus-within>.cc26-site-header__submenu{display:block}
+body.cc26-active .cc26-site-header__submenu .cc26-site-header__navlink{color:#1f344d!important}
+@media(max-width:1120px){
+  body.cc26-active .cc26-site-header__nav :is(.cc26-site-header__navitem,.cc26-site-header__subitem):has(>.cc26-menu-expand){position:relative;padding-right:42px}
+  body.cc26-active .cc26-menu-expand{display:grid;place-items:center;position:absolute;top:0;right:0;width:42px;height:42px;color:#fff}
+  body.cc26-active .cc26-menu-expand .cc26-icon{width:19px;height:19px;transition:rotate .2s}
+  body.cc26-active .cc26-menu-expanded>.cc26-menu-expand .cc26-icon{rotate:90deg}
+  body.cc26-active .cc26-site-header__nav :is(.cc26-site-header__navitem,.cc26-site-header__subitem)>.cc26-site-header__submenu{display:none!important;animation:none!important}
+  body.cc26-active .cc26-site-header__nav .cc26-menu-expanded>.cc26-site-header__submenu{display:block!important}
+  body.cc26-active .cc26-site-header__nav .cc26-site-header__more{display:contents}
+  body.cc26-active .cc26-site-header__nav .cc26-site-header__more>.cc26-more-toggle{display:none!important}
+  body.cc26-active .cc26-site-header__nav .cc26-site-header__more>.cc26-site-header__submenu{display:contents!important}
+  body.cc26-active .cc26-site-header__nav .cc26-site-header__more>.cc26-site-header__submenu>.cc26-site-header__navitem>.cc26-site-header__navlink{color:#fff!important}
+  body.cc26-active .cc26-site-header__nav .cc26-site-header__submenu .cc26-menu-expand{color:#0767ff}
+  body.cc26-active .cc26-site-header__nav .cc26-site-header__more>.cc26-site-header__submenu>.cc26-site-header__navitem>.cc26-menu-expand{color:#fff}
+}
+
 body.cc26-active .cc26-site-header__submenu{
   border-top:3px solid #00c5a1;
   background:#fff;color:#152741;border-radius:0 0 8px 8px;
@@ -3400,6 +3429,32 @@ body.cc26-active #corpo .cc26-catalog-grid>li{
   box-sizing:border-box!important;
   float:none!important;
   max-width:100%!important;
+}
+/* Grade estática de busca/categoria: neutraliza o clearfix Bootstrap,
+   cujos pseudo-elementos ocupavam uma coluna na grade CSS. */
+body.cc26-active #corpo .cc26-static-catalog > ul,
+body.cc26-active #corpo .cc26-static-catalog > ul > .listagem-linha{
+  box-sizing:border-box!important;display:block!important;width:100%!important;
+  max-width:100%!important;min-width:0!important;float:none!important;
+  padding:0!important;margin:0!important;
+}
+body.cc26-active #corpo .cc26-static-catalog .cc26-catalog-grid{
+  grid-template-columns:repeat(4,minmax(0,1fr))!important;
+  gap:15px!important;grid-auto-flow:row!important;margin:0 0 20px!important;
+}
+body.cc26-active #corpo .cc26-catalog-grid::before,
+body.cc26-active #corpo .cc26-catalog-grid::after{
+  content:none!important;display:none!important;
+}
+body.cc26-active #corpo .cc26-static-catalog .cc26-catalog-grid>li{
+  display:block!important;width:100%!important;min-width:0!important;
+  max-width:100%!important;float:none!important;clear:none!important;
+  margin:0!important;padding:0!important;grid-column:auto!important;grid-row:auto!important;
+}
+@media(max-width:849px){
+  body.cc26-active #corpo .cc26-static-catalog .cc26-catalog-grid{
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:10px!important;margin-bottom:10px!important;
+  }
 }
 /* Sem barras, bordas ou pseudo-elementos do tema anterior. */
 body.cc26-active #corpo .cc26-card-two-cta :is(.acoes-produto,.info-produto,.cc26-card-quote-actions)::before,
