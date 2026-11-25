@@ -1213,7 +1213,7 @@
     state.catalogCards={visual:'dois-ctas',total:nodes.length,decorated:completed,requested:2};
     // Uma mesma grade para resultados, categorias, home e relacionados.
     // Carrosséis existentes mantêm seus controles e cálculos nativos.
-    var lists=scope.querySelectorAll('.listagem-linha>ul, .produtos-carrossel, .vitrine-produtos>ul');
+    var lists=scope.querySelectorAll('.listagem-linha>ul, .produtos-carrossel, .vitrine-produtos>ul, .listagem .slick-initialized, .vitrine-produtos .slick-initialized');
     [].slice.call(lists).forEach(function(list){
       if(!list.querySelector('.cc26-card-two-cta'))return;
       var isSlider=list.matches('.produtos-carrossel,.slick-slider,.slick-initialized,.owl-carousel,.swiper-wrapper,.slides') ||
@@ -1221,6 +1221,32 @@
         !!list.querySelector('.slick-track,.owl-stage,.swiper-wrapper,.bx-viewport');
       if(isSlider){
         list.classList.remove('cc26-catalog-grid');
+        // Quando a LI usa Slick, configura cinco cards em telas largas pelo
+        // próprio plugin (sem reescrever track ou clonar produtos).
+        var slider=list.matches('.slick-initialized')?list:list.querySelector('.slick-initialized');
+        if(slider && slider.slick && w.jQuery && slider.dataset.cc26CatalogSlick!=='1'){
+          try{
+            var instance=slider.slick, opts=instance.originalSettings||instance.options||{};
+            var responsive=(Array.isArray(opts.responsive)?opts.responsive:[]).map(function(entry){
+              return Object.assign({},entry,{settings:entry.settings==='unslick'?'unslick':Object.assign({},entry.settings)});
+            });
+            function addBreakpoint(bp,n){
+              var found=responsive.find(function(x){return x.breakpoint===bp;});
+              if(found){if(found.settings!=='unslick')found.settings.slidesToShow=n;}
+              else responsive.push({breakpoint:bp,settings:{slidesToShow:n}});
+            }
+            // Preserva ajustes nativos extras; padroniza quantidade por faixa.
+            responsive.forEach(function(entry){
+              if(entry.settings==='unslick')return;
+              entry.settings.slidesToShow=entry.breakpoint<=850?2:entry.breakpoint<=1350?3:entry.breakpoint<=1600?4:5;
+            });
+            if(!opts.mobileFirst){
+              addBreakpoint(1600,4);addBreakpoint(1350,3);addBreakpoint(850,2);
+              slider.dataset.cc26CatalogSlick='1';
+              w.jQuery(slider).slick('slickSetOption',{slidesToShow:5,slidesToScroll:1,responsive:responsive},true);
+            }
+          }catch(err){warn('Vitrine: configuração Slick mantida no padrão nativo.');}
+        }
         [].slice.call(list.querySelectorAll('.slick-slide,.owl-item,.swiper-slide,.slides>li')).forEach(function(slide){
           if(!slide.matches('.cc26-card-two-cta')&&slide.querySelector('.cc26-card-two-cta'))slide.classList.add('cc26-catalog-slide');
         });
