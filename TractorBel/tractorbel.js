@@ -1,12 +1,12 @@
 /*
- * TractorBel 2026 - FWR Agencia Digital - v1.28.1
+ * TractorBel 2026 - FWR Agencia Digital - v1.28.3
  * Camada visual da Loja Integrada. Sem checkout ou precificacao paralela.
  * Editavel por window.TractorBelSettings no HTML da LI.
  */
 (function (win, doc) {
   'use strict';
   if (win.TractorBel2026) return;
-  var VERSION = '1.28.1';
+  var VERSION = '1.28.3';
   // Assets oficiais da TractorBel, ja hospedados na Loja Integrada.
   // Manter os nomes e extensoes ORIGINAIS, sem converter .jpg/.png para .webp.
   // O nome logico pode continuar .webp para compatibilidade com os componentes existentes.
@@ -1460,8 +1460,57 @@
     var seals=copyLogos('.selos img, .selos-seguranca img, .seguranca img, .compra-segura img, .certificados img',secure,8);
     if(!seals) secure.appendChild(e('p', '', 'Compra protegida pela Loja Integrada.'));
     secure.appendChild(e('h3', '', 'FORMAS DE PAGAMENTO'));
-    var paymentIcons=copyLogos('.pagamento img, .formas-pagamento img, .bandeiras-pagamento img, .bandeiras img, .meios-pagamento img',secure,12);
-    if(!paymentIcons) secure.appendChild(e('p', '', 'Consulte os meios disponíveis no checkout.'));
+    // LI representa bandeiras tanto por imagens quanto por sprites .icone-pagamento.
+    // O HTML do checkout fornecido pelo lojista confirma Mastercard, Visa e Elo.
+    var paymentSelectors='.pagamento, .formas-pagamento, .bandeiras-pagamento, .bandeiras, .meios-pagamento, .gateways-rodape';
+    var paymentWrap=e('div','tb26-footer__payments');
+    var paymentSeen=new Set();
+    var knownBrands={mastercard:'Mastercard',visa:'Visa',elo:'Elo',amex:'American Express',diners:'Diners',hipercard:'Hipercard',hiper:'Hiper',pix:'Pix',boleto:'Boleto'};
+    function brandKey(value) {
+      var str=String(value||'').toLowerCase();
+      return Object.keys(knownBrands).find(function(key){return new RegExp('(?:^|[^a-z])'+key+'(?:[^a-z]|$)').test(str);})||'';
+    }
+    function addPaymentBrand(key,original) {
+      if(!knownBrands[key]||paymentSeen.has(key))return;
+      paymentSeen.add(key);
+      var badge=e('span','tb26-footer__payment-brand tb26-footer__payment-brand--'+key);
+      badge.setAttribute('aria-label',knownBrands[key]);badge.title=knownBrands[key];
+      var sprite=e('i','icone-pagamento '+key+' tb26-footer__payment-sprite');
+      sprite.setAttribute('aria-hidden','true');
+      // Capture sprite properties before the old footer is hidden.
+      if(original){
+        var style=win.getComputedStyle(original);
+        if(style.backgroundImage && style.backgroundImage!=='none'){
+          ['backgroundImage','backgroundPosition','backgroundSize','backgroundRepeat'].forEach(function(prop){sprite.style[prop]=style[prop];});
+          if(parseFloat(style.width)>0)sprite.style.width=style.width;
+          if(parseFloat(style.height)>0)sprite.style.height=style.height;
+        }
+      }
+      var label=e('span','tb26-footer__payment-label',knownBrands[key]);
+      append(badge,sprite,label);paymentWrap.appendChild(badge);
+    }
+    var imageSeen=new Set();
+    [].slice.call(native.querySelectorAll(paymentSelectors.split(', ').map(function(sel){return sel+' img';}).join(','))).forEach(function(n){
+      var raw=n.getAttribute('data-src')||n.getAttribute('src');
+      if(!raw)return;
+      var clean=safeUrl(raw);
+      if(!clean||imageSeen.has(clean))return;
+      var key=brandKey((n.getAttribute('alt')||'')+' '+(n.getAttribute('title')||'')+' '+raw);
+      if(key&&paymentSeen.has(key))return;
+      imageSeen.add(clean);if(key)paymentSeen.add(key);
+      var badge=e('span','tb26-footer__payment-image');
+      var img=e('img');img.src=clean;img.alt=n.getAttribute('alt')||n.getAttribute('title')||(key?knownBrands[key]:'Forma de pagamento');
+      img.loading='lazy';img.decoding='async';
+      if(key)img.addEventListener('error',function(){badge.replaceChildren(e('span','tb26-footer__payment-label',knownBrands[key]));},{once:true});
+      badge.appendChild(img);paymentWrap.appendChild(badge);
+    });
+    [].slice.call(native.querySelectorAll('.icone-pagamento, .gateways-rodape [class*="bandeira-"]')).forEach(function(n){
+      var key=brandKey(n.className+' '+(n.getAttribute('title')||''));
+      if(key)addPaymentBrand(key,n);
+    });
+    // Fallback restrito às tres bandeiras explicitamente exibidas no checkout da loja.
+    ['mastercard','visa','elo'].forEach(function(key){addPaymentBrand(key,null);});
+    secure.appendChild(paymentWrap);
     grid.appendChild(secure); right.appendChild(grid);
     var legal=e('div','tb26-footer__bottom');
     legal.appendChild(e('small','tb26-footer__legal-copy','TRACTORBEL | Todos os direitos reservados. Os preços anunciados neste site ou via e-mail promocional podem ser alterados sem prévio aviso.'));
@@ -1472,6 +1521,14 @@
     agency.appendChild(agencyLogo);legal.appendChild(agency);
     append(footer,left,right,legal);
     native.parentNode.insertBefore(footer, native); native.classList.add('tb26-native-footer'); doc.body.classList.add('tb26-with-footer'); state.footer = true;
+    // Quando o CSS nativo tem sprite, usar o desenho oficial. Sem sprite,
+    // manter o nome da bandeira legível, nunca um quadrado vazio.
+    [].slice.call(paymentWrap.querySelectorAll('.tb26-footer__payment-sprite')).forEach(function(sprite){
+      var style=win.getComputedStyle(sprite);
+      if(style.backgroundImage && style.backgroundImage!=='none' && parseFloat(style.width)>0 && parseFloat(style.height)>0){
+        sprite.parentNode.classList.add('tb26-footer__payment-brand--sprite');
+      }
+    });
     setupMotion(footer);
   }
   // v1.8 | PDP premium - progressive enhancement of the real Loja Integrada page.

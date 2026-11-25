@@ -3067,3 +3067,37 @@ body.tb26-active #tb26-footer{
     padding-inline:15px;
   }
 }
+
+
+/* TractorBel v1.28.3 — meios de pagamento (sprites LI + imagens).
+   Fundo claro para contraste de Pix, boleto e bandeiras. */
+body.tb26-active #tb26-footer .tb26-footer__payments{
+  display:flex;flex-wrap:wrap;align-items:center;gap:6px;
+  width:100%;min-width:0;
+}
+body.tb26-active #tb26-footer .tb26-footer__payment-brand,
+body.tb26-active #tb26-footer .tb26-footer__payment-image{
+  display:inline-flex;align-items:center;justify-content:center;
+  min-height:29px;max-width:100%;padding:4px 6px;
+  border:1px solid #e7e7e7;border-radius:4px;background:#fff;
+  box-sizing:border-box;flex:0 0 auto;
+}
+body.tb26-active #tb26-footer .tb26-footer__payment-image img{
+  display:block;max-height:23px;max-width:59px;width:auto;height:auto;object-fit:contain;
+}
+body.tb26-active #tb26-footer .tb26-footer__payment-label{
+  font:750 10px/1.2 'Montserrat',Arial,sans-serif!important;color:#232323;
+}
+body.tb26-active #tb26-footer .tb26-footer__payment-brand--visa .tb26-footer__payment-label{color:#172b85;font-style:italic!important;}
+body.tb26-active #tb26-footer .tb26-footer__payment-brand--mastercard .tb26-footer__payment-label{color:#a73517;}
+body.tb26-active #tb26-footer .tb26-footer__payment-brand--elo .tb26-footer__payment-label{color:#111;}
+body.tb26-active #tb26-footer .tb26-footer__payment-sprite{
+  display:inline-block;position:absolute;visibility:hidden;
+  pointer-events:none;flex:none;
+}
+body.tb26-active #tb26-footer .tb26-footer__payment-brand--sprite .tb26-footer__payment-sprite{
+  position:static;visibility:visible;
+}
+body.tb26-active #tb26-footer .tb26-footer__payment-brand--sprite .tb26-footer__payment-label{
+  position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;
+}
