@@ -6,7 +6,7 @@
 (function (w,d) {
   'use strict';
   if(w.Cabcom2026) return;
-  var VERSION='2.2.0';
+  var VERSION='2.2.1';
   var CDN='https://cdn.awsli.com.br/80/80577/arquivos/';
   var DEFAULTS={
     geral:{ativo:true,publicarNaLoja:false,debug:false},
@@ -1113,7 +1113,9 @@
     var completed=0;
     nodes.forEach(function(card){
       if(card.classList.contains('cc26-card-two-cta') &&
-         card.querySelector('.cc26-card-quote-actions')){
+         card.querySelector(':scope > .cc26-card-quote-actions')){
+        var legacy=card.querySelector('.acoes-produto');
+        if(legacy)legacy.classList.add('cc26-card-legacy-visual');
         hideLegacy(card);
         completed++;
         return;
@@ -1172,25 +1174,37 @@
           email.dataset.cc26QuoteFallback='pdp';
         }
       }
-      if(!actions){
-        actions=el('div','acoes-produto');
-        card.appendChild(actions);
-      }
+      // CTA independente: jamais herda a altura, hover, opacity ou display
+      // da .acoes-produto original. Ações LI ficam disponíveis no DOM.
       var newActions=el('div','cc26-card-quote-actions');
-      whats.classList.add('cc26-card-quote-actions__whatsapp');
-      email.classList.add('cc26-card-quote-actions__email');
-      // Manter o anchor real preserva handlers LI; só atualiza o rótulo visual.
-      // Para anchors criados localmente, texto/ícone são montados do zero.
-      whats.replaceChildren(inlineIcon('phone'),el('span','','Cotar por WhatsApp'));
-      email.replaceChildren(inlineIcon('mail'),el('span','','Cotar por e-mail'));
-      whats.setAttribute('aria-label','Cotar por WhatsApp');
-      email.setAttribute('aria-label','Cotar por e-mail');
-      newActions.appendChild(whats);
-      newActions.appendChild(email);
-      // Esconder os controles duplicados de dentro e fora do .acoes-produto.
+      function visibleCTA(original,kind,label,icon){
+        var link=a(original.getAttribute('href')||href,'cc26-card-quote-actions__'+kind);
+        link.appendChild(inlineIcon(icon));
+        link.appendChild(el('span','',label));
+        link.setAttribute('aria-label',label);
+        if(original.target){link.target=original.target;link.rel='noopener noreferrer';}
+        if(original.dataset.cc26QuoteFallback)link.dataset.cc26QuoteFallback=original.dataset.cc26QuoteFallback;
+        // Se o tema usar ação própria, delega ao original; a rota de cotação
+        // oficial é interceptada pelo sidebar no clique do link novo.
+        if(existing.indexOf(original)>=0){
+          var nativeURL;
+          try{nativeURL=new URL(original.href,location.href);}catch(e){}
+          var official=kind==='email'&&nativeURL&&nativeURL.origin===location.origin&&/^\/carrinho\/produto\/\d+\/adicionar\/?$/i.test(nativeURL.pathname);
+          var directWhats=kind==='whatsapp'&&nativeURL&&/^(wa\.me|api\.whatsapp\.com|web\.whatsapp\.com)$/i.test(nativeURL.hostname);
+          if(!official&&!directWhats){
+            link.addEventListener('click',function(ev){
+              if(ev.ctrlKey||ev.metaKey||ev.shiftKey||ev.altKey)return;
+              ev.preventDefault();original.click();
+            });
+          }
+          original.classList.add('cc26-card-legacy-action');
+        }
+        return link;
+      }
+      newActions.appendChild(visibleCTA(whats,'whatsapp','Cotar por WhatsApp','phone'));
+      newActions.appendChild(visibleCTA(email,'email','Cotar por e-mail','mail'));
       existing.forEach(function(node){
-        if(node!==whats && node!==email &&
-           (actions.contains(node)||isMore(node)))node.classList.add('cc26-card-legacy-action');
+        if((actions&&actions.contains(node))||isMore(node))node.classList.add('cc26-card-legacy-action');
       });
       // Composição fixa: foto, título, dois CTAs. Ações ficam no rodapé
       // sem depender de .info-produto ou do posicionamento legado.
@@ -1200,8 +1214,9 @@
       if(title)title.classList.add('cc26-card-name');
       var info=card.querySelector('.info-produto');
       if(info)info.classList.add('cc26-card-info');
-      actions.appendChild(newActions);
-      if(actions.parentElement!==card)card.appendChild(actions);
+      // Mantém foto e título no lugar original; o CTA é filho direto do card.
+      if(actions)actions.classList.add('cc26-card-legacy-visual');
+      card.appendChild(newActions);
       card.classList.add('cc26-card-two-cta');
       // Mantém elementos LI no DOM; não deixa preços/selos ocupar o card de cotação.
       [].slice.call(card.querySelectorAll('.preco-produto,.bandeiras-produto,.bandeiras,.bandeira-promocao,.produto-selo,.produto-bandeiras,.avaliacao,.avaliacoes,.produto-avaliacoes')).forEach(function(node){
