@@ -6,7 +6,7 @@
 (function (w,d) {
   'use strict';
   if(w.Cabcom2026) return;
-  var VERSION='2.2.7';
+  var VERSION='2.2.8';
   var CDN='https://cdn.awsli.com.br/80/80577/arquivos/';
   var DEFAULTS={
     geral:{ativo:true,publicarNaLoja:false,debug:false},
@@ -1177,6 +1177,34 @@
   // Não altera produtos, links ou handlers comerciais. Não depende dos
   // cálculos/width/transform do FlexSlider legado da Loja Integrada.
   var catalogPaging=new WeakMap();
+  // O tema antigo da Cabcom troca o FlexSlider pelo Owl no window.load.
+  // Configurar a instância efetiva, não o wrapper descartado pelo tema.
+  function configureLegacyOwl(list){
+    if(!w.jQuery)return false;
+    var $list=w.jQuery(list),owl=$list.data('owl.carousel');
+    if(!owl||!owl.options||typeof owl.refresh!=='function')return false;
+    var responsive=owl.options.responsive||{},changed=false;
+    Object.keys(responsive).forEach(function(key){
+      if(Number(key)>=1024&&responsive[key]){
+        if(responsive[key].items!==5||responsive[key].slideBy!==5){
+          responsive[key]=Object.assign({},responsive[key],{items:5,slideBy:5});changed=true;
+        }
+      }
+    });
+    if(!responsive[1024]||responsive[1024].items!==5||responsive[1024].slideBy!==5){
+      responsive[1024]=Object.assign({},responsive[1024],{items:5,slideBy:5});changed=true;
+    }
+    owl.options.responsive=responsive;
+    // Também manter os cinco após a inicialização ou resize do plugin.
+    if(w.innerWidth>=1024&&owl.settings&&(owl.settings.items!==5||owl.settings.slideBy!==5))changed=true;
+    if(changed){
+      // Owl recalcula settings e larguras usando o próprio pipeline.
+      owl.invalidate('settings');
+      owl.refresh();
+    }
+    if(!list.classList.contains('cc26-owl-managed'))list.classList.add('cc26-owl-managed');
+    return true;
+  }
   function mountCatalogPaging(list){
     // LI entrega data-produtos-linha="4" do painel; sobrescrever na camada
     // de prévia ANTES de a grade/slider fazer o cálculo responsivo.
@@ -1420,7 +1448,7 @@
       if(isSlider){
         list.classList.remove('cc26-catalog-grid');
         if(list.matches('.produtos-carrossel')){
-          mountCatalogPaging(list);
+          if(!configureLegacyOwl(list))mountCatalogPaging(list);
           mountedCarousels++;
         }
         // Quando a LI usa Slick, configura cinco cards em telas largas pelo
@@ -1459,7 +1487,7 @@
         list.classList.add('cc26-catalog-grid');
       }
     });
-    state.carouselAudit={version:'2.2.4',source:'Loja Integrada',desktopProducts:5,
+    state.carouselAudit={version:'2.2.8',source:'Loja Integrada',desktopProducts:5,
       mounted:mountedCarousels,windowWidth:w.innerWidth};
   }
   function decorateNativeShelves(){
@@ -2219,6 +2247,7 @@
     initFade();
     initExperience();
     if(home){
+      if(typeof w.vitrineProdutos!=='undefined')w.vitrineProdutos=5;
       w.addEventListener('load',schedule,{once:true});
       [600,1800].forEach(function(ms){w.setTimeout(schedule,ms);});
     }
