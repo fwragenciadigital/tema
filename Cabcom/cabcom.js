@@ -6,7 +6,7 @@
 (function (w,d) {
   'use strict';
   if(w.Cabcom2026) return;
-  var VERSION='2.2.8';
+  var VERSION='2.2.9';
   var CDN='https://cdn.awsli.com.br/80/80577/arquivos/';
   var DEFAULTS={
     geral:{ativo:true,publicarNaLoja:false,debug:false},
@@ -1184,23 +1184,40 @@
     var $list=w.jQuery(list),owl=$list.data('owl.carousel');
     if(!owl||!owl.options||typeof owl.refresh!=='function')return false;
     var responsive=owl.options.responsive||{},changed=false;
-    Object.keys(responsive).forEach(function(key){
-      if(Number(key)>=1024&&responsive[key]){
-        if(responsive[key].items!==5||responsive[key].slideBy!==5){
-          responsive[key]=Object.assign({},responsive[key],{items:5,slideBy:5});changed=true;
-        }
-      }
-    });
-    if(!responsive[1024]||responsive[1024].items!==5||responsive[1024].slideBy!==5){
-      responsive[1024]=Object.assign({},responsive[1024],{items:5,slideBy:5});changed=true;
+    // Owl multiplica a duração pela distância entre slides: 220 ms x 5
+    // resulta em aproximadamente 1,1 s de transição no desktop.
+    function timing(desktop){
+      var speed=desktop?220:500;
+      return {smartSpeed:speed,navSpeed:speed,autoplaySpeed:speed,
+        autoplayTimeout:7500,autoplayHoverPause:true};
     }
+    function set(target,settings){
+      Object.keys(settings).forEach(function(key){
+        if(target[key]!==settings[key]){target[key]=settings[key];changed=true;}
+      });
+    }
+    set(owl.options,timing(false));
+    Object.keys(responsive).forEach(function(key){
+      if(!responsive[key])return;
+      var desktop=Number(key)>=1024;
+      set(responsive[key],timing(desktop));
+      if(desktop)set(responsive[key],{items:5,slideBy:5});
+    });
+    if(!responsive[1024]){responsive[1024]={};changed=true;}
+    set(responsive[1024],Object.assign(timing(true),{items:5,slideBy:5}));
     owl.options.responsive=responsive;
-    // Também manter os cinco após a inicialização ou resize do plugin.
-    if(w.innerWidth>=1024&&owl.settings&&(owl.settings.items!==5||owl.settings.slideBy!==5))changed=true;
+    var expected=timing(w.innerWidth>=1024);
+    if(w.innerWidth>=1024){expected.items=5;expected.slideBy=5;}
+    if(owl.settings&&Object.keys(expected).some(function(key){return owl.settings[key]!==expected[key];}))changed=true;
     if(changed){
-      // Owl recalcula settings e larguras usando o próprio pipeline.
       owl.invalidate('settings');
       owl.refresh();
+      // Reiniciar apenas o timer existente, sem ativar autoplay em uma
+      // vitrine cujo painel o tenha desabilitado.
+      if(owl.settings&&owl.settings.autoplay){
+        $list.trigger('stop.owl.autoplay');
+        $list.trigger('play.owl.autoplay',[7500,owl.settings.autoplaySpeed]);
+      }
     }
     if(!list.classList.contains('cc26-owl-managed'))list.classList.add('cc26-owl-managed');
     return true;
@@ -1487,7 +1504,7 @@
         list.classList.add('cc26-catalog-grid');
       }
     });
-    state.carouselAudit={version:'2.2.8',source:'Loja Integrada',desktopProducts:5,
+    state.carouselAudit={version:'2.2.9',source:'Loja Integrada',desktopProducts:5,
       mounted:mountedCarousels,windowWidth:w.innerWidth};
   }
   function decorateNativeShelves(){
