@@ -6,7 +6,7 @@
 (function (w,d) {
   'use strict';
   if(w.Cabcom2026) return;
-  var VERSION='2.2.11';
+  var VERSION='2.2.14';
   var CDN='https://cdn.awsli.com.br/80/80577/arquivos/';
   var DEFAULTS={
     geral:{ativo:true,publicarNaLoja:false,debug:false},
@@ -975,7 +975,7 @@
     return results;
   }
   function findNativeMiniSources(){
-    // Fonte exclusiva: secao Mini Banner do painel LI. Nao usar Banner Vitrine.
+    // Módulos legados: ocultar após inserir o HTML manual.
     var selectors=[
       '#corpo .banner.mini','#corpo .mini-banner','#corpo .mini-banners',
       '#corpo .banner-mini','#corpo .banners-mini',
@@ -996,192 +996,55 @@
       return !candidates.some(function(parent){return parent!==node && parent.contains(node);});
     });
   }
-  function miniBannerUrl(raw){
-    if(!raw)return '';
-    var candidate=String(raw).trim();
-    if(!candidate || /^data:|^blob:|^javascript:/i.test(candidate))return '';
-    try{
-      var u=new URL(candidate,location.href);
-      return /^https?:$/.test(u.protocol)?u.href:'';
-    }catch(e){return '';}
-  }
-  function fullMiniBannerUrl(href){
-    // Remover APENAS prefixos de resize CDN AWSLI conhecidos e manter
-    // o original como fallback caso o arquivo sem resize nao exista.
-    var original=miniBannerUrl(href);
-    if(!original)return '';
-    var replacement=original.replace(
-      /^(https:\/\/cdn\.awsli\.com\.br)\/(?:\d{2,5}x\d{2,5})\/(80\/80577\/arquivos\/)/i,
-      '$1/$2'
-    );
-    return replacement===original?'':replacement;
-  }
-  function miniBannerSrcset(value){
-    if(!value)return '';
-    var entries=String(value).split(',').map(function(part){
-      var segments=part.trim().split(/\s+/);
-      var score=1;
-      if(segments[1]){
-        var width=segments[1].match(/^(\d+)w$/),density=segments[1].match(/^([\d.]+)x$/);
-        score=width?Number(width[1]):density?Number(density[1])*1000:1;
-      }
-      return {url:miniBannerUrl(segments[0]),score:score};
-    }).filter(function(part){return !!part.url;});
-    entries.sort(function(a,b){return b.score-a.score;});
-    return entries.length?entries[0].url:'';
-  }
-  function miniBannerImageCandidates(image,holder){
-    var list=[];
-    function add(candidate){
-      var url=miniBannerUrl(candidate);
-      if(url && list.indexOf(url)<0)list.push(url);
-    }
-    if(image){
-      // Em browsers com lazy load, currentSrc pode ser miniatura ou placeholder.
-      // Priorizar srcsets, data-original e tamanho integral publicado pela LI.
-      ['data-image-full','data-full','data-large','data-original'].forEach(function(attr){
-        add(image.getAttribute(attr));
-      });
-      add(miniBannerSrcset(image.getAttribute('data-srcset')));
-      add(miniBannerSrcset(image.getAttribute('srcset')));
-      var picture=image.closest('picture');
-      if(picture) [].slice.call(picture.querySelectorAll('source[srcset]')).forEach(function(s){
-        add(miniBannerSrcset(s.getAttribute('srcset')));
-      });
-      add(image.getAttribute('data-src'));
-      add(image.getAttribute('data-lazy-src'));
-      add(image.getAttribute('src'));
-      add(image.currentSrc);
-    }
-    var target=holder||image;
-    if(target){
-      ['data-background','data-bg','data-image','data-banner-image','data-src'].forEach(function(attr){
-        add(target.getAttribute(attr));
-      });
-      var styled=target.getAttribute('style')||'';
-      var match=styled.match(/background(?:-image)?\s*:\s*[^;]*url\(\s*["']?([^"')]+)["']?\s*\)/i);
-      if(match)add(match[1]);
-      var linked=target.closest('a[href]')||target.querySelector('a[href]');
-      if(linked && /\.(?:png|jpe?g|webp|avif)(?:[?#]|$)/i.test(linked.href||''))add(linked.href);
-    }
-    // Versao não redimensionada da imagem mais confiável; teste com fallback.
-    var high=list.length?fullMiniBannerUrl(list[0]):'';
-    if(high)list.unshift(high);
-    return list;
-  }
-  function readMiniBanners(sources){
-    var entries=[],used=new Set();
-    sources.forEach(function(source){
-      if(entries.length>=4)return;
-      var images=[].slice.call(source.querySelectorAll('img'));
-      // Imagens estão às vezes no próprio bloco .mini-banner via CSS.
-      if(source.matches&&source.matches('img'))images.unshift(source);
-      images.forEach(function(image){
-        if(entries.length>=4 || image.closest('.slick-cloned, .swiper-slide-duplicate, .owl-item.cloned'))return;
-        var parent=image.closest('a[href],.mini-banner,.banner-mini,.banner')||image.parentElement;
-        var urls=miniBannerImageCandidates(image,parent);
-        if(!urls.length)return;
-        // Chave DOM: NÃO deduplicar somente por URL; banners diferentes podem
-        // ter o mesmo thumbnail antes do lazy loading ou usar a mesma arte.
-        var slot=image;
-        if(used.has(slot))return;
-        used.add(slot);
-        var anchor=image.closest('a[href]');
-        var link='';
-        if(anchor){
-          try{
-            var u=new URL(anchor.href,location.href);
-            if(/^https?:$/.test(u.protocol))link=u.href;
-          }catch(e){}
-        }
-        entries.push({id:'mini-'+entries.length,image:urls[0],fallbacks:urls.slice(1),
-          link:link,alt:image.getAttribute('alt')||'',src:image});
-      });
-      // Banners cuja imagem é background (sem tag IMG).
-      if(!images.length && entries.length<4){
-        var backgrounds=(source.nodeType===1?[source]:[]).concat([].slice.call(source.querySelectorAll(
-          '[style*="background"],[data-background],[data-bg],[data-banner-image]'
-        )));
-        backgrounds.forEach(function(elm){
-          if(entries.length>=4||used.has(elm))return;
-          var urls=miniBannerImageCandidates(null,elm);
-          if(!urls.length)return;
-          used.add(elm);
-          var a=elm.closest('a[href]')||elm.querySelector('a[href]');
-          entries.push({id:'mini-'+entries.length,image:urls[0],fallbacks:urls.slice(1),
-            link:a?miniBannerUrl(a.getAttribute('href')):'',alt:elm.getAttribute('aria-label')||'',src:elm});
-        });
-      }
-    });
-    return entries.slice(0,4);
-  }
+  // Quatro posições administradas exclusivamente pelo HTML personalizado.
+  // O painel de mini banners nativo deixa de ser fonte do componente.
   function miniBanners(){
-    if(cfg.home.miniBanners===false || !cfg.home.miniBanners)return null;
-    var sources=findNativeMiniSources(),items=readMiniBanners(sources);
-    // Layout clássico LI fornece apenas três módulos Mini. Um quarto
-    // cadastrado como Banner Vitrine (título/alt Mini Banner 4) ou no HTML
-    // administrativo é aceito sem confundir com banners promocionais comuns.
-    var extra=d.getElementById('cc26-mini-banner-extra');
-    var extraSource=extra?[extra.content||extra]:[];
-    if(items.length<4){
-      var alternate=[].slice.call(d.querySelectorAll('img[alt],img[title]')).find(function(img){
-        if(img.closest('.cc26-section')||img.closest('#cc26-footer')||img.closest('.cc26-cart-sidebar'))return false;
-        if(sources.some(function(source){return source.contains(img);}))return false;
-        if(img.closest('.owl-item.cloned,.slick-cloned,.flex-clone,.swiper-slide-duplicate'))return false;
-        return /^MINI[\s-]*BANNER[\s-]*4$/.test(normalized(img.alt||img.title||'').trim());
-      });
-      if(alternate)extraSource.push(alternate);
-      readMiniBanners(extraSource).forEach(function(it){
-        if(items.length<4&&!items.some(function(existing){return existing.image===it.image;})){
-          items.push(it);
-          if(it.src===alternate){
-            var block=alternate.closest('.banner,.banner-vitrine,.banner-vitrine-container');
-            (block&&block.querySelectorAll('img').length===1?block:alternate).classList.add('cc26-mini-native-hidden');
-          }
-        }
-      });
+    if(!cfg.home.miniBanners)return null;
+    var admin=d.getElementById('cc26-banners-admin');
+    var source=admin&&(admin.content||admin);
+    if(!source)return null; // Até instalar o HTML, preservar os banners nativos.
+    function safeURL(value){
+      value=String(value||'').trim();if(!value)return '';
+      try{var u=new URL(value,location.href);return /^https?:$/.test(u.protocol)?u.href:'';}catch(e){return '';}
     }
-    var existing=d.querySelector('.cc26-mini-banners');
-    if(items.length<2){
-      if(!existing)warn('Mini Banner LI: menos de 2 imagens encontradas no HTML.');
-      return existing||null;
-    }
-    var currentSignature=items.map(function(it){return it.image+'@'+it.link;}).join('|');
-    if(existing && existing.dataset.cc26Signature===currentSignature)return existing;
-    var s=existing||section('cc26-mini-banners');
-    var grid=existing?existing.querySelector('.cc26-mini-banners__grid'):null;
-    if(!grid){
-      grid=wrap();grid.classList.add('cc26-mini-banners__grid');
-      s.appendChild(grid);
-    }
-    grid.replaceChildren();
-    items.forEach(function(item){
-      var tile=item.link?a(item.link,'cc26-mini-banner'):el('div','cc26-mini-banner');
-      var picture=el('img');picture.alt=item.alt;picture.loading='lazy';
-      picture.decoding='async';
-      picture.src=item.image;
-      // Preferir arquivo full-res da CDN, retornando ao original se falhar.
-      var candidates=item.fallbacks.slice();
-      picture.addEventListener('error',function(){
-        if(candidates.length)picture.src=candidates.shift();
-        else warn('Mini Banner LI: imagem sem origem válida.');
-      });
-      picture.addEventListener('load',function(){
-        if(picture.naturalWidth && picture.getBoundingClientRect().width > picture.naturalWidth*1.35){
-          warn('Mini Banner LI: original publicado com resolução baixa ('+picture.naturalWidth+'px).');
-        }
-      });
-      tile.appendChild(picture);grid.appendChild(tile);
+    var slots=[].slice.call(source.querySelectorAll('[data-cc26-banner]')).slice(0,4);
+    var items=slots.map(function(slot,i){
+      return {image:safeURL(slot.getAttribute('data-imagem')),link:safeURL(slot.getAttribute('data-link')),
+        alt:slot.getAttribute('data-alt')||('Banner '+(i+1))};
     });
-    s.dataset.cc26Signature=currentSignature;
-    s.dataset.cc26Count=String(items.length);
-    s.dataset.nativeSource='minibanner';
-    sources.forEach(function(source){source.classList.add('cc26-mini-native-hidden');});
-    state.miniBanners={origin:'Loja Integrada / Mini Banner',count:items.length,expected:4,
-      complete:items.length===4,sourceNodes:sources.length};
-    if(items.length<4)warn('Mini Banner LI: '+items.length+' de 4 imagens legíveis no DOM; verificando carregamento.');
+    var count=items.filter(function(it){return !!it.image;}).length;
+    var existing=d.querySelector('.cc26-mini-banners');
+    if(!count){if(existing)existing.remove();return null;}
+    var signature=JSON.stringify(items);
+    var s=existing||section('cc26-mini-banners');
+    var grid=s.querySelector('.cc26-mini-banners__grid');
+    if(!grid){grid=wrap();grid.classList.add('cc26-mini-banners__grid');s.appendChild(grid);}
+    if(s.dataset.cc26Signature!==signature){
+      grid.replaceChildren();
+      items.forEach(function(item){
+        if(!item.image&&!preview)return;
+        var tile=item.image&&item.link?a(item.link,'cc26-mini-banner'):el('div','cc26-mini-banner');
+        if(item.image){
+          var picture=el('img');picture.alt=item.alt;picture.loading='lazy';picture.decoding='async';picture.src=item.image;
+          tile.appendChild(picture);
+        }else{
+          tile.classList.add('cc26-mini-banner--placeholder');
+          tile.appendChild(el('span','','Imagem pendente: '+item.alt));
+        }
+        grid.appendChild(tile);
+      });
+      s.dataset.cc26Signature=signature;
+      s.dataset.cc26Count=String(count);
+      s.dataset.cc26Slots=String(slots.length);
+      s.dataset.nativeSource='html-admin';
+    }
+    findNativeMiniSources().forEach(function(node){
+      if(node!==admin&&!node.contains(admin))node.classList.add('cc26-mini-native-hidden');
+    });
+    state.miniBanners={origin:'HTML personalizado',count:count,expected:4,complete:count===4,slots:slots.length};
     return s;
   }
+
   function findNativeBrandSource(){
     var sources=[].slice.call(d.querySelectorAll('#corpo .marcas.hidden-phone, #corpo .marcas, .marcas.hidden-phone'));
     return sources.find(function(node){
@@ -1267,14 +1130,21 @@
     if(!cfg.home.instagram)return null;
     var link=safeInstagram(cfg.conteudo.instagram);
     var s=section('cc26-instagram');
-    var c=wrap(), heading=el('div','cc26-instagram__title');
-    heading.appendChild(el('span','','Siga-nos no Instagram'));
-    heading.appendChild(el('strong','','@cabcomoficial'));
+    var c=wrap(), heading=link?a(link,'cc26-instagram__title'):el('div','cc26-instagram__title');
+    if(link){heading.target='_blank';heading.rel='noopener noreferrer';}
+    heading.appendChild(inlineIcon('instagram'));
+    var copy=el('div','cc26-instagram__heading-copy');
+    copy.appendChild(el('span','','Siga-nos no Instagram'));
+    copy.appendChild(el('strong','','@cabcomoficial'));heading.appendChild(copy);
     c.appendChild(heading);
+    var scroll=el('div','cc26-instagram__scroll');
+    scroll.setAttribute('aria-label','Publicações do Instagram da Cabcom');
     var media=link?a(link,'cc26-instagram__link'):el('div','cc26-instagram__link');
     if(link){media.target='_blank';media.rel='noopener noreferrer';}
-    media.appendChild(img('insta.png','Publicações da Cabcom no Instagram'));
-    c.appendChild(media);s.appendChild(c);return s;
+    var picture=el('img');picture.src='https://cdn.awsli.com.br/80/80577/arquivos/insta.png';
+    picture.alt='Quatro publicações da Cabcom no Instagram';picture.width=1730;picture.height=525;
+    picture.loading='lazy';picture.decoding='async';
+    media.appendChild(picture);scroll.appendChild(media);c.appendChild(scroll);s.appendChild(c);return s;
   }
   // Normalização visual progressiva das vitrines sem clonar produtos nem slider LI.
   function labelHomeShelves(listing){
