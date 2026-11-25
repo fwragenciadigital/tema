@@ -330,6 +330,19 @@
           var result=await requestQuoteQuantity(product,current,next);
           // Atualiza com dados confirmados; preserva o formulário, máscaras e campos preenchidos.
           render(result.quantity);
+          var liveRow=d.querySelector('#corpo table.tabela-carrinho tr[data-produto-id="'+product+'"]');
+          var newRow=result.doc.querySelector('table.tabela-carrinho tr[data-produto-id="'+product+'"]');
+          if(liveRow&&newRow){
+            liveRow.setAttribute('data-produto-quantidade',String(result.quantity));
+            ['quantidade','quantidade_atual'].forEach(function(name){
+              var input=liveRow.querySelector('input[name="'+name+'"]');
+              if(input){input.value=String(result.quantity);input.setAttribute('value',String(result.quantity));}
+            });
+            ['a.icon-minus','a.icon-plus'].forEach(function(selector){
+              var link=liveRow.querySelector(selector),fresh=newRow.querySelector(selector);
+              if(link&&fresh)link.setAttribute('href',fresh.getAttribute('href'));
+            });
+          }
           error.textContent=result.quantity===next?'Quantidade atualizada.':'Quantidade ajustada pela disponibilidade da loja.';
           if(send)send.disabled=oldDisabled;
         }catch(e){
@@ -1105,10 +1118,28 @@
   function miniBanners(){
     if(cfg.home.miniBanners===false || !cfg.home.miniBanners)return null;
     var sources=findNativeMiniSources(),items=readMiniBanners(sources);
+    // Layout clássico LI fornece apenas três módulos Mini. Um quarto
+    // cadastrado como Banner Vitrine (título/alt Mini Banner 4) ou no HTML
+    // administrativo é aceito sem confundir com banners promocionais comuns.
     var extra=d.getElementById('cc26-mini-banner-extra');
-    if(items.length<4&&extra){
-      var extraItems=readMiniBanners([extra.content||extra]);
-      extraItems.forEach(function(it){if(items.length<4&&!items.some(function(existing){return existing.image===it.image;}))items.push(it);});
+    var extraSource=extra?[extra.content||extra]:[];
+    if(items.length<4){
+      var alternate=[].slice.call(d.querySelectorAll('img[alt],img[title]')).find(function(img){
+        if(img.closest('.cc26-section')||img.closest('#cc26-footer')||img.closest('.cc26-cart-sidebar'))return false;
+        if(sources.some(function(source){return source.contains(img);}))return false;
+        if(img.closest('.owl-item.cloned,.slick-cloned,.flex-clone,.swiper-slide-duplicate'))return false;
+        return /^MINI[\s-]*BANNER[\s-]*4$/.test(normalized(img.alt||img.title||'').trim());
+      });
+      if(alternate)extraSource.push(alternate);
+      readMiniBanners(extraSource).forEach(function(it){
+        if(items.length<4&&!items.some(function(existing){return existing.image===it.image;})){
+          items.push(it);
+          if(it.src===alternate){
+            var block=alternate.closest('.banner,.banner-vitrine,.banner-vitrine-container');
+            (block&&block.querySelectorAll('img').length===1?block:alternate).classList.add('cc26-mini-native-hidden');
+          }
+        }
+      });
     }
     var existing=d.querySelector('.cc26-mini-banners');
     if(items.length<2){
