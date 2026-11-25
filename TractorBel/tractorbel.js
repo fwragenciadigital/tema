@@ -1,12 +1,12 @@
 /*
- * TractorBel 2026 - FWR Agencia Digital - v1.28.0
+ * TractorBel 2026 - FWR Agencia Digital - v1.28.1
  * Camada visual da Loja Integrada. Sem checkout ou precificacao paralela.
  * Editavel por window.TractorBelSettings no HTML da LI.
  */
 (function (win, doc) {
   'use strict';
   if (win.TractorBel2026) return;
-  var VERSION = '1.28.0';
+  var VERSION = '1.28.1';
   // Assets oficiais da TractorBel, ja hospedados na Loja Integrada.
   // Manter os nomes e extensoes ORIGINAIS, sem converter .jpg/.png para .webp.
   // O nome logico pode continuar .webp para compatibilidade com os componentes existentes.
@@ -1315,7 +1315,7 @@
     var opt=cfg.rodape.contatos;
     if(!opt||opt.ativo===false)return;
     var box=e('div','tb26-footer__contacts');
-    var heading=e('h4','tb26-footer__contacts-title',opt.titulo||'Conheça nossa loja');
+    var heading=e('h3','tb26-footer__contacts-title',opt.titulo||'Conheça nossa loja');
     box.appendChild(heading);
     function row(kind,text,href,external){
       if(!text)return;
@@ -1434,11 +1434,16 @@
       institutionalPages.push([text,new URL(url).pathname + new URL(url).search]);
     });
     var institutionalCol=column('INSTITUCIONAL',institutionalPages);
-    mountFooterContacts(institutionalCol,instagramURL,facebookURL);
+    var contactCol=e('div','tb26-footer__col tb26-footer__col--contacts');
+    mountFooterContacts(contactCol,instagramURL,facebookURL);
     append(grid,
       column('ÁREA DO CLIENTE', [['Minha Conta', '/conta/index'], ['Meus Pedidos', '/conta/pedido/listar'], ['Cadastre-se', '/conta/criar'], ['Fale Conosco', 'https://wa.me/' + String(cfg.conteudo.whatsapp).replace(/\D/g,'')]]),
       institutionalCol
     );
+    if(contactCol.children.length){
+      grid.classList.add('tb26-footer__grid--contacts');
+      grid.appendChild(contactCol);
+    }
     var secure = e('div', 'tb26-footer__col tb26-footer__secure'); secure.appendChild(e('h3', '', 'COMPRA SEGURA'));
     function copyLogos(selectors, parent, limit) {
       var seen = new Set(); var wrap = e('div','tb26-footer__native-seals');

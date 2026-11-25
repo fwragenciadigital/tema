@@ -2949,3 +2949,68 @@ body.tb26-active:is(.tb26-cart-open,.tb26-menu-open,.tb26-pdp-zoom-open) #tb26-w
  body.tb26-active #tb26-whatsapp .tb26-wa__input{font-size:16px!important}
  body.tb26-active .tb26-footer__contacts{gap:10px}
 }
+
+
+/* TractorBel v1.28.1 — coluna independente de contatos no rodape.
+   Mantem a grade anterior se os contatos estiverem desativados/vazios. */
+body.tb26-active #tb26-footer .tb26-footer__right:has(.tb26-footer__grid--contacts){
+  min-width:0;
+  padding:clamp(38px,3.8vw,76px) clamp(18px,2.4vw,48px) 35px;
+}
+body.tb26-active #tb26-footer .tb26-footer__grid--contacts{
+  grid-template-columns:minmax(0,1fr) minmax(0,.9fr) minmax(0,1.3fr) minmax(0,1.15fr);
+  gap:clamp(12px,1.3vw,26px);
+  align-items:start;
+}
+body.tb26-active #tb26-footer .tb26-footer__grid--contacts > .tb26-footer__col{
+  min-width:0;
+  gap:16px;
+  overflow-wrap:anywhere;
+}
+body.tb26-active #tb26-footer .tb26-footer__grid--contacts > .tb26-footer__col:not(:first-child){
+  padding-left:clamp(10px,1.2vw,24px);
+}
+body.tb26-active #tb26-footer .tb26-footer__col--contacts .tb26-footer__contacts{
+  margin:0;
+  padding:0;
+  border:0;
+  gap:11px;
+}
+body.tb26-active #tb26-footer .tb26-footer__col--contacts .tb26-footer__contacts-title{
+  font:400 clamp(12px,.9vw,17px)/1.5 'Michroma',Arial,sans-serif!important;
+  text-transform:uppercase;
+  color:var(--tb26-yellow);
+  margin:0 0 8px;
+}
+body.tb26-active #tb26-footer .tb26-footer__col--contacts .tb26-footer__contact-row > span:last-child{
+  min-width:0;
+  overflow-wrap:anywhere;
+}
+@media(max-width:1279px){
+  body.tb26-active #tb26-footer .tb26-footer__grid--contacts{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:30px 22px;
+  }
+  body.tb26-active #tb26-footer .tb26-footer__grid--contacts > .tb26-footer__col{
+    border:0;
+    padding-left:0;
+  }
+  body.tb26-active #tb26-footer .tb26-footer__grid--contacts > .tb26-footer__secure{
+    grid-column:auto;
+  }
+}
+@media(max-width:767px){
+  body.tb26-active #tb26-footer .tb26-footer__right:has(.tb26-footer__grid--contacts){
+    padding:32px 20px;
+  }
+}
+@media(max-width:480px){
+  body.tb26-active #tb26-footer .tb26-footer__grid--contacts{
+    grid-template-columns:minmax(0,1fr);
+    gap:24px;
+  }
+  body.tb26-active #tb26-footer .tb26-footer__grid--contacts > .tb26-footer__col:not(:first-child){
+    padding-top:20px;
+    border-top:1px solid #51482d;
+  }
+}

@@ -352,3 +352,8 @@ A auditoria do arquivo backup `legacy/loja-css-original-20261119.css` detectou *
 - `whatsappFlutuante`: número internacional, atraso em ms, avatar, título, subtítulo, mensagem, placeholder e mensagem padrão configuráveis no HTML. Se número vazio, herda `conteudo.whatsapp`; não usar número da referência de outra loja. Abertura automática padrão 3s, sem focar automaticamente. Fechar ou encaminhar grava sessionStorage; reabrir manualmente continua possível. Sem storage não abre automaticamente. Link wa.me funciona como encaminhamento desktop/mobile, sem envio automático. Não afirma presença online sem integração.
 - Oculta somente o botão legado #ws_icon_chat quando o novo está montado. Não roda no checkout/pedido finalizado. CSS e JS principais mantêm os demais componentes.
 - QA real: confirmar painel, contatos, links, mensagens com acentos, abertura manual, recarga e navegação após minimizar, mobile, desktop e carrinho. O HTML publicado no repositório é modelo de configuração; atualizar o bloco no painel preservando ajustes particulares existentes.
+
+
+## v1.28.1 — Coluna exclusiva de contatos no rodapé
+
+Contatos saem de Institucional e passam a ser a terceira coluna, entre Institucional e Compra Segura. O título continua editável por `rodape.contatos.titulo` e o componente usa a mesma classe de coluna e animação das demais. Grade de quatro colunas a partir de 1280px, duas até 1279px e uma até 480px; a grade original permanece se os contatos estiverem vazios ou desativados. Nenhuma alteração nas configurações HTML, WhatsApp ou checkout.
