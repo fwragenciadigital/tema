@@ -3014,3 +3014,56 @@ body.tb26-active #tb26-footer .tb26-footer__col--contacts .tb26-footer__contact-
     border-top:1px solid #51482d;
   }
 }
+
+
+/* TractorBel v1.28.2 — eixo horizontal do rodape alinhado ao Instagram.
+   Mesma largura externa de .tb26-container e mesmo gutter efetivo de 15px.
+   A arte amarela e o fundo escuro continuam full bleed. */
+body.tb26-active #tb26-footer{
+  --tb26-footer-inset:max(15px,calc((100% - var(--tb26-width) - var(--tb26-gutter)*2)/2 + 15px));
+}
+@media(min-width:768px){
+  body.tb26-active #tb26-footer{
+    grid-template-columns:[full-start] var(--tb26-footer-inset) [content-start] minmax(0,1fr) [art-end] minmax(0,4fr) [content-end] var(--tb26-footer-inset) [full-end];
+  }
+  body.tb26-active #tb26-footer > .tb26-footer__art{
+    grid-column:full-start / art-end;
+    min-width:0;
+    justify-content:flex-end;
+  }
+  body.tb26-active #tb26-footer > .tb26-footer__right,
+  body.tb26-active #tb26-footer > .tb26-footer__right:has(.tb26-footer__grid--contacts){
+    grid-column:art-end / content-end;
+    min-width:0;
+    padding-inline:clamp(16px,1.7vw,32px) 0;
+  }
+  body.tb26-active #tb26-footer > .tb26-footer__right > .tb26-footer__grid{
+    width:100%;
+    min-width:0;
+  }
+  body.tb26-active #tb26-footer > .tb26-footer__bottom{
+    grid-column:full-start / full-end;
+  }
+  @supports(grid-template-columns:subgrid){
+    body.tb26-active #tb26-footer > .tb26-footer__art{
+      display:grid;
+      grid-template-columns:subgrid;
+      align-items:end;
+    }
+    body.tb26-active #tb26-footer .tb26-footer__social{
+      grid-column:2;
+      justify-content:flex-start;
+      min-width:0;
+      padding:22px 12px 30px 0;
+    }
+  }
+}
+@media(max-width:767px){
+  body.tb26-active #tb26-footer > .tb26-footer__right,
+  body.tb26-active #tb26-footer > .tb26-footer__right:has(.tb26-footer__grid--contacts){
+    padding-inline:15px;
+  }
+  body.tb26-active #tb26-footer .tb26-footer__social{
+    padding-inline:15px;
+  }
+}
