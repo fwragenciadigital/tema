@@ -1700,20 +1700,20 @@ body.cc26-active .cc26-cart-sidebar__note{
   color:#718096;text-align:center;
   font:450 10px/1.5 var(--cc26-font-text)!important;
 }
-body.cc26-active .cc26-cart-sidebar__checkout{
-  display:flex!important;align-items:center;justify-content:center;
-  min-height:51px;text-align:center;
-  border:0!important;border-radius:999px!important;
-  padding:12px 17px!important;
-  background:linear-gradient(100deg,#0a68f7,#00bfa1)!important;
-  color:#fff!important;text-decoration:none!important;
-  font:800 13px/1.4 var(--cc26-font-text)!important;
-  letter-spacing:.02em!important;
-  transition:filter .22s ease,transform .22s ease;
+body.cc26-active .cc26-cart-sidebar__foot :is(.cc26-cart-sidebar__checkout,.cc26-cart-sidebar__whatsapp,.cc26-cart-sidebar__email){
+  box-sizing:border-box!important;display:flex!important;align-items:center;justify-content:center;gap:9px;
+  width:100%!important;min-height:49px;text-align:center;
+  border:0!important;border-radius:999px!important;margin:0!important;padding:12px 17px!important;
+  color:#fff!important;text-decoration:none!important;cursor:pointer;
+  font:700 15px/1.4 var(--cc26-font-title)!important;
+  box-shadow:none!important;transition:filter .25s ease,transform .25s ease;
 }
-body.cc26-active .cc26-cart-sidebar__checkout:hover{
-  filter:brightness(1.08);transform:translateY(-1px);
-}
+body.cc26-active .cc26-cart-sidebar__foot :is(.cc26-cart-sidebar__checkout,.cc26-cart-sidebar__email){background:#0868ff!important}
+body.cc26-active .cc26-cart-sidebar__foot .cc26-cart-sidebar__whatsapp{background:#00bd91!important}
+body.cc26-active .cc26-cart-sidebar__foot :is(.cc26-cart-sidebar__checkout,.cc26-cart-sidebar__whatsapp,.cc26-cart-sidebar__email):hover{filter:brightness(1.06);transform:translateY(-1px)}
+body.cc26-active .cc26-cart-sidebar__foot .cc26-cart-sidebar__email:disabled{opacity:.6;cursor:progress}
+body.cc26-active .cc26-cart-sidebar__foot .cc26-icon{width:19px;height:19px;flex:0 0 19px}
+body.cc26-active .cc26-cart-sidebar__manage{font:500 12px/1.5 var(--cc26-font-text);text-align:center;color:#285983!important;padding:4px 0;text-decoration:underline}
 body.cc26-active .cc26-cart-sidebar__continue{
   display:flex!important;align-items:center;justify-content:center;
   min-height:42px;border:1px solid #d3deea!important;
@@ -3455,4 +3455,87 @@ body.cc26-active #corpo .cc26-catalog-grid>li{
     translate:none!important;
     scale:1!important;
   }
+}
+
+
+/* Cabcom 2.2.6 — modal de cotação original da LI, sem substituir seus campos. */
+body.cc26-active #modalSolicitarOrcamento.modal{
+  box-sizing:border-box!important;position:fixed!important;
+  left:50%!important;top:50%!important;bottom:auto!important;right:auto!important;
+  transform:translate(-50%,-50%)!important;
+  width:min(1000px,calc(100% - 36px))!important;max-width:none!important;
+  max-height:calc(100dvh - 36px)!important;
+  margin:0!important;padding:0!important;
+  border:0!important;border-radius:16px!important;background:#fff!important;
+  box-shadow:0 20px 90px rgba(0,22,47,.27)!important;
+  overflow:auto!important;z-index:2147483005!important;
+  font-family:var(--cc26-font-text)!important;
+}
+body.cc26-active .modal-backdrop:has(~#modalSolicitarOrcamento.in),
+body.cc26-active:has(#modalSolicitarOrcamento.in) .modal-backdrop{z-index:2147483004!important;background:#061b32!important;opacity:.65!important}
+body.cc26-active #modalSolicitarOrcamento .modal-header{
+  display:flex!important;align-items:center;justify-content:space-between;flex-direction:row-reverse;
+  gap:18px;padding:22px 28px!important;
+  border:0!important;background:linear-gradient(110deg,#063a75,#0874df 68%,#00bfa0)!important;
+  color:#fff!important;position:sticky;top:0;z-index:2;
+}
+body.cc26-active #modalSolicitarOrcamento .modal-header .titulo{
+  margin:0!important;padding:0!important;color:#fff!important;border:0!important;background:none!important;
+  font:700 25px/1.25 var(--cc26-font-title)!important;
+}
+body.cc26-active #modalSolicitarOrcamento .modal-header .close{
+  display:grid;place-items:center;float:none!important;flex:0 0 35px;width:35px;height:35px;margin:0!important;
+  border-radius:50%;background:#ffffff24;color:#fff!important;opacity:1!important;text-shadow:none!important;font-size:24px;
+}
+body.cc26-active #modalSolicitarOrcamento #formOrcamento{margin:0!important}
+body.cc26-active #modalSolicitarOrcamento .modal-body{
+  box-sizing:border-box!important;padding:26px 28px!important;max-height:none!important;overflow:visible!important;border:0!important;
+}
+body.cc26-active #modalSolicitarOrcamento .modal-body>.row-fluid{
+  display:grid!important;grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);gap:28px;
+}
+body.cc26-active #modalSolicitarOrcamento .modal-body>.row-fluid:before,
+body.cc26-active #modalSolicitarOrcamento .modal-body>.row-fluid:after{display:none!important}
+body.cc26-active #modalSolicitarOrcamento .modal-body>.row-fluid>.span6{float:none!important;width:100%!important;min-width:0;margin:0!important}
+body.cc26-active #modalSolicitarOrcamento .control-group{margin:0 0 12px!important}
+body.cc26-active #modalSolicitarOrcamento .control-label{
+  float:none!important;display:block;width:auto!important;text-align:left!important;padding:0!important;margin:0 0 5px!important;
+  color:#263b54;font:600 12px/1.4 var(--cc26-font-text)!important;
+}
+body.cc26-active #modalSolicitarOrcamento .controls{margin:0!important}
+body.cc26-active #modalSolicitarOrcamento :is(input:not([type=hidden]),select,textarea){
+  box-sizing:border-box!important;width:100%!important;max-width:100%!important;min-height:42px;
+  border:1px solid #dce5ef!important;border-radius:8px!important;padding:10px 12px!important;margin:0!important;
+  background:#fff!important;color:#21364e!important;box-shadow:none!important;
+  font:500 13px/1.4 var(--cc26-font-text)!important;
+}
+body.cc26-active #modalSolicitarOrcamento textarea{min-height:90px;resize:vertical}
+body.cc26-active #modalSolicitarOrcamento :is(input,select,textarea):focus{border-color:#0868ff!important;outline:2px solid #0868ff18!important}
+body.cc26-active #modalSolicitarOrcamento .control-group.error :is(input,select,textarea){border-color:#c73838!important}
+body.cc26-active #modalSolicitarOrcamento .tabela-carrinho{
+  background:#f6f9fc!important;border:1px solid #e5edf4!important;border-radius:10px;
+  width:100%!important;margin:0!important;
+}
+body.cc26-active #modalSolicitarOrcamento .tabela-carrinho th{font:700 13px/1.4 var(--cc26-font-title)!important;color:#063f82}
+body.cc26-active #modalSolicitarOrcamento .tabela-carrinho td{padding:12px 8px!important;vertical-align:middle!important;font-size:11px}
+body.cc26-active #modalSolicitarOrcamento .tabela-carrinho img{display:block;max-width:64px!important;max-height:64px!important;object-fit:contain}
+body.cc26-active #modalSolicitarOrcamento .produto-info ul{list-style:none;padding:0;margin:0}
+body.cc26-active #modalSolicitarOrcamento .modal-footer{
+  position:sticky;bottom:0;z-index:2;display:flex!important;justify-content:flex-end;align-items:center;gap:10px;
+  padding:16px 28px!important;border-top:1px solid #e3eaf2!important;background:#fff!important;box-shadow:none!important;
+}
+body.cc26-active #modalSolicitarOrcamento .modal-footer button{
+  min-height:44px;margin:0!important;padding:10px 24px!important;border-radius:999px!important;text-shadow:none!important;
+  font:700 14px/1.3 var(--cc26-font-title)!important;
+}
+body.cc26-active #modalSolicitarOrcamento .modal-footer button[data-dismiss="modal"]{background:#fff!important;border:1px solid #d7e1ec!important;color:#2b4a6b!important}
+body.cc26-active #modalSolicitarOrcamento .modal-footer button[type="submit"]{background:#0868ff!important;border:1px solid #0868ff!important;color:#fff!important}
+@media(max-width:680px){
+  body.cc26-active #modalSolicitarOrcamento.modal{width:calc(100% - 18px)!important;max-height:calc(100dvh - 18px)!important;border-radius:12px!important}
+  body.cc26-active #modalSolicitarOrcamento .modal-header{padding:17px 16px!important}
+  body.cc26-active #modalSolicitarOrcamento .modal-header .titulo{font-size:21px!important}
+  body.cc26-active #modalSolicitarOrcamento .modal-body{padding:18px 16px!important}
+  body.cc26-active #modalSolicitarOrcamento .modal-body>.row-fluid{grid-template-columns:minmax(0,1fr);gap:18px}
+  body.cc26-active #modalSolicitarOrcamento .modal-footer{padding:12px 16px!important}
+  body.cc26-active #modalSolicitarOrcamento .modal-footer button{flex:1;min-width:0;padding:10px!important}
 }
