@@ -2116,6 +2116,8 @@
       whatsapp=whatsapp||extra.find(containsWhatsapp);
       quote=quote||extra.find(containsQuote);
     }
+    // O tema legado deixa .cotar-whats fora da ficha antes de movê-lo no load.
+    if(!whatsapp)whatsapp=d.querySelector('.cotar-whats a[href]');
     root.classList.add('cc26-pdp','cc26-pdp--editorial');
     grid.classList.add('cc26-pdp__grid');
     media.classList.add('cc26-pdp__media');
@@ -2176,8 +2178,12 @@
     if(quote){
       // Mantém o botão real da LI; apenas orienta o contato por orçamento.
       var hint=el('p','cc26-pdp__quote-hint','Solicite valores e condições para este produto.');
-      var container=whatsapp?(whatsapp.closest('.cotar-whats')||whatsapp): (quote.closest('.comprar')||quote);
+      var container=quote.closest('.comprar')||quote;
       if(container && container.parentNode)container.parentNode.insertBefore(hint,container);
+      if(whatsapp&&container.parentNode){
+        var whatsBlock=whatsapp.closest('.cotar-whats')||whatsapp;
+        if(!whatsBlock.contains(container))container.parentNode.insertBefore(whatsBlock,container);
+      }
     }
     var code=info.querySelector('.codigo-produto');
     if(code)code.classList.add('cc26-pdp__code');
@@ -2277,6 +2283,18 @@
     d.body.classList.add('cc26-pdp-ready');
     state.product={active:true,visual:'editorial-minimal',source:'PDP nativa LI',whatsapp:!!whatsapp,quote:!!quote};
   }
+  function syncPdpQuoteOrder(){
+    var info=d.querySelector('.cc26-pdp__details');
+    if(!info)return;
+    var quote=info.querySelector('.cc26-pdp__cta--quote'),hint=info.querySelector('.cc26-pdp__quote-hint');
+    var whatsapp=info.querySelector('.cc26-pdp__cta--whatsapp,.cotar-whats a[href]')||d.querySelector('.cotar-whats a[href]');
+    if(!quote||!hint||!whatsapp)return;
+    var container=quote.closest('.comprar')||quote,block=whatsapp.closest('.cotar-whats')||whatsapp;
+    if(!container.parentNode||block.contains(container))return;
+    whatsapp.classList.add('cc26-pdp__cta','cc26-pdp__cta--whatsapp');
+    if(block.parentNode!==container.parentNode||block.nextElementSibling!==container)container.parentNode.insertBefore(block,container);
+    if(hint.parentNode!==container.parentNode||hint.nextElementSibling!==block)container.parentNode.insertBefore(hint,block);
+  }
   function enhanceNative(){
     if(cfg.catalogo.ativo){
       [].slice.call(d.querySelectorAll('.listagem .listagem-item, .vitrine-produtos .produto')).forEach(function(item){
@@ -2286,6 +2304,7 @@
     }
     if(cfg.produto.ativo&&(d.body.classList.contains('pagina-produto')||d.querySelector('#corpo #imagemProduto')))d.body.classList.add('cc26-page-product');
     enhanceProductPage();
+    syncPdpQuoteOrder();
     if(cfg.rodape.ativo){
       var f=d.querySelector('#rodape');
       if(f){f.classList.add('cc26-native-footer');footer();}
