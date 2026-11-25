@@ -3178,7 +3178,7 @@ body.cc26-active #corpo .cc26-card-two-cta .cc26-card-quote-actions .cc26-icon s
   display:block!important;
 }
 
-/* Vitrine Cabcom: o próprio track é a área de rolagem. As larguras
+/* Vitrine Cabcom 2.2.4: o próprio track é a área de rolagem. As larguras
    calculadas pelo FlexSlider não se aplicam aos carrosséis de produtos. */
 body.cc26-active #corpo .cc26-page-carousel{
   position:relative!important;
@@ -3190,13 +3190,13 @@ body.cc26-active #corpo .cc26-page-carousel{
   border:0!important;
   background:transparent!important;
 }
-body.cc26-active #corpo .cc26-page-carousel > .flex-viewport{
+body.cc26-active #corpo :is(.cc26-page-carousel, .produtos-carrossel > .listagem-linha):has(.cc26-card-two-cta) > .flex-viewport{
   width:100%!important;
   height:auto!important;
   max-height:none!important;
   overflow:visible!important;
 }
-body.cc26-active #corpo .cc26-page-carousel .cc26-page-track{
+body.cc26-active #corpo :is(.cc26-page-carousel .cc26-page-track, .produtos-carrossel > .listagem-linha > .flex-viewport > ul, .produtos-carrossel > .listagem-linha > ul):has(.cc26-card-two-cta){
   --cc26-cols:5;
   --cc26-card-gap:15px;
   box-sizing:border-box!important;
@@ -3225,12 +3225,12 @@ body.cc26-active #corpo .cc26-page-carousel .cc26-page-track{
   -webkit-overflow-scrolling:touch;
   list-style:none!important;
 }
-body.cc26-active #corpo .cc26-page-carousel .cc26-page-track::-webkit-scrollbar{display:none}
-body.cc26-active #corpo .cc26-page-carousel .cc26-page-track::before,
-body.cc26-active #corpo .cc26-page-carousel .cc26-page-track::after{
+body.cc26-active #corpo :is(.cc26-page-carousel .cc26-page-track, .produtos-carrossel > .listagem-linha > .flex-viewport > ul, .produtos-carrossel > .listagem-linha > ul):has(.cc26-card-two-cta)::-webkit-scrollbar{display:none}
+body.cc26-active #corpo :is(.cc26-page-carousel .cc26-page-track, .produtos-carrossel > .listagem-linha > .flex-viewport > ul, .produtos-carrossel > .listagem-linha > ul):has(.cc26-card-two-cta)::before,
+body.cc26-active #corpo :is(.cc26-page-carousel .cc26-page-track, .produtos-carrossel > .listagem-linha > .flex-viewport > ul, .produtos-carrossel > .listagem-linha > ul):has(.cc26-card-two-cta)::after{
   content:none!important;display:none!important;
 }
-body.cc26-active #corpo .cc26-page-carousel .cc26-page-track > li{
+body.cc26-active #corpo :is(.cc26-page-carousel .cc26-page-track, .produtos-carrossel > .listagem-linha > .flex-viewport > ul, .produtos-carrossel > .listagem-linha > ul):has(.cc26-card-two-cta) > li{
   box-sizing:border-box!important;
   display:block!important;
   width:100%!important;
@@ -3243,7 +3243,7 @@ body.cc26-active #corpo .cc26-page-carousel .cc26-page-track > li{
   padding:0!important;
   scroll-snap-align:start;
 }
-body.cc26-active #corpo .cc26-page-carousel .cc26-page-track > :is(.clone,.flex-clone,.slick-cloned),
+body.cc26-active #corpo :is(.cc26-page-carousel .cc26-page-track, .produtos-carrossel > .listagem-linha > .flex-viewport > ul, .produtos-carrossel > .listagem-linha > ul):has(.cc26-card-two-cta) > :is(.clone,.flex-clone,.slick-cloned),
 body.cc26-active #corpo .cc26-page-carousel > :is(.flex-direction-nav,.flex-control-nav,.flex-pauseplay){
   display:none!important;
 }
@@ -3270,12 +3270,12 @@ body.cc26-active #corpo .cc26-page-carousel .cc26-page-arrow--prev .cc26-icon{ro
 body.cc26-active #corpo .cc26-page-carousel .cc26-page-arrow:disabled{opacity:.35;cursor:default}
 body.cc26-active #corpo .cc26-page-carousel .cc26-page-arrow:not(:disabled):hover{background:#0868ff!important}
 @media(max-width:1023px){
-  body.cc26-active #corpo .cc26-page-carousel .cc26-page-track{--cc26-cols:3}
+  body.cc26-active #corpo :is(.cc26-page-carousel .cc26-page-track, .produtos-carrossel > .listagem-linha > .flex-viewport > ul, .produtos-carrossel > .listagem-linha > ul):has(.cc26-card-two-cta){--cc26-cols:3}
   body.cc26-active #corpo .cc26-page-carousel .cc26-page-arrow--prev{left:3px}
   body.cc26-active #corpo .cc26-page-carousel .cc26-page-arrow--next{right:3px}
 }
 @media(max-width:849px){
-  body.cc26-active #corpo .cc26-page-carousel .cc26-page-track{--cc26-cols:2;--cc26-card-gap:10px}
+  body.cc26-active #corpo :is(.cc26-page-carousel .cc26-page-track, .produtos-carrossel > .listagem-linha > .flex-viewport > ul, .produtos-carrossel > .listagem-linha > ul):has(.cc26-card-two-cta){--cc26-cols:2;--cc26-card-gap:10px}
 }
 @media(prefers-reduced-motion:reduce){
   body.cc26-active #corpo .cc26-page-carousel .cc26-page-arrow{transition:none!important}
