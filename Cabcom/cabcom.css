@@ -44,16 +44,6 @@
 .cc26-active #corpo .cc26-enhanced-shelf{max-width:1724px;margin:48px auto 58px;padding:0 32px;background:transparent}
 .cc26-active #corpo .cc26-enhanced-shelf h4,
 .cc26-active #corpo .cc26-enhanced-shelf .titulo{color:var(--cc26-blue);font-weight:800;text-transform:uppercase;border-bottom:2px solid var(--cc26-blue)}
-.cc26-active #corpo .cc26-enhanced-shelf.cc26-grid-safe .listagem-linha>ul{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:16px;align-items:stretch;margin:0}
-.cc26-active #corpo .cc26-enhanced-shelf.cc26-grid-safe .listagem-linha>ul>li{width:auto!important;float:none!important;min-width:0;margin:0!important;padding:0!important}
-.cc26-active #corpo .cc26-enhanced-shelf .listagem-item{height:100%;background:#fff;border:1px solid #e3e6ee;box-shadow:0 5px 16px #00000013;transition:transform .2s ease,box-shadow .2s ease;padding:14px!important}
-.cc26-active #corpo .cc26-enhanced-shelf .listagem-item:hover{transform:translateY(-4px);box-shadow:0 10px 25px #0000001d}
-.cc26-active #corpo .cc26-enhanced-shelf .imagem-produto{background:#fff;display:flex;align-items:center;justify-content:center}
-.cc26-active #corpo .cc26-enhanced-shelf .imagem-produto img{max-width:100%;object-fit:contain}
-.cc26-active #corpo .cc26-enhanced-shelf .nome-produto{font-size:13px;line-height:1.5;font-weight:700;color:#242c3b;min-height:3.6em}
-.cc26-active #corpo .cc26-enhanced-shelf .acoes-produto a,
-.cc26-active #corpo .cc26-enhanced-shelf .botao.principal{border-radius:26px!important;background:var(--cc26-blue)!important;color:white!important;font-weight:700;border:0}
-.cc26-active #corpo .cc26-enhanced-shelf [href*="wa.me"],.cc26-active #corpo .cc26-enhanced-shelf [href*="whatsapp"]{background:var(--cc26-green)!important;color:white!important}
 .cc26-title{display:flex;align-items:center;gap:12px;font-size:clamp(20px,1.7vw,27px);line-height:1.2;font-weight:900;text-transform:uppercase;color:var(--cc26-blue);margin:0 0 35px}
 .cc26-title:after{content:'';flex:1;height:2px;background:var(--cc26-blue)}
 .cc26-title__logo{width:36px;max-height:51px;object-fit:contain}
@@ -93,7 +83,6 @@
 .cc26-active #rodape.cc26-native-footer .institucional,.cc26-active #rodape.cc26-native-footer .pagamento-selos{max-width:1660px;margin:auto}
 .cc26-active #rodape.cc26-native-footer .titulo{color:#0868f8;font-weight:800}
 .cc26-active #rodape.cc26-native-footer a:hover{color:#00b997}
-.cc26-active .pagina-categoria .listagem-item,.cc26-active .pagina-busca .listagem-item{border-radius:10px;border:1px solid #e6edf8;box-shadow:0 2px 12px #001a3320}
 .cc26-active.cc26-page-product #corpo .produto .nome-produto,.cc26-active.cc26-page-product #corpo h1{color:#003b81}
 .cc26-active.cc26-page-product .acoes-produto .botao.principal{background:#00b995;border:0;border-radius:32px}
 .cc26-active.cc26-page-product .principal .preco-produto{color:#0566e8}
@@ -105,7 +94,6 @@
   .cc26-category-grid__cards{grid-template-columns:repeat(3,minmax(0,1fr))}
   .cc26-category-grid__intro{min-height:0}
   .cc26-benefits__grid{grid-template-columns:repeat(2,minmax(0,1fr))}
-  .cc26-active #corpo .cc26-enhanced-shelf.cc26-grid-safe .listagem-linha>ul{grid-template-columns:repeat(4,minmax(0,1fr))}
 }
 @media(max-width:767px){
   .cc26-container{padding-inline:16px}
@@ -124,8 +112,6 @@
   .cc26-presentation__copy h2{font-size:38px}
   .cc26-presentation__copy p{font-size:13px;line-height:1.65}
   .cc26-active #corpo .cc26-enhanced-shelf{margin:28px auto;padding:0 16px}
-  .cc26-active #corpo .cc26-enhanced-shelf.cc26-grid-safe .listagem-linha>ul{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
-  .cc26-active #corpo .cc26-enhanced-shelf .listagem-item{padding:8px!important}
   .cc26-active #corpo .cc26-enhanced-shelf .nome-produto{font-size:11px;line-height:1.4}
   .cc26-title{font-size:20px}
   .cc26-category-grid{padding:30px 0}
@@ -576,18 +562,6 @@ body.cc26-active.cc26-cart-empty #corpo .cc26-cart-empty__panel h1{
   body.cc26-active .cc26-presentation__copy p{font-size:13px!important;line-height:1.7!important}
   body.cc26-active #listagemProdutos .titulo-categoria{font-size:17px!important;min-height:47px;margin-bottom:14px!important}
   body.cc26-active #listagemProdutos .titulo-categoria::before{flex-basis:34px;width:34px;height:47px}
-  body.cc26-active #listagemProdutos .produtos-carrossel .listagem-item{
-    min-height:420px!important;padding:12px 9px 16px!important;
-  }
-  body.cc26-active #listagemProdutos .produtos-carrossel :is(.imagem-produto,.imagem-produto a){min-height:180px;max-height:210px}
-  body.cc26-active #listagemProdutos .produtos-carrossel .imagem-produto img{max-height:170px!important}
-  body.cc26-active #listagemProdutos .produtos-carrossel .nome-produto{
-    min-height:63px!important;margin:8px 0 12px!important;
-    font-size:11px!important;
-  }
-  body.cc26-active #listagemProdutos .produtos-carrossel .acoes-produto :is(a.botao,button.botao){
-    min-height:35px!important;font-size:10px!important;padding:7px 8px!important;
-  }
   body.cc26-active.cc26-cart-ready #corpo .cc26-cart-table td{padding:9px 5px;font-size:11px}
   body.cc26-active.cc26-cart-ready #corpo .cc26-cart-shell{overflow-x:auto}
   body.cc26-active.cc26-cart-ready #corpo .cc26-cart-main,
@@ -2997,9 +2971,9 @@ body.cc26-active .cc26-mini-banners .cc26-mini-banner:hover img{
 
 
 /* ======================================================================
-   CABCOM CATALOG CARDS v2.1 — fonte única para cards com dois CTAs
+   CABCOM CATALOG CARDS v2.2 — componente único em todas as vitrines
    Padrão aprovado: foto grande, título central, WhatsApp e E-mail abaixo.
-   As regras v1.2, v1.7 e v2.0 conflitantes foram removidas.
+   Home, categorias, busca, marcas e produtos relacionados.
    ====================================================================== */
 body.cc26-active #corpo .cc26-card-two-cta{
   box-sizing:border-box!important;
@@ -3009,9 +2983,10 @@ body.cc26-active #corpo .cc26-card-two-cta{
   align-items:stretch!important;
   justify-content:flex-start!important;
   min-width:0!important;
-  height:520px!important;
-  min-height:520px!important;
-  padding:22px 18px 30px!important;
+  height:516px!important;
+  min-height:516px!important;
+  width:100%!important;
+  padding:16px 18px 32px!important;
   overflow:hidden!important;
   background:#fff!important;
   border:0!important;
@@ -3045,15 +3020,15 @@ body.cc26-active #corpo .cc26-card-two-cta :is(
 body.cc26-active #corpo .cc26-card-two-cta .imagem-produto{
   position:relative!important;
   box-sizing:border-box!important;
-  flex:0 0 276px!important;
+  flex:0 0 306px!important;
   display:flex!important;
   align-items:center!important;
   justify-content:center!important;
   width:100%!important;
   min-width:0!important;
-  height:276px!important;
-  min-height:276px!important;
-  max-height:276px!important;
+  height:306px!important;
+  min-height:306px!important;
+  max-height:306px!important;
   margin:0 0 12px!important;
   padding:8px 0!important;
   background:#fff!important;
@@ -3075,7 +3050,7 @@ body.cc26-active #corpo .cc26-card-two-cta .imagem-produto img{
   width:auto!important;
   height:auto!important;
   max-width:100%!important;
-  max-height:260px!important;
+  max-height:290px!important;
   margin:auto!important;
   padding:0!important;
   object-fit:contain!important;
@@ -3087,7 +3062,7 @@ body.cc26-active #corpo .cc26-card-two-cta .info-produto{
   display:flex!important;
   flex:1 1 auto!important;
   flex-direction:column!important;
-  justify-content:flex-end!important;
+  justify-content:center!important;
   align-items:stretch!important;
   min-height:0!important;
   width:100%!important;
@@ -3095,20 +3070,20 @@ body.cc26-active #corpo .cc26-card-two-cta .info-produto{
   padding:0!important;
   background:transparent!important;
 }
-body.cc26-active #corpo .cc26-card-two-cta .nome-produto{
+body.cc26-active #corpo .cc26-card-two-cta :is(.nome-produto,.produto-nome){
   display:-webkit-box!important;
   -webkit-line-clamp:3;
   -webkit-box-orient:vertical!important;
   overflow:hidden!important;
-  min-height:58px!important;
-  max-height:67px!important;
+  min-height:44px!important;
+  max-height:58px!important;
   width:100%!important;
-  margin:0 0 20px!important;
+  margin:0 0 15px!important;
   padding:0!important;
   color:#18212e!important;
   text-align:center!important;
   text-transform:uppercase!important;
-  font:500 12px/1.5 var(--cc26-font-text)!important;
+  font:500 13px/1.35 var(--cc26-font-text)!important;
 }
 body.cc26-active #corpo .cc26-card-two-cta .acoes-produto{
   box-sizing:border-box!important;
@@ -3140,7 +3115,7 @@ body.cc26-active #corpo .cc26-card-two-cta .cc26-card-quote-actions{
   flex-direction:column!important;
   align-items:center!important;
   justify-content:center!important;
-  gap:5px!important;
+  gap:3px!important;
   width:100%!important;
   max-width:100%!important;
   margin:0!important;
@@ -3155,7 +3130,7 @@ body.cc26-active #corpo .cc26-card-two-cta .cc26-card-quote-actions :is(a,button
   align-items:center!important;
   justify-content:center!important;
   gap:7px!important;
-  width:min(100%,205px)!important;
+  width:min(100%,200px)!important;
   min-width:0!important;
   height:38px!important;
   min-height:38px!important;
@@ -3169,7 +3144,7 @@ body.cc26-active #corpo .cc26-card-two-cta .cc26-card-quote-actions :is(a,button
   text-decoration:none!important;
   white-space:nowrap!important;
   color:#fff!important;
-  font:700 12px/1.25 var(--cc26-font-text)!important;
+  font:700 14px/1.25 var(--cc26-font-title)!important;
   transition:filter .2s ease,translate .2s ease!important;
 }
 body.cc26-active #corpo .cc26-card-two-cta .cc26-card-quote-actions__whatsapp{
@@ -3197,6 +3172,41 @@ body.cc26-active #corpo .cc26-card-two-cta .cc26-card-quote-actions .cc26-icon s
   height:17px!important;
   display:block!important;
 }
+
+/* Gap horizontal real: a caixa do slide conserva sua largura nativa. */
+body.cc26-active #corpo .cc26-catalog-slide{
+  box-sizing:border-box!important;
+  padding-inline:7.5px!important;
+  padding-block:5px 12px!important;
+  min-width:0;
+}
+body.cc26-active #corpo .cc26-catalog-grid{
+  width:100%!important;
+  margin:0!important;
+  padding:5px 0 12px!important;
+  list-style:none!important;
+}
+body.cc26-active #corpo .cc26-catalog-grid>li{
+  box-sizing:border-box!important;
+  float:none!important;
+  max-width:100%!important;
+}
+/* Sem barras, bordas ou pseudo-elementos do tema anterior. */
+body.cc26-active #corpo .cc26-card-two-cta :is(.acoes-produto,.info-produto,.cc26-card-quote-actions)::before,
+body.cc26-active #corpo .cc26-card-two-cta :is(.acoes-produto,.info-produto,.cc26-card-quote-actions)::after{
+  content:none!important;
+  display:none!important;
+}
+body.cc26-active #corpo .cc26-card-two-cta :is(.acoes-produto,.info-produto){
+  border:0!important;
+  box-shadow:none!important;
+  inset:auto!important;
+}
+body.cc26-active #corpo .cc26-card-two-cta :is(.nome-produto,.produto-nome) a{
+  color:inherit!important;
+  text-decoration:none!important;
+  font:inherit!important;
+}
 /* Preservar controles de navegação reais dos sliders LI. */
 body.cc26-active #corpo.cc26-native-home :is(#listagemProdutos,.cc26-enhanced-shelf) .produtos-carrossel{
   position:relative;
@@ -3204,13 +3214,13 @@ body.cc26-active #corpo.cc26-native-home :is(#listagemProdutos,.cc26-enhanced-sh
   min-height:0!important;
   overflow:visible;
 }
-body.cc26-active #corpo.cc26-native-home .cc26-enhanced-shelf.cc26-grid-safe .listagem-linha>ul{
+body.cc26-active #corpo .cc26-catalog-grid{
   display:grid!important;
   grid-template-columns:repeat(5,minmax(0,1fr));
   align-items:stretch;
   gap:15px!important;
 }
-body.cc26-active #corpo.cc26-native-home .cc26-enhanced-shelf.cc26-grid-safe .listagem-linha>ul>li{
+body.cc26-active #corpo .cc26-catalog-grid>li{
   width:auto!important;
   min-width:0!important;
   height:100%;
@@ -3232,7 +3242,7 @@ body.cc26-active #corpo.cc26-native-home .cc26-enhanced-shelf.cc26-grid-safe .li
   body.cc26-active #corpo .cc26-card-two-cta .imagem-produto img{
     max-height:235px!important;
   }
-  body.cc26-active #corpo.cc26-native-home .cc26-enhanced-shelf.cc26-grid-safe .listagem-linha>ul{
+  body.cc26-active #corpo .cc26-catalog-grid{
     grid-template-columns:repeat(4,minmax(0,1fr));
   }
 }
@@ -3249,12 +3259,12 @@ body.cc26-active #corpo.cc26-native-home .cc26-enhanced-shelf.cc26-grid-safe .li
     max-height:205px!important;
   }
   body.cc26-active #corpo .cc26-card-two-cta .imagem-produto img{max-height:190px!important}
-  body.cc26-active #corpo .cc26-card-two-cta .nome-produto{
+  body.cc26-active #corpo .cc26-card-two-cta :is(.nome-produto,.produto-nome){
     font-size:11px!important;
     margin-bottom:14px!important;
     min-height:54px!important;
   }
-  body.cc26-active #corpo.cc26-native-home .cc26-enhanced-shelf.cc26-grid-safe .listagem-linha>ul{
+  body.cc26-active #corpo .cc26-catalog-grid{
     grid-template-columns:repeat(2,minmax(0,1fr));
     gap:10px!important;
   }
@@ -3272,7 +3282,7 @@ body.cc26-active #corpo.cc26-native-home .cc26-enhanced-shelf.cc26-grid-safe .li
     max-height:175px!important;
   }
   body.cc26-active #corpo .cc26-card-two-cta .imagem-produto img{max-height:162px!important}
-  body.cc26-active #corpo .cc26-card-two-cta .nome-produto{
+  body.cc26-active #corpo .cc26-card-two-cta :is(.nome-produto,.produto-nome){
     font-size:10px!important;
     min-height:50px!important;
     margin-bottom:10px!important;
