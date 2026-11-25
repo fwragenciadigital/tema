@@ -6,7 +6,7 @@
 (function (w,d) {
   'use strict';
   if(w.Cabcom2026) return;
-  var VERSION='2.2.10';
+  var VERSION='2.2.11';
   var CDN='https://cdn.awsli.com.br/80/80577/arquivos/';
   var DEFAULTS={
     geral:{ativo:true,publicarNaLoja:false,debug:false},
@@ -275,6 +275,74 @@
   // Consulta somente dados originados na Loja Integrada; jamais altera a sessao,
   // quantidades, precos, frete, cupom, formas de pagamento ou checkout nativo.
   var cartSidebarApi=null;
+  // Quantidades: única operação oficial LI, com confirmação do carrinho.
+  var quoteQtyPending=false;
+  async function requestQuoteQuantity(id,current,next){
+    if(quoteQtyPending||!/^\d+$/.test(String(id))||!Number.isInteger(current)||!Number.isInteger(next)||next<1||next>9999||current===next)throw Error('Quantidade inválida ou atualização em andamento.');
+    quoteQtyPending=true;
+    try{
+      var route='/carrinho/produto/'+id+'/atualizar/'+next+'/'+current;
+      var response=await w.fetch(route,{method:'GET',credentials:'same-origin',cache:'no-store',redirect:'follow',headers:{Accept:'text/html'}});
+      if(!response.ok||new URL(response.url,location.href).origin!==location.origin)throw Error('Não foi possível confirmar a quantidade.');
+      var doc=new DOMParser().parseFromString(await response.text(),'text/html');
+      var row=doc.querySelector('table.tabela-carrinho tr[data-produto-id="'+id+'"]');
+      var confirmed=row&&Number(row.getAttribute('data-produto-quantidade'));
+      if(!Number.isInteger(confirmed)||confirmed<1)throw Error('Quantidade não confirmada pela loja.');
+      return {doc:doc,quantity:confirmed};
+    }finally{quoteQtyPending=false;}
+  }
+  function quoteQuantityControl(id,quantity,change){
+    var box=el('div','cc26-quote-qty');
+    box.setAttribute('role','group');box.setAttribute('aria-label','Quantidade do produto');
+    var minus=el('button','cc26-quote-qty__step','−'),plus=el('button','cc26-quote-qty__step','+');
+    minus.type=plus.type='button';minus.setAttribute('aria-label','Diminuir quantidade');plus.setAttribute('aria-label','Aumentar quantidade');
+    var amount=el('span','cc26-quote-qty__amount',String(quantity));amount.setAttribute('aria-live','polite');
+    minus.disabled=quantity<=1;plus.disabled=quantity>=9999;
+    box.appendChild(minus);box.appendChild(amount);box.appendChild(plus);
+    minus.addEventListener('click',function(){if(quantity>1)change(id,quantity,quantity-1);});
+    plus.addEventListener('click',function(){if(quantity<9999)change(id,quantity,quantity+1);});
+    return box;
+  }
+  function enhanceQuoteModalQuantities(){
+    var modal=d.getElementById('modalSolicitarOrcamento');
+    if(!modal||!w.fetch)return;
+    var table=modal.querySelector('table.tabela-carrinho');
+    if(!table||table.dataset.cc26QuantityReady==='1')return;
+    table.dataset.cc26QuantityReady='1';
+    [].slice.call(table.querySelectorAll('tbody tr')).forEach(function(row){
+      var m=String(row.className).match(/(?:^|\s)produto-item-(\d+)(?:\s|$)/);
+      var cell=row.querySelector('td.text-align-center')||row.lastElementChild;
+      var quantity=cell&&Number((cell.textContent||'').trim());
+      if(!m||!Number.isInteger(quantity)||quantity<1)return;
+      var id=m[1];
+      function render(q){cell.replaceChildren(quoteQuantityControl(id,q,update));}
+      async function update(product,current,next){
+        if(quoteQtyPending)return;
+        var send=modal.querySelector('button[type="submit"]');
+        var oldDisabled=send&&send.disabled;
+        var error=modal.querySelector('.cc26-quote-qty-status');
+        if(!error){error=el('p','cc26-quote-qty-status');error.setAttribute('role','status');table.parentElement.appendChild(error);}
+        error.textContent='Atualizando quantidade…';
+        if(send)send.disabled=true;
+        var controls=[].slice.call(table.querySelectorAll('.cc26-quote-qty button'));
+        controls.forEach(function(btn){btn.dataset.cc26WasDisabled=btn.disabled?'1':'0';btn.disabled=true;});
+        try{
+          var result=await requestQuoteQuantity(product,current,next);
+          // Atualiza com dados confirmados; preserva o formulário, máscaras e campos preenchidos.
+          render(result.quantity);
+          error.textContent=result.quantity===next?'Quantidade atualizada.':'Quantidade ajustada pela disponibilidade da loja.';
+          if(send)send.disabled=oldDisabled;
+        }catch(e){
+          error.textContent='Não foi possível confirmar a quantidade. Feche e reabra a cotação para atualizar os itens.';
+          // Não permite enviar um orçamento com quantidades potencialmente divergentes.
+          if(send)send.disabled=true;
+        }finally{
+          controls.forEach(function(btn){btn.disabled=btn.dataset.cc26WasDisabled==='1';delete btn.dataset.cc26WasDisabled;});
+        }
+      }
+      render(quantity);
+    });
+  }
   function mountCartSidebar(trigger){
     if(cartSidebarApi||!trigger||d.getElementById('cc26-cart-sidebar'))return;
     var nativeCartAnchor=d.querySelector('#cabecalho .carrinho > a[href], #cabecalho a[href*="/carrinho/"]');
@@ -359,7 +427,9 @@
       var productHref=anchor?safeHref(anchor.getAttribute('href'),true):'';
       if(productHref && /\/carrinho(?:\/|$)|\/conta(?:\/|$)/i.test(new URL(productHref).pathname))productHref='';
       var price=money(first(row,['.preco-promocional','.preco-venda','.preco-produto','.preco-por','.item-preco','.preco','.valor']));
-      return {id:row.getAttribute('data-produto-id')||'',name:name.slice(0,210),href:productHref,image:imageHref,quantity:readQty(row),price:price};
+      var skuNode=[].slice.call(row.querySelectorAll('.produto-info li')).find(function(li){return /^SKU\s*:/i.test(text(li));});
+      var sku=skuNode?text(skuNode).replace(/^SKU\s*:\s*/i,''):'';
+      return {id:row.getAttribute('data-produto-id')||'',name:name.slice(0,210),href:productHref,image:imageHref,quantity:readQty(row),sku:sku,price:price};
     }
     function readItems(root,selectors){
       for(var i=0;i<selectors.length;i++){
@@ -430,7 +500,7 @@
       badge.hidden=count===0;
       trigger.setAttribute('aria-label',count?'Meu orçamento, '+count+' itens':'Meu orçamento vazio');
     }
-    var adding=false,modalLoading=false;
+    var adding=false,modalLoading=false,lastOfficialCount=null;
     function show(data,mode){
       body.replaceChildren();foot.replaceChildren();
       var items=data&&data.items||[];
@@ -451,7 +521,13 @@
           }else thumb.appendChild(inlineIcon('cart'));
           var info=el('div','cc26-cart-sidebar__info');
           info.appendChild(it.href?a(it.href,'cc26-cart-sidebar__item-title',it.name):el('strong','cc26-cart-sidebar__item-title',it.name));
-          if(it.quantity!==null)info.appendChild(el('span','cc26-cart-sidebar__quantity','Quantidade: '+it.quantity));
+          if(it.quantity!==null){
+            var qtyLine=el('div','cc26-cart-sidebar__quantity');
+            qtyLine.appendChild(el('span','','Quantidade'));
+            if(data.source==='carrinho'&&/^\d+$/.test(it.id)&&w.fetch)qtyLine.appendChild(quoteQuantityControl(it.id,it.quantity,function(id,current,next){changeSidebarQuantity(data,id,current,next);}));
+            else qtyLine.appendChild(el('strong','',String(it.quantity)));
+            info.appendChild(qtyLine);
+          }
           
           item.appendChild(thumb);item.appendChild(info);list.appendChild(item);
         });
@@ -464,9 +540,11 @@
         if(data.source==='carrinho'){
           var phone=String(cfg.conteudo.contato||'').replace(/\D/g,'');
           if(/^\d{10,11}$/.test(phone)){
-            var message='Olá! Gostaria de solicitar um orçamento na Cabcom:\n\n'+items.map(function(it,index){
-              return (index+1)+'. '+it.name+(it.quantity!==null?' — Quantidade: '+it.quantity:'')+(it.href?'\n'+it.href:'');
-            }).join('\n\n');
+            var totalUnits=items.every(function(it){return Number.isInteger(it.quantity);})?items.reduce(function(n,it){return n+it.quantity;},0):null;
+            var message='*SOLICITAÇÃO DE ORÇAMENTO | CABCOM*\n\nOlá! Gostaria de receber uma cotação para os seguintes produtos:\n\n'+items.map(function(it,index){
+              return '*'+String(index+1).padStart(2,'0')+' — '+it.name+'*'+(it.sku?'\nCódigo: '+it.sku:'')+(it.quantity!==null?'\nQuantidade: '+it.quantity:'')+(it.href?'\nProduto: '+it.href:'');
+            }).join('\n\n')+'\n\n*Resumo da solicitação*\nProdutos distintos: '+items.length+(totalUnits!==null?'\nTotal de unidades: '+totalUnits:'')+'\n\nPor favor, informar valores, disponibilidade, prazo de entrega e condições de pagamento. Obrigado!';
+
             var whats=a('https://wa.me/55'+phone+'?text='+encodeURIComponent(message),'cc26-cart-sidebar__whatsapp');
             whats.target='_blank';whats.rel='noopener noreferrer';
             whats.appendChild(inlineIcon('phone'));whats.appendChild(el('span','','Cotar por WhatsApp'));
@@ -493,8 +571,26 @@
         back.type='button';back.addEventListener('click',closeSidebar);
         foot.appendChild(back);
       }
-      if(data)updateBadge(data.count);
+      if(data){if(data.source==='carrinho'&&Number.isFinite(data.count))lastOfficialCount=data.count;updateBadge(data.count);}
       state.cartSidebar={open:open,mode:mode,source:data&&data.source||'sem-dados'};
+    }
+    async function changeSidebarQuantity(data,id,current,next){
+      if(adding||modalLoading||quoteQtyPending)return;
+      adding=true;
+      if(fetchController)fetchController.abort();
+      ++fetchSeq;
+      var scroll=body.scrollTop;
+      show(null,'loading');
+      try{
+        var result=await requestQuoteQuantity(id,current,next);
+        var official=parseSource(result.doc,'carrinho');
+        official.count=official.items.every(function(it){return Number.isInteger(it.quantity);})?official.items.reduce(function(n,it){return n+it.quantity;},0):null;
+        if(open){show(official,'items');body.scrollTop=scroll;}
+        else{lastOfficialCount=official.count;updateBadge(official.count);}
+        if(result.quantity!==next&&open){var note=el('p','cc26-quote-qty-status','Quantidade ajustada pela disponibilidade da loja.');body.prepend(note);}
+      }catch(e){
+        if(open){show(null,'loading');fetchOfficial(null);}
+      }finally{adding=false;}
     }
     function fetchOfficial(existing){
       if(!open)return;
@@ -533,8 +629,8 @@
         .finally(function(){if(fetchController===controller)fetchController=null;});
     }
     function refresh(fallback){
-      if(adding||modalLoading)return;
-      if(!open){updateBadge(parseSource(d,'minicart').count);return;}
+      if(adding||modalLoading||quoteQtyPending)return;
+      if(!open){updateBadge(lastOfficialCount===null?parseSource(d,'minicart').count:lastOfficialCount);return;}
       if(fallback&&w.fetch)fetchOfficial(null);
     }
     function openSidebar(ev){
@@ -569,7 +665,7 @@
     }
     // Modal remoto oficial da LI: mesmos campos, máscaras, CAPTCHA e envio.
     function openNativeQuote(button){
-      if(modalLoading||adding)return;
+      if(modalLoading||adding||quoteQtyPending)return;
       var $=w.jQuery,endpoint='/checkout/orcamento.json';
       if(!$||!$.fn||!$.fn.modal||!$.fn.load){w.location.assign(url);return;}
       modalLoading=true;button.disabled=true;button.setAttribute('aria-busy','true');
@@ -601,7 +697,7 @@
           modal.remove();w.location.assign(url);return;
         }
         if(!open){modal.remove();return;}
-        send.disabled=false;closeSidebar();
+        send.disabled=false;enhanceQuoteModalQuantities();closeSidebar();
         $(modal).on('hidden',function(){if(d.contains(modal))modal.remove();});
         $(modal).modal('show');
       });
@@ -2049,7 +2145,7 @@
     if(quote){
       // Mantém o botão real da LI; apenas orienta o contato por orçamento.
       var hint=el('p','cc26-pdp__quote-hint','Solicite valores e condições para este produto.');
-      var container=quote.closest('.comprar')||quote.parentElement;
+      var container=whatsapp?(whatsapp.closest('.cotar-whats')||whatsapp): (quote.closest('.comprar')||quote);
       if(container && container.parentNode)container.parentNode.insertBefore(hint,container);
     }
     var code=info.querySelector('.codigo-produto');
@@ -2165,6 +2261,7 @@
     }
     // Mensagens/cotacoes continuam nativas; sem interceptacao de eventos.
     enhanceCartPage();
+    enhanceQuoteModalQuantities();
   }
   var scheduled=false;
   function refresh(){
