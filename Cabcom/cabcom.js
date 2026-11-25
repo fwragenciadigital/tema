@@ -6,7 +6,7 @@
 (function (w,d) {
   'use strict';
   if(w.Cabcom2026) return;
-  var VERSION='2.2.3';
+  var VERSION='2.2.4';
   var CDN='https://cdn.awsli.com.br/80/80577/arquivos/';
   var DEFAULTS={
     geral:{ativo:true,publicarNaLoja:false,debug:false},
@@ -1084,6 +1084,12 @@
   // cálculos/width/transform do FlexSlider legado da Loja Integrada.
   var catalogPaging=new WeakMap();
   function mountCatalogPaging(list){
+    // LI entrega data-produtos-linha="4" do painel; sobrescrever na camada
+    // de prévia ANTES de a grade/slider fazer o cálculo responsivo.
+    var columns=w.innerWidth>=1024?5:w.innerWidth>=850?3:2;
+    var configured=list.getAttribute('data-produtos-linha');
+    if(configured!==String(columns))list.setAttribute('data-produtos-linha',String(columns));
+    if(w.jQuery)w.jQuery(list).data('produtos-linha',columns);
     [].slice.call(list.querySelectorAll('.listagem-linha')).forEach(function(row){
       var track=row.querySelector(':scope > .flex-viewport > ul, :scope > ul');
       if(!track)return;
@@ -1100,8 +1106,23 @@
       }
       row.classList.add('cc26-page-carousel');
       track.classList.add('cc26-page-track');
+      row.dataset.cc26CarouselColumns=String(columns);
+      track.style.setProperty('--cc26-cols',String(columns));
+      // Caso o plugin LI recalcule o slide depois do carregamento, manter
+      // transform e largura do track entregues ao CSS da Cabcom.
+      track.style.setProperty('transform','none','important');
+      track.style.setProperty('width','100%','important');
+      track.style.setProperty('max-width','100%','important');
+      if(native && native.vars){
+        native.vars.slideshow=false;
+        native.vars.move=columns;
+      }
       var current=catalogPaging.get(row);
-      if(current&&current.track===track){current.sync();return;}
+      if(current&&current.track===track){
+        row.dataset.cc26CarouselColumns=String(columns);
+        track.style.setProperty('--cc26-cols',String(columns));
+        current.sync();return;
+      }
       if(current){current.track.removeEventListener('scroll',current.sync);current.controls.remove();}
       var controls=el('div','cc26-page-controls');
       function arrow(direction,label){
@@ -1290,14 +1311,24 @@
     // Uma mesma grade para resultados, categorias, home e relacionados.
     // Carrosséis existentes mantêm seus controles e cálculos nativos.
     var lists=scope.querySelectorAll('.listagem-linha>ul, .produtos-carrossel, .vitrine-produtos>ul, .listagem .slick-initialized, .vitrine-produtos .slick-initialized');
+    var mountedCarousels=0;
     [].slice.call(lists).forEach(function(list){
+      if(list.matches('.produtos-carrossel')){
+        var desired=w.innerWidth>=1024?5:w.innerWidth>=850?3:2;
+        if(list.getAttribute('data-produtos-linha')!==String(desired))
+          list.setAttribute('data-produtos-linha',String(desired));
+        if(w.jQuery)w.jQuery(list).data('produtos-linha',desired);
+      }
       if(!list.querySelector('.cc26-card-two-cta'))return;
       var isSlider=list.matches('.produtos-carrossel,.slick-slider,.slick-initialized,.owl-carousel,.swiper-wrapper,.slides') ||
         !!list.closest('.slick-slider,.slick-initialized,.owl-carousel,.swiper,.flexslider,.bx-wrapper') ||
         !!list.querySelector('.slick-track,.owl-stage,.swiper-wrapper,.bx-viewport');
       if(isSlider){
         list.classList.remove('cc26-catalog-grid');
-        if(list.matches('.produtos-carrossel'))mountCatalogPaging(list);
+        if(list.matches('.produtos-carrossel')){
+          mountCatalogPaging(list);
+          mountedCarousels++;
+        }
         // Quando a LI usa Slick, configura cinco cards em telas largas pelo
         // próprio plugin (sem reescrever track ou clonar produtos).
         var slider=list.matches('.slick-initialized')?list:list.querySelector('.slick-initialized');
@@ -1334,6 +1365,8 @@
         list.classList.add('cc26-catalog-grid');
       }
     });
+    state.carouselAudit={version:'2.2.4',source:'Loja Integrada',desktopProducts:5,
+      mounted:mountedCarousels,windowWidth:w.innerWidth};
   }
   function decorateNativeShelves(){
     decorateQuoteCards();
