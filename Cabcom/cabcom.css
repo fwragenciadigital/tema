@@ -67,12 +67,39 @@
 .cc26-brands__grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:12px;align-items:center}
 .cc26-brands__brand{min-height:90px;display:grid;place-items:center;background:#f9fbff;color:#0d3991!important;font-weight:900;font-size:clamp(14px,1.4vw,25px);text-decoration:none!important;letter-spacing:-.04em;padding:12px;text-align:center;border-radius:10px}
 .cc26-brands__brand:hover{background:#eaf3ff}
-.cc26-institutional{padding:80px 0;background:#001b35 url('https://cdn.awsli.com.br/80/80577/arquivos/bg-empresa.jpg') center/cover no-repeat;color:#fff}
-.cc26-institutional__panel{max-width:780px;padding:35px 0}
-.cc26-institutional__eyebrow{font-size:12px;letter-spacing:.2em;font-weight:700;color:#00ceab;margin-bottom:22px}
-.cc26-institutional h2{font-size:clamp(30px,3.2vw,52px);line-height:1.1;color:#fff;margin:0 0 20px}
-.cc26-institutional p{color:#e2e8f1;font-size:16px;line-height:1.9;margin:0 0 25px}
-.cc26-institutional__cta{display:inline-block;border-radius:30px;padding:13px 26px;background:#00c99b;color:#001d34!important;text-decoration:none!important;font-weight:800}
+/* Institucional Cabcom — referência aprovada, logo nativo e texto do painel. */
+body.cc26-active .cc26-institutional{
+  box-sizing:border-box;
+  width:100%;padding:clamp(48px,3.9vw,78px) 0;
+  background:#031a30 url('https://cdn.awsli.com.br/80/80577/arquivos/bg-empresa.jpg') center center/cover no-repeat;
+  color:#fff;
+}
+body.cc26-active #corpo .cc26-institutional .cc26-container{
+  box-sizing:border-box;
+  width:100%;max-width:1920px!important;
+  padding-inline:clamp(24px,6.8vw,136px)!important;
+  margin:0 auto;
+}
+body.cc26-active .cc26-institutional__panel{
+  box-sizing:border-box;
+  width:53%;max-width:900px;padding:0;
+  background:transparent;border-radius:0;
+}
+body.cc26-active .cc26-institutional__logo{
+  display:block;width:clamp(210px,19.4vw,375px);
+  max-width:100%;height:auto;object-fit:contain;
+  margin:0 0 clamp(25px,2.3vw,44px);
+  background:transparent;
+}
+body.cc26-active .cc26-institutional__logo[hidden]{display:none}
+body.cc26-active .cc26-institutional__copy p{
+  color:#fff!important;
+  font:400 clamp(13px,.79vw,15.5px)/1.23 var(--cc26-font-text)!important;
+  margin:0 0 15px!important;
+  padding:0!important;text-align:left;
+}
+body.cc26-active .cc26-institutional__copy p:last-child{margin-bottom:0!important}
+
 .cc26-instagram{background:#f0f0f0;padding:65px 0 90px}
 .cc26-instagram__title{text-align:center;margin-bottom:30px}
 .cc26-instagram__title span{display:block;color:#66717d;font-size:16px}
@@ -127,9 +154,11 @@
   .cc26-brands{padding:40px 0}
   .cc26-brands__grid{grid-template-columns:repeat(2,minmax(0,1fr))}
   .cc26-brands__brand{min-height:65px}
-  .cc26-institutional{padding:35px 0;background-position:58% center}
-  .cc26-institutional__panel{padding:18px;background:#001b35c7;border-radius:12px}
-  .cc26-institutional p{font-size:13px}
+  body.cc26-active .cc26-institutional{padding:38px 0;background-position:62% center; background-image:linear-gradient(90deg,rgba(3,26,48,.94),rgba(3,26,48,.74)),url('https://cdn.awsli.com.br/80/80577/arquivos/bg-empresa.jpg')}
+  body.cc26-active #corpo .cc26-institutional .cc26-container{padding-inline:24px!important}
+  body.cc26-active .cc26-institutional__panel{width:100%;max-width:680px}
+  body.cc26-active .cc26-institutional__logo{width:240px;margin-bottom:24px}
+  body.cc26-active .cc26-institutional__copy p{font-size:13px!important;line-height:1.55!important;margin-bottom:14px!important}
   .cc26-instagram{padding:40px 0}
 }
 @media(max-width:370px){.cc26-benefits__grid{grid-template-columns:1fr}.cc26-shortcuts__grid{grid-template-columns:repeat(2,1fr)}}
