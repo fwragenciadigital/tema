@@ -54,7 +54,7 @@
 .cc26-category-grid__intro h2{position:relative;z-index:1;color:#00c99b;font-size:clamp(24px,2.5vw,42px);line-height:1.04;max-width:260px;margin:65px 15px 0 48px;text-shadow:0 2px 10px #00192e;font-weight:800}
 .cc26-category-grid__cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
 .cc26-category-card{position:relative;display:grid;align-items:end;overflow:hidden;aspect-ratio:1/1;background:#075cf8;color:white!important;text-decoration:none!important;transition:transform .2s,box-shadow .2s}
-.cc26-category-card:hover{transform:translateY(-3px);box-shadow:0 10px 20px #001e4433}
+/* Hover dos cards centralizado nas regras de interação abaixo. */
 .cc26-category-card img{position:absolute;inset:0;width:100%;height:100%!important;object-fit:cover}
 .cc26-category-card:after{content:'';position:absolute;inset:44% 0 0;background:linear-gradient(0deg,#001c46cf,transparent)}
 .cc26-category-card strong{position:relative;z-index:1;text-align:center;padding:15px;font-size:clamp(14px,1.35vw,23px);line-height:1.16;color:white}
@@ -503,9 +503,20 @@ body.cc26-active.cc26-cart-ready #corpo .cc26-cart-table td{
 body.cc26-active.cc26-cart-ready #corpo .cc26-cart-table :is(.produto-info a,.nome-produto){
   color:#1d293a;font-weight:600;font-family:var(--cc26-font-text);
 }
-body.cc26-active.cc26-cart-ready #corpo .cc26-cart-table .quantidade input{
-  border:1px solid #d7dfeb!important;border-radius:8px;min-height:39px;
-  text-align:center;box-shadow:none;
+body.cc26-active.cc26-cart-ready #corpo .cc26-cart-table .quantidade{
+  display:flex!important;align-items:center;justify-content:center;gap:5px;flex-wrap:wrap;min-width:105px;
+}
+body.cc26-active.cc26-cart-ready #corpo .cc26-cart-table .quantidade input[name="quantidade"]{
+  display:block!important;box-sizing:border-box!important;width:48px!important;min-height:36px;
+  border:1px solid #d7dfeb!important;border-radius:8px;margin:0!important;text-align:center;box-shadow:none;
+}
+body.cc26-active.cc26-cart-ready #corpo .cc26-cart-table .quantidade :is(a.icon-minus,a.icon-plus){
+  display:inline-grid!important;place-items:center;width:31px;height:36px;
+  background:#f3f7fb;color:#0868ff!important;border-radius:6px;text-decoration:none;
+}
+body.cc26-active.cc26-cart-ready #corpo .cc26-cart-table .quantidade .atualizar-quantidade{
+  display:block!important;flex:0 0 100%;background:#0868ff!important;color:#fff!important;
+  font-size:11px!important;border:0!important;border-radius:6px;min-height:30px;margin:2px 0!important;
 }
 body.cc26-active.cc26-cart-ready #corpo :is(#formCalcularFrete,#usarCupom){
   box-sizing:border-box;max-width:100%;
@@ -1512,10 +1523,26 @@ body.cc26-active #listagemProdutos :is(.listagem-item,.produto){
     translate .26s cubic-bezier(.2,.7,.3,1),
     border-color .26s ease;
 }
-body.cc26-active .cc26-category-card:hover,
-body.cc26-active .cc26-mini-banner:hover{
-  border-color:rgba(6,109,252,.24)!important;
-  box-shadow:0 13px 30px rgba(0,32,77,.11);
+body.cc26-active .cc26-category-card img,
+body.cc26-active .cc26-mini-banner img,
+body.cc26-active .cc26-brands__brand img{
+  transition:scale .42s cubic-bezier(.2,.7,.3,1),filter .32s ease!important;
+}
+body.cc26-active .cc26-category-card strong{
+  transition:translate .32s cubic-bezier(.2,.7,.3,1),color .25s ease!important;
+}
+@media(hover:hover) and (pointer:fine) and (prefers-reduced-motion:no-preference){
+  body.cc26-active .cc26-category-card:hover,
+  body.cc26-active .cc26-mini-banner:hover{
+    translate:0 -3px;
+    box-shadow:0 12px 26px rgba(0,32,77,.18)!important;
+  }
+  body.cc26-active .cc26-category-card:hover img{scale:1.055;filter:brightness(1.05)}
+  body.cc26-active .cc26-category-card:hover strong{translate:0 -3px}
+  body.cc26-active .cc26-mini-banner:hover img{scale:1.025;filter:brightness(1.04)}
+  body.cc26-active .cc26-brands__brand:hover img{scale:1.045}
+  body.cc26-active .cc26-footer__navlink,
+  body.cc26-active .cc26-footer__contact-line{transition:color .25s ease}
 }
 body.cc26-active .cc26-section :is(a,button):active{
   scale:.985;
@@ -1658,8 +1685,31 @@ body.cc26-active .cc26-cart-sidebar__item-title{
 }
 body.cc26-active .cc26-cart-sidebar__item-title:hover{color:#0069e8!important}
 body.cc26-active .cc26-cart-sidebar__quantity{
+  display:flex;flex-wrap:wrap;align-items:center;gap:9px;
   color:#66768c;font:450 12px/1.45 var(--cc26-font-text)!important;
 }
+body.cc26-active .cc26-quote-qty{
+  display:inline-flex;align-items:center;justify-content:center;gap:0;
+  border:1px solid #dce5ee;border-radius:8px;background:#fff;
+  min-width:100px;max-width:100%;overflow:hidden;
+}
+body.cc26-active .cc26-quote-qty__step{
+  box-sizing:border-box!important;display:grid!important;place-items:center;
+  flex:0 0 33px;width:33px!important;height:34px!important;
+  border:0!important;border-radius:0!important;margin:0!important;padding:0!important;
+  background:#f3f7fb!important;color:#0868ff!important;
+  font:700 19px/1 var(--cc26-font-title)!important;cursor:pointer;
+  transition:background .2s,color .2s;
+}
+body.cc26-active .cc26-quote-qty__step:not(:disabled):hover{background:#0868ff!important;color:#fff!important}
+body.cc26-active .cc26-quote-qty__step:disabled{opacity:.42;cursor:default}
+body.cc26-active .cc26-quote-qty__amount{
+  min-width:34px;padding:0 6px;text-align:center;color:#17324c;
+  font:600 13px/1.3 var(--cc26-font-text)!important;
+}
+body.cc26-active .cc26-quote-qty-status{font:500 12px/1.5 var(--cc26-font-text)!important;color:#52667e;margin:10px 0}
+body.cc26-active #modalSolicitarOrcamento .modal-footer button[type="submit"]:disabled{opacity:.5;cursor:not-allowed}
+
 body.cc26-active .cc26-cart-sidebar__price{
   color:#003f8c;font:800 16px/1.2 var(--cc26-font-text)!important;
 }
@@ -2111,7 +2161,7 @@ body.cc26-active.cc26-pdp-ready .cc26-pdp__details .cc26-pdp__cta--whatsapp{
   background:#00bc8d!important;color:#fff!important;
 }
 body.cc26-active.cc26-pdp-ready .cc26-pdp__details .cc26-pdp__cta--quote{
-  background:#0669ed!important;color:#fff!important;
+  background:#0868ff!important;color:#fff!important;
 }
 body.cc26-active.cc26-pdp-ready .cc26-pdp__details .cc26-pdp__cta:hover{
   filter:brightness(1.065);translate:0 -2px;
@@ -2564,7 +2614,7 @@ body.cc26-active.cc26-pdp-ready #corpo .cc26-pdp--editorial .cc26-pdp__native-pr
   font-family:var(--cc26-font-text)!important;
 }
 body.cc26-active.cc26-pdp-ready #corpo .cc26-pdp--editorial .cc26-pdp__quote-hint{
-  margin:20px 0 13px!important;
+  margin:12px 0 10px!important;
   color:#747d89!important;
   font:450 12px/1.55 var(--cc26-font-text)!important;
 }
@@ -2583,7 +2633,7 @@ body.cc26-active.cc26-pdp-ready #corpo .cc26-pdp--editorial .comprar{
   margin:0!important;
   width:100%!important;
 }
-/* CTA principal escuro seguindo a referência, WhatsApp como segunda opção. */
+/* CTAs da PDP seguem a identidade aprovada das vitrines. */
 body.cc26-active.cc26-pdp-ready #corpo .cc26-pdp--editorial .comprar .cc26-pdp__cta--quote{
   order:0!important;
   display:flex!important;align-items:center!important;justify-content:center!important;
@@ -2591,10 +2641,10 @@ body.cc26-active.cc26-pdp-ready #corpo .cc26-pdp--editorial .comprar .cc26-pdp__
   width:100%!important;
   max-width:none!important;
   min-height:58px!important;
-  border:1px solid #11161b!important;
+  border:1px solid #0868ff!important;
   border-radius:10px!important;
   padding:13px 20px!important;
-  background:#15191f!important;
+  background:#0868ff!important;
   color:#fff!important;
   font:750 15px/1.3 var(--cc26-font-text)!important;
   box-shadow:none!important;
@@ -2747,7 +2797,7 @@ body.cc26-active.cc26-pdp-ready #corpo .cc26-pdp--editorial .cc26-pdp__descripti
     min-height:47px!important;font-size:13px!important;
   }
   body.cc26-active.cc26-pdp-ready .cc26-pdp__mobile-buttons .cc26-pdp__mobile-quote{
-    background:#15191f!important;
+    background:#0868ff!important;
   }
   body.cc26-active.cc26-pdp-ready .cc26-pdp__mobile-buttons .cc26-pdp__mobile-whatsapp{
     background:#008e70!important;
