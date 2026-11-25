@@ -6,7 +6,7 @@
 (function (w,d) {
   'use strict';
   if(w.Cabcom2026) return;
-  var VERSION='2.2.15';
+  var VERSION='2.2.16';
   var CDN='https://cdn.awsli.com.br/80/80577/arquivos/';
   var DEFAULTS={
     geral:{ativo:true,publicarNaLoja:false,debug:false},
@@ -266,11 +266,13 @@
     function syncMobileHeader(){
       var mobile=w.innerWidth<=767;
       if(mobile){
-        if(toggle.parentNode!==main)main.appendChild(toggle);
+        if(toggle.parentNode!==main||toggle.nextElementSibling!==logo)main.insertBefore(toggle,logo);
+        if(quote&&quote.parentNode!==main)main.appendChild(quote);
         if(actions.parentNode!==header)header.appendChild(actions);
       }else{
         if(actions.parentNode!==main)main.appendChild(actions);
-        if(toggle.parentNode!==actions)actions.appendChild(toggle);
+        if(quote&&quote.parentNode!==actions)actions.appendChild(quote);
+        if(toggle.parentNode!==actions||toggle!==actions.lastElementChild)actions.appendChild(toggle);
       }
     }
     syncMobileHeader();w.addEventListener('resize',syncMobileHeader,{passive:true});
@@ -1963,6 +1965,9 @@
     [].slice.call(els).forEach(function(node,index){
       // Animar a seção, não slides individuais clonados pelo Owl.
       if(node.matches('.listagem-item,.cc26-benefit')&&node.closest('.produtos-carrossel,.cc26-benefits')){
+        node.classList.remove('cc26-reveal','cc26-inview');return;
+      }
+      if(w.innerWidth<=767&&d.body.matches('.pagina-categoria,.pagina-busca')&&node.matches('.listagem-item')){
         node.classList.remove('cc26-reveal','cc26-inview');return;
       }
       if(node.classList.contains('cc26-reveal'))return;
