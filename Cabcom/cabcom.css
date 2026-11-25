@@ -2972,7 +2972,7 @@ body.cc26-active .cc26-mini-banners .cc26-mini-banner:hover img{
 
 
 /* ======================================================================
-   CABCOM CATALOG CARDS v2.2.2 — componente único em todas as vitrines
+   CABCOM CATALOG CARDS v2.2.3 — componente único em todas as vitrines
    Padrão aprovado: foto grande, título central, WhatsApp e E-mail abaixo.
    Home, categorias, busca, marcas e produtos relacionados.
    ====================================================================== */
@@ -3176,6 +3176,109 @@ body.cc26-active #corpo .cc26-card-two-cta .cc26-card-quote-actions .cc26-icon s
   width:17px!important;
   height:17px!important;
   display:block!important;
+}
+
+/* Vitrine Cabcom: o próprio track é a área de rolagem. As larguras
+   calculadas pelo FlexSlider não se aplicam aos carrosséis de produtos. */
+body.cc26-active #corpo .cc26-page-carousel{
+  position:relative!important;
+  width:100%!important;
+  min-width:0!important;
+  margin:0!important;
+  padding:0!important;
+  overflow:visible!important;
+  border:0!important;
+  background:transparent!important;
+}
+body.cc26-active #corpo .cc26-page-carousel > .flex-viewport{
+  width:100%!important;
+  height:auto!important;
+  max-height:none!important;
+  overflow:visible!important;
+}
+body.cc26-active #corpo .cc26-page-carousel .cc26-page-track{
+  --cc26-cols:5;
+  --cc26-card-gap:15px;
+  box-sizing:border-box!important;
+  display:grid!important;
+  grid-auto-flow:column!important;
+  grid-template-rows:auto!important;
+  grid-auto-columns:calc((100% - (var(--cc26-cols) - 1) * var(--cc26-card-gap)) / var(--cc26-cols))!important;
+  gap:var(--cc26-card-gap)!important;
+  align-items:stretch!important;
+  width:100%!important;
+  min-width:0!important;
+  max-width:100%!important;
+  height:auto!important;
+  margin:0!important;
+  padding:5px 0 14px!important;
+  position:relative!important;
+  inset:auto!important;
+  float:none!important;
+  transform:none!important;
+  transition:none!important;
+  overflow-x:auto!important;
+  overflow-y:hidden!important;
+  scroll-snap-type:x mandatory;
+  scrollbar-width:none;
+  overscroll-behavior-x:contain;
+  -webkit-overflow-scrolling:touch;
+  list-style:none!important;
+}
+body.cc26-active #corpo .cc26-page-carousel .cc26-page-track::-webkit-scrollbar{display:none}
+body.cc26-active #corpo .cc26-page-carousel .cc26-page-track::before,
+body.cc26-active #corpo .cc26-page-carousel .cc26-page-track::after{
+  content:none!important;display:none!important;
+}
+body.cc26-active #corpo .cc26-page-carousel .cc26-page-track > li{
+  box-sizing:border-box!important;
+  display:block!important;
+  width:100%!important;
+  min-width:0!important;
+  max-width:100%!important;
+  height:auto!important;
+  float:none!important;
+  clear:none!important;
+  margin:0!important;
+  padding:0!important;
+  scroll-snap-align:start;
+}
+body.cc26-active #corpo .cc26-page-carousel .cc26-page-track > :is(.clone,.flex-clone,.slick-cloned),
+body.cc26-active #corpo .cc26-page-carousel > :is(.flex-direction-nav,.flex-control-nav,.flex-pauseplay){
+  display:none!important;
+}
+body.cc26-active #corpo .cc26-page-carousel .cc26-page-controls[hidden]{display:none!important}
+body.cc26-active #corpo .cc26-page-carousel .cc26-page-arrow{
+  position:absolute!important;
+  top:50%;
+  z-index:10;
+  translate:0 -50%;
+  width:27px;height:27px;
+  display:grid;place-items:center;
+  padding:0!important;
+  border:0!important;
+  border-radius:50%!important;
+  background:#bfc1c4!important;
+  color:#fff!important;
+  cursor:pointer;
+  transition:background .25s ease,opacity .25s ease;
+}
+body.cc26-active #corpo .cc26-page-carousel .cc26-page-arrow--prev{left:-36px}
+body.cc26-active #corpo .cc26-page-carousel .cc26-page-arrow--next{right:-36px}
+body.cc26-active #corpo .cc26-page-carousel .cc26-page-arrow .cc26-icon{width:17px;height:17px}
+body.cc26-active #corpo .cc26-page-carousel .cc26-page-arrow--prev .cc26-icon{rotate:180deg}
+body.cc26-active #corpo .cc26-page-carousel .cc26-page-arrow:disabled{opacity:.35;cursor:default}
+body.cc26-active #corpo .cc26-page-carousel .cc26-page-arrow:not(:disabled):hover{background:#0868ff!important}
+@media(max-width:1023px){
+  body.cc26-active #corpo .cc26-page-carousel .cc26-page-track{--cc26-cols:3}
+  body.cc26-active #corpo .cc26-page-carousel .cc26-page-arrow--prev{left:3px}
+  body.cc26-active #corpo .cc26-page-carousel .cc26-page-arrow--next{right:3px}
+}
+@media(max-width:849px){
+  body.cc26-active #corpo .cc26-page-carousel .cc26-page-track{--cc26-cols:2;--cc26-card-gap:10px}
+}
+@media(prefers-reduced-motion:reduce){
+  body.cc26-active #corpo .cc26-page-carousel .cc26-page-arrow{transition:none!important}
 }
 
 /* Gap horizontal real: a caixa do slide conserva sua largura nativa. */
