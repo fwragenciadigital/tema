@@ -6,7 +6,7 @@
 (function (w,d) {
   'use strict';
   if(w.Cabcom2026) return;
-  var VERSION='2.2.14';
+  var VERSION='2.2.15';
   var CDN='https://cdn.awsli.com.br/80/80577/arquivos/';
   var DEFAULTS={
     geral:{ativo:true,publicarNaLoja:false,debug:false},
@@ -171,50 +171,48 @@
     navigation.id='cc26-navigation';
     navigation.setAttribute('aria-label','Categorias');
     var navList=el('ul','cc26-site-header__list');
-    var preferred=['ACESSÓRIOS','ANTENAS','CABOS','CONECTORES','FERRAMENTAS','ISOLANTES','RADIOS'];
-    var mainNodes=[];
-    preferred.forEach(function(name){
-      var node=navItems.find(function(li){
-        var anchor=li.querySelector(':scope > a[href]');
-        return anchor && normalized(anchor.textContent)===normalized(name);
-      });
-      if(node)mainNodes.push(node);
-    });
-    // Outras categorias nativas continuam acessiveis; nenhuma e fabricada.
-    var remaining=navItems.filter(function(li){return mainNodes.indexOf(li)<0;});
-    function menuItem(li){
+    // Ordem e níveis do painel: nenhum nome ou ordenação fixa.
+    function menuItem(li,depth){
       var original=li.querySelector(':scope > a[href]');
       if(!original)return null;
-      var row=el('li','cc26-site-header__navitem');
-      var item=a(original.href,'cc26-site-header__navlink',original.textContent.trim());
+      var row=el('li',depth?'cc26-site-header__subitem':'cc26-site-header__navitem');
+      var label=(original.querySelector('.titulo')||original).textContent.trim();
+      var item=a(original.href,depth?'':'cc26-site-header__navlink',label);
       row.appendChild(item);
       var childList=li.querySelector(':scope > ul');
       if(childList){
         var sub=el('ul','cc26-site-header__submenu');
-        var childAnchors=[].slice.call(childList.querySelectorAll('a[href]')).slice(0,45);
-        childAnchors.forEach(function(c){
-          var child=el('li');
-          child.appendChild(a(c.href,'',c.textContent.trim()));
-          sub.appendChild(child);
+        [].slice.call(childList.children).forEach(function(child){
+          var nested=menuItem(child,depth+1);if(nested)sub.appendChild(nested);
         });
-        if(sub.children.length)row.appendChild(sub);
+        if(sub.children.length){
+          var toggle=el('button','cc26-menu-expand');
+          toggle.type='button';toggle.setAttribute('aria-label','Expandir '+label);
+          toggle.setAttribute('aria-expanded','false');toggle.appendChild(inlineIcon('arrow'));
+          toggle.addEventListener('click',function(){
+            var expanded=row.classList.toggle('cc26-menu-expanded');
+            toggle.setAttribute('aria-expanded',String(expanded));
+            toggle.setAttribute('aria-label',(expanded?'Recolher ':'Expandir ')+label);
+          });
+          row.appendChild(toggle);row.appendChild(sub);
+        }
       }
       return row;
     }
-    mainNodes.forEach(function(li){var row=menuItem(li);if(row)navList.appendChild(row);});
+    // Se necessário, agrupa somente o final da sequência; mobile exibe
+    // todas as categorias de primeiro nível, na ordem do painel.
+    var mainNodes=navItems.slice(0,7),remaining=navItems.slice(7);
+    mainNodes.forEach(function(li){var row=menuItem(li,0);if(row)navList.appendChild(row);});
     if(remaining.length){
       var more=el('li','cc26-site-header__navitem cc26-site-header__more');
-      var text=el('span','cc26-site-header__navlink','MAIS');
-      more.appendChild(text);
+      var toggle=el('button','cc26-site-header__navlink cc26-more-toggle','MAIS');
+      toggle.type='button';toggle.setAttribute('aria-expanded','false');
       var sub=el('ul','cc26-site-header__submenu');
-      remaining.forEach(function(li){
-        var anchor=li.querySelector(':scope > a[href]');
-        if(!anchor)return;
-        var item=el('li');item.appendChild(a(anchor.href,'',anchor.textContent.trim()));sub.appendChild(item);
-      });
-      if(sub.children.length)more.appendChild(sub);
-      navList.appendChild(more);
+      remaining.forEach(function(li){var row=menuItem(li,0);if(row)sub.appendChild(row);});
+      toggle.addEventListener('click',function(){var open=more.classList.toggle('cc26-menu-expanded');toggle.setAttribute('aria-expanded',String(open));});
+      more.appendChild(toggle);more.appendChild(sub);navList.appendChild(more);
     }
+    state.menuOrder=navItems.map(function(li){var a=li.querySelector(':scope > a[href]');return a?(a.querySelector('.titulo')||a).textContent.trim():'';}).filter(Boolean);
     navigation.appendChild(navList);
     main.appendChild(navigation);
     var actions=el('div','cc26-site-header__actions');
@@ -265,6 +263,17 @@
     actions.appendChild(toggle);
     main.appendChild(actions);inner.appendChild(main);header.appendChild(inner);
     nativeHeader.parentNode.insertBefore(header,nativeHeader);
+    function syncMobileHeader(){
+      var mobile=w.innerWidth<=767;
+      if(mobile){
+        if(toggle.parentNode!==main)main.appendChild(toggle);
+        if(actions.parentNode!==header)header.appendChild(actions);
+      }else{
+        if(actions.parentNode!==main)main.appendChild(actions);
+        if(toggle.parentNode!==actions)actions.appendChild(toggle);
+      }
+    }
+    syncMobileHeader();w.addEventListener('resize',syncMobileHeader,{passive:true});
     nativeHeader.classList.add('cc26-native-header');
     d.body.classList.add('cc26-with-custom-header');
     var originalMenu=d.querySelector('.menu.superior');
@@ -831,7 +840,18 @@
       words.appendChild(el('small','',item[2]));
       box.appendChild(icon);box.appendChild(words);content.appendChild(box);
     });
-    s.appendChild(content);return s;
+    content.setAttribute('aria-label','Benefícios da Cabcom');
+    var controls=el('div','cc26-benefits__controls');
+    var prev=el('button','cc26-benefits__prev'),next=el('button','cc26-benefits__next'),status=el('span','cc26-benefits__status','1 / '+items.length);
+    prev.type=next.type='button';prev.setAttribute('aria-label','Benefício anterior');next.setAttribute('aria-label','Próximo benefício');
+    prev.appendChild(inlineIcon('arrow'));next.appendChild(inlineIcon('arrow'));status.setAttribute('aria-live','polite');
+    controls.appendChild(prev);controls.appendChild(status);controls.appendChild(next);
+    function index(){var slides=[].slice.call(content.children);var first=slides[0];return slides.reduce(function(best,slide,i){return Math.abs(slide.offsetLeft-first.offsetLeft-content.scrollLeft)<Math.abs(slides[best].offsetLeft-first.offsetLeft-content.scrollLeft)?i:best;},0);}
+    function showIndex(){var i=index();status.textContent=(i+1)+' / '+items.length;prev.disabled=i===0;next.disabled=i===items.length-1;}
+    function step(delta){var i=Math.max(0,Math.min(items.length-1,index()+delta));var target=content.children[i].offsetLeft-content.children[0].offsetLeft;content.scrollTo({left:target,behavior:reducedMotion()?'auto':'smooth'});}
+    prev.addEventListener('click',function(){step(-1);});next.addEventListener('click',function(){step(1);});
+    content.addEventListener('scroll',showIndex,{passive:true});prev.disabled=true;
+    s.appendChild(content);s.appendChild(controls);return s;
   }
   function presentation(){
     if(!cfg.home.apresentacao)return null;
@@ -1198,13 +1218,22 @@
       if(!responsive[key])return;
       var desktop=Number(key)>=1024;
       set(responsive[key],timing(desktop));
-      if(desktop)set(responsive[key],{items:5,slideBy:5});
+      set(responsive[key],{items:desktop?5:Number(key)>=850?3:2,slideBy:desktop?5:1});
     });
+    if(!responsive[0]){responsive[0]={};changed=true;}
+    set(responsive[0],Object.assign(timing(false),{items:2,slideBy:1}));
+    if(!responsive[850]){responsive[850]={};changed=true;}
+    set(responsive[850],Object.assign(timing(false),{items:3,slideBy:1}));
     if(!responsive[1024]){responsive[1024]={};changed=true;}
     set(responsive[1024],Object.assign(timing(true),{items:5,slideBy:5}));
     owl.options.responsive=responsive;
     var expected=timing(w.innerWidth>=1024);
-    if(w.innerWidth>=1024){expected.items=5;expected.slideBy=5;}
+    expected.items=w.innerWidth>=1024?5:w.innerWidth>=850?3:2;expected.slideBy=w.innerWidth>=1024?5:1;
+    if(typeof owl.items==='function'&&typeof owl.remove==='function'){
+      var slides=owl.items(),hasProduct=slides.some(function(item){return item.is('.listagem-item')||item.find('.listagem-item').length;});
+      if(hasProduct)for(var i=slides.length-1;i>=0;i--){if(!slides[i].is('.listagem-item')&&!slides[i].find('.listagem-item').length){owl.remove(i);changed=true;}}
+    }
+    [].slice.call(list.querySelectorAll('.listagem-item.cc26-reveal')).forEach(function(card){card.classList.remove('cc26-reveal','cc26-inview');});
     if(owl.settings&&Object.keys(expected).some(function(key){return owl.settings[key]!==expected[key];}))changed=true;
     if(changed){
       owl.invalidate('settings');
@@ -1462,7 +1491,11 @@
       if(isSlider){
         list.classList.remove('cc26-catalog-grid');
         if(list.matches('.produtos-carrossel')){
-          if(!configureLegacyOwl(list))mountCatalogPaging(list);
+          if(!configureLegacyOwl(list)){
+            // Não criar controles dentro da estrutura que o tema legado desmontará.
+            var legacy=d.querySelector('script[src*="newfwrnewnovo2"]');
+            if(!legacy||d.readyState==='complete'&&list.querySelector('.listagem-linha')&&!(w.jQuery&&w.jQuery.fn&&w.jQuery.fn.owlCarousel))mountCatalogPaging(list);
+          }
           mountedCarousels++;
         }
         // Quando a LI usa Slick, configura cinco cards em telas largas pelo
@@ -1501,7 +1534,7 @@
         list.classList.add('cc26-catalog-grid');
       }
     });
-    state.carouselAudit={version:'2.2.9',source:'Loja Integrada',desktopProducts:5,
+    state.carouselAudit={version:'2.2.15',source:'Loja Integrada',desktopProducts:5,
       mounted:mountedCarousels,windowWidth:w.innerWidth};
   }
   function decorateNativeShelves(){
@@ -1856,6 +1889,19 @@
     final.appendChild(el('h3','cc26-footer__security-title','Segurança'));
     final.appendChild(el('div','cc26-footer__seals'));
     grid.appendChild(contact);grid.appendChild(account);grid.appendChild(institutional);grid.appendChild(final);
+    [].slice.call(grid.children).forEach(function(col,index){
+      var heading=col.querySelector(':scope > h3');
+      if(!heading)return;
+      var label=heading.textContent,body=el('div','cc26-footer__column-content'),toggle=el('button','cc26-footer__toggle');
+      body.id='cc26-footer-content-'+index;toggle.type='button';toggle.setAttribute('aria-controls',body.id);
+      toggle.appendChild(el('span','',label));toggle.appendChild(inlineIcon('arrow'));
+      heading.replaceChildren(toggle);
+      [].slice.call(col.children).filter(function(n){return n!==heading;}).forEach(function(n){body.appendChild(n);});
+      col.appendChild(body);
+      function sync(){var mobile=w.innerWidth<=767,expanded=!mobile||col.classList.contains('cc26-footer--expanded');toggle.disabled=!mobile;toggle.setAttribute('aria-expanded',String(expanded));body.hidden=!expanded;}
+      toggle.addEventListener('click',function(){if(w.innerWidth<=767){col.classList.toggle('cc26-footer--expanded');sync();}});
+      sync();w.addEventListener('resize',sync,{passive:true});
+    });
     main.appendChild(grid);f.appendChild(main);
     var bottom=el('div','cc26-footer__bottom');
     var bottomInner=wrap();bottomInner.classList.add('cc26-footer__bottom-inner');
@@ -1915,6 +1961,10 @@
       '.cc26-benefit, .cc26-presentation__copy, .cc26-cart-main, .cc26-cart-checkout-form'
     );
     [].slice.call(els).forEach(function(node,index){
+      // Animar a seção, não slides individuais clonados pelo Owl.
+      if(node.matches('.listagem-item,.cc26-benefit')&&node.closest('.produtos-carrossel,.cc26-benefits')){
+        node.classList.remove('cc26-reveal','cc26-inview');return;
+      }
       if(node.classList.contains('cc26-reveal'))return;
       if(node.closest('.cc26-preview-legacy-hidden'))return;
       node.classList.add('cc26-reveal');
