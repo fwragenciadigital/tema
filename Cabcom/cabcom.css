@@ -2972,7 +2972,7 @@ body.cc26-active .cc26-mini-banners .cc26-mini-banner:hover img{
 
 
 /* ======================================================================
-   CABCOM CATALOG CARDS v2.2.1 — componente único em todas as vitrines
+   CABCOM CATALOG CARDS v2.2.2 — componente único em todas as vitrines
    Padrão aprovado: foto grande, título central, WhatsApp e E-mail abaixo.
    Home, categorias, busca, marcas e produtos relacionados.
    ====================================================================== */
@@ -2993,12 +2993,17 @@ body.cc26-active #corpo .cc26-card-two-cta{
   border-radius:0!important;
   box-shadow:0 5px 13px rgba(0,0,0,.12)!important;
   text-align:center!important;
-  transition:box-shadow .22s ease,translate .22s ease;
+  transition:box-shadow .35s cubic-bezier(.2,.7,.3,1),translate .35s cubic-bezier(.2,.7,.3,1)!important;
 }
 body.cc26-active #corpo .cc26-card-two-cta:not(.slick-slide,.owl-item,.swiper-slide){width:100%!important}
-body.cc26-active #corpo .cc26-card-two-cta:hover{
-  box-shadow:0 9px 22px rgba(0,0,0,.14)!important;
-  translate:0 -2px;
+@media(hover:hover) and (pointer:fine){
+  body.cc26-active #corpo .cc26-card-two-cta:hover{
+    box-shadow:0 9px 20px rgba(0,0,0,.15)!important;
+    translate:0 -3px;
+  }
+  body.cc26-active #corpo .cc26-card-two-cta:hover .imagem-produto img{
+    scale:1.035;
+  }
 }
 /* Remover TOTALMENTE visual legado: badge percentual, barra azul e Ver mais. */
 body.cc26-active #corpo .cc26-card-two-cta :is(
@@ -3056,6 +3061,8 @@ body.cc26-active #corpo .cc26-card-two-cta .imagem-produto img{
   padding:0!important;
   object-fit:contain!important;
   transform:none!important;
+  scale:1;
+  transition:scale .4s cubic-bezier(.2,.7,.3,1)!important;
 }
 body.cc26-active #corpo .cc26-card-two-cta .info-produto{
   box-sizing:border-box!important;
@@ -3141,7 +3148,7 @@ body.cc26-active #corpo .cc26-card-two-cta .cc26-card-quote-actions :is(a,button
   white-space:nowrap!important;
   color:#fff!important;
   font:700 14px/1.25 var(--cc26-font-title)!important;
-  transition:filter .2s ease,translate .2s ease!important;
+  transition:filter .25s ease,translate .3s cubic-bezier(.2,.7,.3,1)!important;
 }
 body.cc26-active #corpo .cc26-card-two-cta .cc26-card-quote-actions__whatsapp{
   background:#00c99b!important;
@@ -3151,9 +3158,11 @@ body.cc26-active #corpo .cc26-card-two-cta .cc26-card-quote-actions__email{
   background:#0868ff!important;
   color:#fff!important;
 }
-body.cc26-active #corpo .cc26-card-two-cta .cc26-card-quote-actions :is(a,button):hover{
-  filter:brightness(1.06);
-  translate:0 -1px;
+@media(hover:hover) and (pointer:fine){
+  body.cc26-active #corpo .cc26-card-two-cta .cc26-card-quote-actions :is(a,button):hover{
+    filter:brightness(1.06);
+    translate:0 -1px;
+  }
 }
 body.cc26-active #corpo .cc26-card-two-cta .cc26-card-quote-actions .cc26-icon{
   display:inline-grid!important;
@@ -3242,10 +3251,13 @@ body.cc26-active #corpo .cc26-catalog-grid>li{
     max-height:235px!important;
   }
   body.cc26-active #corpo .cc26-catalog-grid{
-    grid-template-columns:repeat(4,minmax(0,1fr));
+    grid-template-columns:repeat(5,minmax(0,1fr));
   }
 }
-@media(max-width:850px){
+@media(max-width:1023px){
+  body.cc26-active #corpo .cc26-catalog-grid{grid-template-columns:repeat(3,minmax(0,1fr));}
+}
+@media(max-width:849px){
   body.cc26-active #corpo .cc26-card-two-cta > .cc26-card-quote-actions{inset:auto 10px 20px!important;}
   body.cc26-active #corpo .cc26-card-two-cta{
     height:440px!important;
@@ -3305,8 +3317,10 @@ body.cc26-active #corpo .cc26-catalog-grid>li{
 }
 @media(prefers-reduced-motion:reduce){
   body.cc26-active #corpo .cc26-card-two-cta,
+  body.cc26-active #corpo .cc26-card-two-cta .imagem-produto img,
   body.cc26-active #corpo .cc26-card-two-cta .cc26-card-quote-actions :is(a,button){
     transition:none!important;
     translate:none!important;
+    scale:1!important;
   }
 }
