@@ -966,7 +966,7 @@
       if(entries.length>=4)return;
       var images=[].slice.call(source.querySelectorAll('img'));
       // Imagens estão às vezes no próprio bloco .mini-banner via CSS.
-      if(source.matches('img'))images.unshift(source);
+      if(source.matches&&source.matches('img'))images.unshift(source);
       images.forEach(function(image){
         if(entries.length>=4 || image.closest('.slick-cloned, .swiper-slide-duplicate, .owl-item.cloned'))return;
         var parent=image.closest('a[href],.mini-banner,.banner-mini,.banner')||image.parentElement;
@@ -990,7 +990,7 @@
       });
       // Banners cuja imagem é background (sem tag IMG).
       if(!images.length && entries.length<4){
-        var backgrounds=[source].concat([].slice.call(source.querySelectorAll(
+        var backgrounds=(source.nodeType===1?[source]:[]).concat([].slice.call(source.querySelectorAll(
           '[style*="background"],[data-background],[data-bg],[data-banner-image]'
         )));
         backgrounds.forEach(function(elm){
