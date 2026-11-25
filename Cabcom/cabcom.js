@@ -6,7 +6,7 @@
 (function (w,d) {
   'use strict';
   if(w.Cabcom2026) return;
-  var VERSION='2.2.2';
+  var VERSION='2.2.3';
   var CDN='https://cdn.awsli.com.br/80/80577/arquivos/';
   var DEFAULTS={
     geral:{ativo:true,publicarNaLoja:false,debug:false},
@@ -1079,6 +1079,67 @@
   // Card de cotação: estrutura idêntica à referência, SEM "Ver mais" e
   // sem selos de desconto que a LI gera mesmo em produtos sem preço.
   // Os links reais do produto e do carrinho permanecem acessíveis.
+  // Paginação Cabcom: scroll nativo com cinco colunas reais no desktop.
+  // Não altera produtos, links ou handlers comerciais. Não depende dos
+  // cálculos/width/transform do FlexSlider legado da Loja Integrada.
+  var catalogPaging=new WeakMap();
+  function mountCatalogPaging(list){
+    [].slice.call(list.querySelectorAll('.listagem-linha')).forEach(function(row){
+      var track=row.querySelector(':scope > .flex-viewport > ul, :scope > ul');
+      if(!track)return;
+      var cards=[].slice.call(track.children).filter(function(slot){
+        return slot.matches('li')&&!slot.matches('.clone,.flex-clone,.slick-cloned')&&!!slot.querySelector('.cc26-card-two-cta');
+      });
+      if(!cards.length)return;
+      // Desativa apenas autoplay legado; as ações nativas dos produtos ficam intactas.
+      var native=w.jQuery&&w.jQuery(row).data('flexslider');
+      if(native && native!==row.cc26PausedSlider){
+        try{if(typeof native.stop==='function')native.stop();else if(typeof native.pause==='function')native.pause();}
+        catch(e){warn('Cabcom: autoplay legado não pôde ser pausado.');}
+        row.cc26PausedSlider=native;
+      }
+      row.classList.add('cc26-page-carousel');
+      track.classList.add('cc26-page-track');
+      var current=catalogPaging.get(row);
+      if(current&&current.track===track){current.sync();return;}
+      if(current){current.track.removeEventListener('scroll',current.sync);current.controls.remove();}
+      var controls=el('div','cc26-page-controls');
+      function arrow(direction,label){
+        var button=el('button','cc26-page-arrow cc26-page-arrow--'+direction);
+        button.type='button';button.setAttribute('aria-label',label);
+        button.appendChild(inlineIcon('arrow'));return button;
+      }
+      var prev=arrow('prev','Produtos anteriores'),next=arrow('next','Próximos produtos');
+      controls.appendChild(prev);controls.appendChild(next);row.appendChild(controls);
+      track.setAttribute('aria-label','Vitrine de produtos');
+      track.tabIndex=0;
+      function sync(){
+        var max=Math.max(0,track.scrollWidth-track.clientWidth);
+        prev.disabled=track.scrollLeft<=2;
+        next.disabled=track.scrollLeft>=max-2;
+        controls.hidden=max<=2;
+      }
+      function advance(direction){
+        var slots=[].slice.call(track.children).filter(function(slot){
+          return slot.matches('li')&&!slot.matches('.clone,.flex-clone,.slick-cloned')&&slot.getClientRects().length;
+        });
+        if(!slots.length)return;
+        var columns=w.innerWidth>=1024?5:w.innerWidth>=850?3:2;
+        var gap=parseFloat(w.getComputedStyle(track).columnGap)||0;
+        var stride=slots[0].getBoundingClientRect().width+gap;
+        if(!stride)return;
+        var step=w.innerWidth>=1024?columns:1;
+        var position=Math.round(track.scrollLeft/stride);
+        var target=Math.max(0,Math.min(track.scrollWidth-track.clientWidth,(position+direction*step)*stride));
+        track.scrollTo({left:target,behavior:reducedMotion()?'instant':'smooth'});
+      }
+      prev.addEventListener('click',function(){advance(-1);});
+      next.addEventListener('click',function(){advance(1);});
+      track.addEventListener('scroll',sync,{passive:true});
+      catalogPaging.set(row,{track:track,controls:controls,sync:sync});
+      w.requestAnimationFrame(sync);
+    });
+  }
   function decorateQuoteCards(){
     if(!cfg.catalogo.ativo)return;
     var scope=d.querySelector('#corpo');
@@ -1236,41 +1297,7 @@
         !!list.querySelector('.slick-track,.owl-stage,.swiper-wrapper,.bx-viewport');
       if(isSlider){
         list.classList.remove('cc26-catalog-grid');
-        // HTML real Cabcom: ul.produtos-carrossel[data-produtos-linha="4"]
-        // > li.listagem-linha.flexslider. API nativa jQuery FlexSlider.
-        if(list.matches('.produtos-carrossel') && w.jQuery){
-          var columns=w.innerWidth>=1024?5:w.innerWidth>=850?3:2;
-          var $list=w.jQuery(list);
-          if(list.getAttribute('data-produtos-linha')!==String(columns)){
-            list.setAttribute('data-produtos-linha',String(columns));
-            $list.data('produtos-linha',columns);
-          }
-          [].slice.call(list.querySelectorAll('.listagem-linha.flexslider')).forEach(function(sliderNode){
-            var instance=w.jQuery(sliderNode).data('flexslider');
-            if(!instance||!instance.vars||!instance.doMath||!instance.slides||instance.animating)return;
-            var width=instance.viewport?instance.viewport.width():w.jQuery(sliderNode).width();
-            if(!width)return;
-            var n=Math.min(columns,instance.count||columns);
-            var step=columns===5?n:1;
-            var signature=n+':'+step+':'+Math.round(width);
-            if(sliderNode.dataset.cc26FlexSignature===signature)return;
-            try{
-              instance.vars.minItems=n;
-              instance.vars.maxItems=n;
-              instance.vars.itemMargin=0;
-              instance.vars.itemWidth=Math.floor(width/n);
-              instance.vars.move=step;
-              instance.vars.animationSpeed=550;
-              instance.doMath();
-              instance.slides.width(instance.computedW);
-              instance.currentSlide=Math.min(instance.currentSlide,Math.max(0,instance.last));
-              instance.animatingTo=instance.currentSlide;
-              instance.update(instance.pagingCount);
-              instance.setProps();
-              sliderNode.dataset.cc26FlexSignature=signature;
-            }catch(err){warn('Vitrine FlexSlider: '+err.message);}
-          });
-        }
+        if(list.matches('.produtos-carrossel'))mountCatalogPaging(list);
         // Quando a LI usa Slick, configura cinco cards em telas largas pelo
         // próprio plugin (sem reescrever track ou clonar produtos).
         var slider=list.matches('.slick-initialized')?list:list.querySelector('.slick-initialized');
