@@ -6,7 +6,7 @@
 (function (w,d) {
   'use strict';
   if(w.Cabcom2026) return;
-  var VERSION='2.2.1';
+  var VERSION='2.2.2';
   var CDN='https://cdn.awsli.com.br/80/80577/arquivos/';
   var DEFAULTS={
     geral:{ativo:true,publicarNaLoja:false,debug:false},
@@ -1239,7 +1239,7 @@
         // HTML real Cabcom: ul.produtos-carrossel[data-produtos-linha="4"]
         // > li.listagem-linha.flexslider. API nativa jQuery FlexSlider.
         if(list.matches('.produtos-carrossel') && w.jQuery){
-          var columns=w.innerWidth>=1360?5:w.innerWidth>=1100?4:w.innerWidth>=850?3:2;
+          var columns=w.innerWidth>=1024?5:w.innerWidth>=850?3:2;
           var $list=w.jQuery(list);
           if(list.getAttribute('data-produtos-linha')!==String(columns)){
             list.setAttribute('data-produtos-linha',String(columns));
@@ -1251,14 +1251,16 @@
             var width=instance.viewport?instance.viewport.width():w.jQuery(sliderNode).width();
             if(!width)return;
             var n=Math.min(columns,instance.count||columns);
-            var signature=n+':'+Math.round(width);
+            var step=columns===5?n:1;
+            var signature=n+':'+step+':'+Math.round(width);
             if(sliderNode.dataset.cc26FlexSignature===signature)return;
             try{
               instance.vars.minItems=n;
               instance.vars.maxItems=n;
               instance.vars.itemMargin=0;
               instance.vars.itemWidth=Math.floor(width/n);
-              instance.vars.move=1;
+              instance.vars.move=step;
+              instance.vars.animationSpeed=550;
               instance.doMath();
               instance.slides.width(instance.computedW);
               instance.currentSlide=Math.min(instance.currentSlide,Math.max(0,instance.last));
@@ -1280,18 +1282,19 @@
             });
             function addBreakpoint(bp,n){
               var found=responsive.find(function(x){return x.breakpoint===bp;});
-              if(found){if(found.settings!=='unslick')found.settings.slidesToShow=n;}
-              else responsive.push({breakpoint:bp,settings:{slidesToShow:n}});
+              if(found){if(found.settings!=='unslick'){found.settings.slidesToShow=n;found.settings.slidesToScroll=n===5?5:1;}}
+              else responsive.push({breakpoint:bp,settings:{slidesToShow:n,slidesToScroll:n===5?5:1}});
             }
             // Preserva ajustes nativos extras; padroniza quantidade por faixa.
             responsive.forEach(function(entry){
               if(entry.settings==='unslick')return;
-              entry.settings.slidesToShow=entry.breakpoint<=850?2:entry.breakpoint<=1350?3:entry.breakpoint<=1600?4:5;
+              entry.settings.slidesToShow=entry.breakpoint<=850?2:entry.breakpoint<=1024?3:5;
+              entry.settings.slidesToScroll=entry.settings.slidesToShow===5?5:1;
             });
             if(!opts.mobileFirst){
-              addBreakpoint(1600,4);addBreakpoint(1350,3);addBreakpoint(850,2);
+              addBreakpoint(1024,3);addBreakpoint(850,2);
               slider.dataset.cc26CatalogSlick='1';
-              w.jQuery(slider).slick('slickSetOption',{slidesToShow:5,slidesToScroll:1,responsive:responsive},true);
+              w.jQuery(slider).slick('slickSetOption',{slidesToShow:5,slidesToScroll:5,speed:550,responsive:responsive},true);
             }
           }catch(err){warn('Vitrine: configuração Slick mantida no padrão nativo.');}
         }
