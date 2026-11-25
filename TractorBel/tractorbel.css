@@ -2907,3 +2907,45 @@ body.tb26-active.tb26-inner-ready .tb26-inner__banner-fallback{
     max-height:65px;
   }
 }
+
+/* TractorBel v1.28.0 — contatos institucionais e WhatsApp flutuante */
+body.tb26-active .tb26-footer__contacts{display:flex;flex-direction:column;gap:11px;min-width:0;margin-top:0;padding-top:15px;border-top:1px solid #51482d}
+body.tb26-active .tb26-footer__contacts-title{font:400 12px/1.55 'Michroma',Arial,sans-serif!important;color:var(--tb26-yellow);margin:0 0 3px}
+body.tb26-active .tb26-footer__contacts .tb26-footer__contact-row{display:flex;align-items:flex-start;gap:9px;min-width:0;color:#eee!important;font:400 12px/1.65 'Montserrat',Arial,sans-serif!important;white-space:pre-line;overflow-wrap:anywhere}
+body.tb26-active .tb26-contact-icon{display:inline-flex;flex:0 0 auto;align-items:center;justify-content:center;width:18px;height:18px;color:inherit}
+body.tb26-active .tb26-contact-icon svg{display:block;width:100%;height:100%}
+body.tb26-active .tb26-footer__contacts .tb26-contact-icon{color:var(--tb26-yellow);margin-top:2px}
+body.tb26-active .tb26-footer__contacts-social{display:flex;flex-wrap:wrap;gap:9px 14px;margin-top:3px}
+body.tb26-active .tb26-footer__contacts-social-link{display:inline-flex;align-items:center;gap:5px;font-size:11px!important}
+body.tb26-active .tb26-footer__contacts-social-link .tb26-contact-icon{width:15px;height:15px}
+body.tb26-active.tb26-wa-ready #ws_icon_chat{display:none!important}
+body.tb26-active #tb26-whatsapp{position:fixed;right:20px;bottom:24px;z-index:950;width:56px;isolation:isolate;font:400 13px/1.5 'Montserrat',Arial,sans-serif;color:#202020}
+body.tb26-active #tb26-whatsapp *{box-sizing:border-box}
+body.tb26-active #tb26-whatsapp [hidden]{display:none!important}
+body.tb26-active #tb26-whatsapp button{font-family:inherit;cursor:pointer;text-shadow:none;box-shadow:none}
+body.tb26-active #tb26-whatsapp .tb26-wa__toggle{display:grid;place-items:center;width:56px;height:56px;margin:0;padding:0;border:0;border-radius:50%;background:#25d366;color:#fff;box-shadow:0 5px 18px #0003}
+body.tb26-active #tb26-whatsapp .tb26-wa__toggle .tb26-contact-icon{width:30px;height:30px}
+body.tb26-active #tb26-whatsapp .tb26-wa__popup{position:absolute;right:0;bottom:70px;width:min(345px,calc(100vw - 32px));max-height:calc(100dvh - 110px);overflow:auto;overscroll-behavior:contain;border:1px solid #e4e4e4;border-radius:15px;background:#fff;box-shadow:0 12px 40px #0003}
+body.tb26-active #tb26-whatsapp .tb26-wa__header{display:flex;align-items:center;gap:12px;padding:15px;background:#075e54;color:#fff}
+body.tb26-active #tb26-whatsapp .tb26-wa__avatar{display:grid;place-items:center;width:44px;height:44px;flex:0 0 44px;border-radius:50%;background:#202020;overflow:hidden;color:#ffc400}
+body.tb26-active #tb26-whatsapp .tb26-wa__avatar img{width:100%;height:100%;object-fit:contain;padding:4px}
+body.tb26-active #tb26-whatsapp .tb26-wa__header-info{display:flex;flex:1;min-width:0;flex-direction:column;gap:2px}
+body.tb26-active #tb26-whatsapp .tb26-wa__header-info strong{font:700 13px/1.4 'Montserrat',Arial,sans-serif!important;color:#fff;overflow-wrap:anywhere}
+body.tb26-active #tb26-whatsapp .tb26-wa__header-info span{font-size:11px;color:#e4f6ef}
+body.tb26-active #tb26-whatsapp .tb26-wa__close{flex:0 0 34px;width:34px;height:34px;display:grid;place-items:center;margin:0;padding:0;border:0;background:transparent;color:#fff;font-size:25px;line-height:1}
+body.tb26-active #tb26-whatsapp .tb26-wa__body{padding:18px 15px 13px;background:#efeae2}
+body.tb26-active #tb26-whatsapp .tb26-wa__bubble{display:table;max-width:94%;padding:10px 13px;border-radius:0 10px 10px 10px;background:#fff;color:#303030;box-shadow:0 1px 3px #0001;overflow-wrap:anywhere;font-size:13px}
+body.tb26-active #tb26-whatsapp .tb26-wa__time{margin:5px 0 17px;color:#666;font-size:10px}
+body.tb26-active #tb26-whatsapp .tb26-wa__input-row{display:flex;align-items:center;gap:8px;margin:0;padding:0}
+body.tb26-active #tb26-whatsapp .tb26-wa__input{flex:1;min-width:0;width:100%;height:44px;margin:0;padding:9px 12px;border:1px solid #ddd;border-radius:22px;background:#fff!important;color:#222!important;font:400 13px/1.4 'Montserrat',Arial,sans-serif!important}
+body.tb26-active #tb26-whatsapp .tb26-wa__send{display:grid;place-items:center;width:44px;height:44px;flex:0 0 44px;margin:0;padding:0;border:0;border-radius:50%;background:#128c7e;color:#fff}
+body.tb26-active #tb26-whatsapp .tb26-wa__direct{display:block;text-align:center;margin-top:10px;color:#075e54!important;font-size:11px;font-weight:700;text-decoration:none}
+body.tb26-active #tb26-whatsapp :is(button,input,a):focus-visible{outline:2px solid #a67b00;outline-offset:3px}
+body.tb26-active:is(.tb26-cart-open,.tb26-menu-open,.tb26-pdp-zoom-open) #tb26-whatsapp{visibility:hidden;pointer-events:none}
+@media(max-width:767px){
+ body.tb26-active #tb26-whatsapp{right:14px;bottom:calc(18px + env(safe-area-inset-bottom,0px))}
+ body.tb26-active.tb26-with-pdp #tb26-whatsapp{bottom:calc(88px + env(safe-area-inset-bottom,0px))}
+ body.tb26-active #tb26-whatsapp .tb26-wa__popup{width:min(345px,calc(100vw - 28px))}
+ body.tb26-active #tb26-whatsapp .tb26-wa__input{font-size:16px!important}
+ body.tb26-active .tb26-footer__contacts{gap:10px}
+}

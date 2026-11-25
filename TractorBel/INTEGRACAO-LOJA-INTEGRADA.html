@@ -9,6 +9,8 @@
 <!-- v1.9: PDP com Pix prioritário, resumos dinâmicos e regras nativas da LI. -->
 <!-- v1.7: tb26-hero removido. Marcas, beneficios e institucional sao componentes independentes. -->
 <!-- Para editar/ocultar cada bloco, altere diretamente os defaults correspondentes no tractorbel.js ou sobrescreva marcas/beneficios/institucional abaixo. -->
+<!-- Contatos: null usa conteudo.telefone/email/instagram/facebook; string vazia oculta o item. -->
+<!-- WhatsApp: numero vazio usa conteudo.whatsapp; atraso em milissegundos; avatar vazio usa logo da loja. -->
 <!-- Parcelamento: valor automatizado apenas se a LI exibir condicoes validas; ver README para opcao manual verificada. -->
 <script>
 window.TractorBelSettings = {
@@ -16,7 +18,16 @@ window.TractorBelSettings = {
   topo: { ativo: true, menu: true },
   home: { ativo: true },
   paginas: { ativo: true, aplicarEmTodas: true },
-  rodape: { ativo: true },
+  rodape: { ativo: true, contatos: {
+      ativo: true, titulo: 'Conheça nossa loja', endereco: 'Av. Amintas Jacques de Moraes, 80', cidade: 'Belo Horizonte - MG', cep: '30881-292',
+      mapa: '', telefone: null, email: null, instagram: null, facebook: null
+    } },
+    whatsappFlutuante: {
+      ativo: true, numero: '', atraso: 3000, abrirAutomaticamente: true,
+      avatar: '', titulo: 'Compre pelo WhatsApp', subtitulo: 'Atendimento comercial',
+      mensagem: 'Você está com alguma dúvida?', placeholder: 'Digite uma mensagem...',
+      mensagemPadrao: 'Olá! Preciso de ajuda para comprar na TractorBel.'
+    },
   vitrines: { ativo: true, destaques: 10, miniaturas: 8, maisVendidos: 10, autoplay: true, loop: true, intervalo: 4500 },
   conteudo: {
     fraseMarcas: 'Temos de imediato FPS com o melhor preço do mercado!',

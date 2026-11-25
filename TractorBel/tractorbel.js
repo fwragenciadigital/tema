@@ -1,12 +1,12 @@
 /*
- * TractorBel 2026 - FWR Agencia Digital - v1.26.0
+ * TractorBel 2026 - FWR Agencia Digital - v1.28.0
  * Camada visual da Loja Integrada. Sem checkout ou precificacao paralela.
  * Editavel por window.TractorBelSettings no HTML da LI.
  */
 (function (win, doc) {
   'use strict';
   if (win.TractorBel2026) return;
-  var VERSION = '1.26.0';
+  var VERSION = '1.28.0';
   // Assets oficiais da TractorBel, ja hospedados na Loja Integrada.
   // Manter os nomes e extensoes ORIGINAIS, sem converter .jpg/.png para .webp.
   // O nome logico pode continuar .webp para compatibilidade com os componentes existentes.
@@ -90,7 +90,16 @@
     produto: { ativo: true, compraFixaMobile: true, pixEmDestaque: true, resumoRapido: true, resumoFixo: true },
     catalogo: { ativo: true, animacao: true },
     paginaCarrinho: { ativo: true },
-    rodape: { ativo: true },
+    rodape: { ativo: true, contatos: {
+      ativo: true, titulo: 'Conheça nossa loja', endereco: 'Av. Amintas Jacques de Moraes, 80', cidade: 'Belo Horizonte - MG', cep: '30881-292',
+      mapa: '', telefone: null, email: null, instagram: null, facebook: null
+    } },
+    whatsappFlutuante: {
+      ativo: true, numero: '', atraso: 3000, abrirAutomaticamente: true,
+      avatar: '', titulo: 'Compre pelo WhatsApp', subtitulo: 'Atendimento comercial',
+      mensagem: 'Você está com alguma dúvida?', placeholder: 'Digite uma mensagem...',
+      mensagemPadrao: 'Olá! Preciso de ajuda para comprar na TractorBel.'
+    },
     vitrines: { ativo: true, destaques: 10, miniaturas: 8, maisVendidos: 10, autoplay: true, loop: true, intervalo: 4500 },
     carrinho: { ativo: true, parcelamento: { maximo: null, semJuros: null, minimoParcela: null } },
     movimento: { ativo: true, fadeIn: true, hover: true, duracao: 740, distancia: 25, intervalo: 80 },
@@ -1275,6 +1284,123 @@
     native.parentNode.insertBefore(root, native); native.classList.add('tb26-native-home'); doc.body.classList.add('tb26-with-home'); state.home = true;
     setupMotion(root);
   }
+  // v1.28: SVGs locais, independentes de Font Awesome.
+  function tb26ContactIcon(kind) {
+    var paths={
+      pin:'<path d="M20 10c0 5-8 11-8 11S4 15 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.5"/>',
+      phone:'<path d="M22 16.9v3a2 2 0 0 1-2.2 2A19.8 19.8 0 0 1 3 5.2 2 2 0 0 1 5 3h3a2 2 0 0 1 2 1.7l.8 3a2 2 0 0 1-.5 2.1L9 11a16 16 0 0 0 4 4l1.2-1.3a2 2 0 0 1 2.1-.5l3 .8a2 2 0 0 1 2.7 2.9Z"/>',
+      mail:'<rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 6 9 7 9-7"/>',
+      instagram:'<rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><path d="M17.5 6.5h.01"/>',
+      facebook:'<path d="M14 21v-8h3l.5-4H14V7c0-1 .4-2 2-2h2V2h-3c-3 0-5 2-5 5v2H7v4h3v8"/>',
+      whatsapp:'<path d="M20.4 3.6A11.8 11.8 0 0 0 1.8 17.8L.2 24l6.3-1.7A11.9 11.9 0 0 0 24 11.8a11.8 11.8 0 0 0-3.6-8.2ZM12.1 21.7a9.8 9.8 0 0 1-5-1.4l-.4-.2-3.7 1 1-3.6-.3-.4A9.8 9.8 0 1 1 12.1 21.7Zm5.5-7.4c-.3-.2-1.8-.9-2.1-1-.3-.1-.5-.2-.7.2l-1 1.1c-.2.2-.4.2-.7.1a8 8 0 0 1-4.1-3.6c-.3-.5.3-.6.9-1.7.1-.2 0-.4 0-.6l-1-2.3c-.2-.6-.5-.5-.7-.5h-.6c-.3 0-.7.1-1 .5-.4.4-1.4 1.3-1.4 3.2 0 1.8 1.4 3.6 1.6 3.8.2.3 2.7 4.1 6.4 5.6 2.4 1 3.3.9 4.4.7.7-.1 1.8-.7 2.1-1.6.3-.8.3-1.5.2-1.7-.1-.1-.4-.2-.7-.4Z" fill="currentColor" stroke="none"/>',
+      send:'<path d="m22 2-7 20-4-9-9-4 20-7Z"/><path d="M22 2 11 13"/>'
+    };
+    var span=e('span','tb26-contact-icon');
+    span.setAttribute('aria-hidden','true');
+    span.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" focusable="false">'+(paths[kind]||'')+'</svg>';
+    return span;
+  }
+  function tb26WhatsNumber(value) {
+    var digits=String(value||'').replace(/\D/g,'');
+    return /^[1-9]\d{9,14}$/.test(digits)?digits:'';
+  }
+  function tb26SocialURL(value,domain) {
+    if(!value)return '';
+    try {var u=new URL(value,location.href);
+      if(u.protocol!=='https:' || !(u.hostname===domain||u.hostname.endsWith('.'+domain)) || u.pathname==='/' || /\/(?:share|sharer|dialog|accounts)(?:\/|\.|$)/i.test(u.pathname))return '';
+      return u.href;
+    }catch(_err){return '';}
+  }
+  function mountFooterContacts(col,instagram,facebook) {
+    var opt=cfg.rodape.contatos;
+    if(!opt||opt.ativo===false)return;
+    var box=e('div','tb26-footer__contacts');
+    var heading=e('h4','tb26-footer__contacts-title',opt.titulo||'Conheça nossa loja');
+    box.appendChild(heading);
+    function row(kind,text,href,external){
+      if(!text)return;
+      var item=href?link(href,'tb26-footer__contact-row'):e('div','tb26-footer__contact-row');
+      append(item,tb26ContactIcon(kind),e('span','',text));
+      if(external&&href){item.target='_blank';item.rel='noopener noreferrer';}
+      box.appendChild(item);
+    }
+    var address=[opt.endereco,opt.cidade,opt.cep?'CEP '+opt.cep:''].filter(Boolean).join('\n');
+    if(address){
+      var map=opt.mapa?safeUrl(opt.mapa):'https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(address.replace(/\n/g,', '));
+      row('pin',address,map,true);
+    }
+    var phone=opt.telefone==null?cfg.conteudo.telefone:opt.telefone;
+    var digits=String(phone||'').replace(/\D/g,'');
+    if(digits.length===10||digits.length===11)digits='55'+digits;
+    if(digits)row('phone',phone,'tel:+'+digits,false);
+    var email=opt.email==null?cfg.conteudo.email:opt.email;
+    if(/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(email||'')))row('mail',email,'mailto:'+email,false);
+    var socials=e('div','tb26-footer__contacts-social');
+    [['instagram',tb26SocialURL(opt.instagram==null?instagram:opt.instagram,'instagram.com'),'Instagram'],['facebook',tb26SocialURL(opt.facebook==null?facebook:opt.facebook,'facebook.com'),'Facebook']].forEach(function(data){
+      if(!data[1])return;
+      var a=link(data[1],'tb26-footer__contacts-social-link');
+      a.target='_blank';a.rel='noopener noreferrer';a.setAttribute('aria-label',data[2]);a.title=data[2];
+      append(a,tb26ContactIcon(data[0]),e('span','',data[2]));socials.appendChild(a);
+    });
+    if(socials.children.length)box.appendChild(socials);
+    if(box.children.length>1)col.appendChild(box);
+  }
+  function mountFloatingWhatsApp() {
+    var opt=cfg.whatsappFlutuante;
+    if(!opt||opt.ativo===false||doc.getElementById('tb26-whatsapp'))return;
+    // Paginas financeiras usam apenas CSS: nao montar chat nessas rotas.
+    if(doc.body.matches('.pagina-pedido-finalizado,.carrinho-checkout,.pagina-checkout')||/^\/(?:checkout|finalizar|pedido\/finalizado)(?:\/|$)/i.test(location.pathname))return;
+    var number=tb26WhatsNumber(opt.numero||cfg.conteudo.whatsapp);
+    if(!number)return;
+    var key='tb26-whatsapp-dismissed-v1', dismissed=false, storage=true, timer=null;
+    try{dismissed=win.sessionStorage.getItem(key)==='1';}catch(_err){storage=false;}
+    var root=e('div','tb26-wa');root.id='tb26-whatsapp';
+    var panel=e('section','tb26-wa__popup');panel.id='tb26-wa-popup';panel.hidden=true;
+    panel.setAttribute('aria-label','Atendimento pelo WhatsApp');
+    var head=e('div','tb26-wa__header');
+    var avatar=e('div','tb26-wa__avatar');var img=e('img');
+    img.alt='';img.width=44;img.height=44;
+    img.src=(opt.avatar&&safeUrl(opt.avatar))||(state.logo&&state.logo.src)||asset('logo-top.webp');
+    img.addEventListener('error',function(){avatar.replaceChildren(tb26ContactIcon('whatsapp'));},{once:true});
+    avatar.appendChild(img);
+    var info=e('div','tb26-wa__header-info');
+    append(info,e('strong','',opt.titulo||'Compre pelo WhatsApp'),e('span','',opt.subtitulo||'Atendimento comercial'));
+    var close=e('button','tb26-wa__close','×');close.type='button';close.setAttribute('aria-label','Minimizar WhatsApp');
+    append(head,avatar,info,close);
+    var body=e('div','tb26-wa__body');
+    var bubble=e('div','tb26-wa__bubble',opt.mensagem||'Você está com alguma dúvida?');
+    var time=e('p','tb26-wa__time','agora');
+    var form=e('form','tb26-wa__input-row');
+    var input=e('input','tb26-wa__input');input.type='text';input.maxLength=1000;input.placeholder=opt.placeholder||'Digite uma mensagem...';input.setAttribute('aria-label','Mensagem para WhatsApp');
+    var send=e('button','tb26-wa__send');send.type='submit';send.setAttribute('aria-label','Enviar mensagem pelo WhatsApp');send.appendChild(tb26ContactIcon('send'));
+    append(form,input,send);
+    var direct=link('https://wa.me/'+number,'tb26-wa__direct','Continuar no WhatsApp');
+    direct.target='_blank';direct.rel='noopener noreferrer';
+    append(body,bubble,time,form,direct);append(panel,head,body);
+    var toggle=e('button','tb26-wa__toggle');toggle.type='button';toggle.setAttribute('aria-label','Abrir atendimento pelo WhatsApp');toggle.setAttribute('aria-controls',panel.id);toggle.setAttribute('aria-expanded','false');toggle.appendChild(tb26ContactIcon('whatsapp'));
+    function remember(){dismissed=true;if(timer!==null){win.clearTimeout(timer);timer=null;}try{win.sessionStorage.setItem(key,'1');}catch(_err){}}
+    function setOpen(open,manual){
+      panel.hidden=!open;toggle.setAttribute('aria-expanded',String(open));toggle.setAttribute('aria-label',open?'Minimizar WhatsApp':'Abrir atendimento pelo WhatsApp');
+      if(!open)remember();
+      if(open&&manual)input.focus({preventScroll:true});
+    }
+    function messageURL(){return 'https://wa.me/'+number+'?text='+encodeURIComponent(input.value.trim()||opt.mensagemPadrao||'Olá!');}
+    toggle.addEventListener('click',function(){setOpen(panel.hidden,true);});
+    close.addEventListener('click',function(){setOpen(false);toggle.focus({preventScroll:true});});
+    root.addEventListener('keydown',function(ev){if(ev.key==='Escape'&&!panel.hidden){setOpen(false);toggle.focus();}});
+    form.addEventListener('submit',function(ev){ev.preventDefault();var url=messageURL();remember();setOpen(false);win.open(url,'_blank','noopener,noreferrer');});
+    direct.addEventListener('click',function(){direct.href=messageURL();remember();setOpen(false);});
+    append(root,panel,toggle);doc.body.appendChild(root);doc.body.classList.add('tb26-wa-ready');
+    // Se sessionStorage estiver bloqueado, nao abrir automaticamente (evita repeticao).
+    if(storage&&!dismissed&&opt.abrirAutomaticamente!==false){
+      var delay=Number(opt.atraso);if(!isFinite(delay))delay=3000;
+      timer=win.setTimeout(function(){timer=null;
+        if(!dismissed&&panel.hidden&&doc.visibilityState!=='hidden'&&!doc.body.matches('.tb26-cart-open,.tb26-menu-open,.tb26-pdp-zoom-open')&&!doc.querySelector('.modal.in'))setOpen(true,false);
+      },Math.max(0,Math.min(delay,60000)));
+    }
+    state.whatsapp={active:true,sessionDismissal:storage};
+  }
+
   function mountFooter() {
     if (!cfg.rodape.ativo || doc.getElementById('tb26-footer')) return;
     var native = doc.querySelector('#rodape') || doc.querySelector('footer'); if (!native) { warn('Rodapé nativo não identificado.'); return; }
@@ -1307,9 +1433,11 @@
       if (institutionalPages.some(function(entry){return entry[1]===new URL(url).pathname;}))return;
       institutionalPages.push([text,new URL(url).pathname + new URL(url).search]);
     });
+    var institutionalCol=column('INSTITUCIONAL',institutionalPages);
+    mountFooterContacts(institutionalCol,instagramURL,facebookURL);
     append(grid,
       column('ÁREA DO CLIENTE', [['Minha Conta', '/conta/index'], ['Meus Pedidos', '/conta/pedido/listar'], ['Cadastre-se', '/conta/criar'], ['Fale Conosco', 'https://wa.me/' + String(cfg.conteudo.whatsapp).replace(/\D/g,'')]]),
-      column('INSTITUCIONAL', institutionalPages)
+      institutionalCol
     );
     var secure = e('div', 'tb26-footer__col tb26-footer__secure'); secure.appendChild(e('h3', '', 'COMPRA SEGURA'));
     function copyLogos(selectors, parent, limit) {
@@ -2319,6 +2447,7 @@
     safely('relacionados',mountRelatedProducts);
     safely('carrinho',mountCartPage);
     safely('rodape',mountFooter);
+    safely('whatsapp',mountFloatingWhatsApp);
     safely('todasPaginas',mountUniversalPages);
     debug('Inicialização', state);
   }

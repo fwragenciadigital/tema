@@ -344,3 +344,11 @@ A auditoria do arquivo backup `legacy/loja-css-original-20261119.css` detectou *
 - Os ícones Font Awesome 5 Free Solid usam peso 900; os Brands usam peso 400.
 - Em `tb26-inner__banner-decor`, o “T” foi substituído pela logo oficial obtida do cabeçalho da LI (`state.logo.src`), com fallback `logo-top.png` via CDN e texto apenas se ambas falharem. A logo é exibida em versão reduzida também no mobile.
 - Formulários e autenticação não foram alterados. Validar visualmente login, cadastro, conta, pedidos e elementos antigos com Font Awesome, pois a disponibilidade efetiva da fonte depende das folhas carregadas pelo tema.
+
+
+## v1.28.0 — Contatos e WhatsApp flutuante (25/11/2026)
+
+- `rodape.contatos` no HTML administra endereço, cidade, CEP, mapa, telefone, email e redes. Endereço inicial: site institucional https://tractorbel.com.br/portal/contato; manter telefone/WhatsApp da loja virtual. Valores null herdam `conteudo`; string vazia desativa o item. Redes sem URL válida não aparecem. SVGs locais sem dependência de Font Awesome.
+- `whatsappFlutuante`: número internacional, atraso em ms, avatar, título, subtítulo, mensagem, placeholder e mensagem padrão configuráveis no HTML. Se número vazio, herda `conteudo.whatsapp`; não usar número da referência de outra loja. Abertura automática padrão 3s, sem focar automaticamente. Fechar ou encaminhar grava sessionStorage; reabrir manualmente continua possível. Sem storage não abre automaticamente. Link wa.me funciona como encaminhamento desktop/mobile, sem envio automático. Não afirma presença online sem integração.
+- Oculta somente o botão legado #ws_icon_chat quando o novo está montado. Não roda no checkout/pedido finalizado. CSS e JS principais mantêm os demais componentes.
+- QA real: confirmar painel, contatos, links, mensagens com acentos, abertura manual, recarga e navegação após minimizar, mobile, desktop e carrinho. O HTML publicado no repositório é modelo de configuração; atualizar o bloco no painel preservando ajustes particulares existentes.
