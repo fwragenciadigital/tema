@@ -6,7 +6,7 @@
 (function (w,d) {
   'use strict';
   if(w.Cabcom2026) return;
-  var VERSION='2.2.6';
+  var VERSION='2.2.7';
   var CDN='https://cdn.awsli.com.br/80/80577/arquivos/';
   var DEFAULTS={
     geral:{ativo:true,publicarNaLoja:false,debug:false},
@@ -1490,38 +1490,96 @@
       return true;
     });
   }
+  // Ordem única da home aprovada. Os dois pares título/carrossel são os
+  // elementos reais de #listagemProdutos, não cópias nem vitrines estáticas.
+  function orderHomeSections(){
+    if(!home||!cfg.home.ativo)return;
+    var corpo=d.querySelector('#corpo');
+    if(!corpo)return;
+    var listing=corpo.querySelector('#listagemProdutos');
+    function component(name){return corpo.querySelector('[data-cc26-component="'+name+'"]');}
+    function place(parent,node,previous){
+      if(!node||node===previous)return previous;
+      var next=previous?previous.nextElementSibling:parent.firstElementChild;
+      if(node.parentElement!==parent||node!==next){
+        parent.insertBefore(node,next||null);
+      }
+      return node;
+    }
+    function shelf(type,selector,pattern){
+      if(!listing)return null;
+      var heading=listing.querySelector(selector)||[].slice.call(listing.querySelectorAll('.titulo-categoria')).find(function(h){
+        return pattern.test(normalized(h.textContent||''));
+      });
+      if(!heading)return null;
+      var wrapper=heading.closest('.cc26-home-shelf');
+      if(wrapper&&listing.contains(wrapper))return wrapper;
+      // No HTML da LI o UL do carrossel é o irmão imediatamente seguinte.
+      var track=heading.nextElementSibling;
+      if(!track||!track.matches('.produtos-carrossel,.listagem-linha,.vitrine-produtos'))return null;
+      wrapper=el('section','cc26-home-shelf cc26-shelf-block--'+type);
+      wrapper.dataset.cc26Shelf=type;
+      heading.parentNode.insertBefore(wrapper,heading);
+      wrapper.appendChild(heading);wrapper.appendChild(track);
+      return wrapper;
+    }
+    var launches=shelf('launches','.titulo-categoria.vitrine-lancamento',/LANCAMENTO|NOVIDADE/);
+    var best=shelf('bestsellers','.titulo-categoria.vitrine-mas-vendido,.titulo-categoria.vitrine-mais-vendido',/MAIS VENDIDOS/);
+    var benefitsNode=component('cc26-benefits'),presentNode=component('cc26-presentation');
+    // Hero e cabeçalho não fazem parte da ordenação solicitada.
+    var heroNode=corpo.querySelector(':scope > .cc26-hero,:scope > .cc26-native-hero');
+    var cursor=heroNode||null;
+    cursor=place(corpo,benefitsNode,cursor);
+    cursor=place(corpo,presentNode,cursor);
+    var middle=[
+      component('cc26-category-grid cc26-category-grid--cabos'),
+      component('cc26-shortcuts'),
+      component('cc26-category-grid cc26-category-grid--conectores')
+    ];
+    if(listing&&launches&&best&&launches!==best){
+      listing.classList.add('cc26-home-ordered-listing');
+      cursor=place(corpo,listing,cursor);
+      var shelfCursor=place(listing,launches,null);
+      middle.forEach(function(node){shelfCursor=place(listing,node,shelfCursor);});
+      place(listing,best,shelfCursor);
+    }else{
+      // Não adivinhar a identidade de vitrines nem esconder produtos se
+      // o painel ainda não entregou os dois títulos esperados.
+      if(listing)cursor=place(corpo,listing,cursor);
+      middle.forEach(function(node){cursor=place(corpo,node,cursor);});
+    }
+    ['cc26-mini-banners','cc26-brands','cc26-institutional','cc26-instagram'].forEach(function(name){
+      cursor=place(corpo,component(name),cursor);
+    });
+    var order=[].slice.call(corpo.querySelectorAll('[data-cc26-component],.cc26-home-shelf'))
+      .map(function(node){return node.dataset.cc26Shelf||node.getAttribute('data-cc26-component');})
+      .filter(function(name){return name&&name!=='cc26-hero cc26-approved-preview-hero'&&name!=='cc26-hero';});
+    state.homeOrder={launches:!!launches,bestsellers:!!best,order:order};
+  }
   function homeContent(){
     if(!home||!cfg.home.ativo)return;
     var corpo=d.querySelector('#corpo');
     if(!corpo)return;
-    if(d.querySelector('.cc26-benefits'))return;
-    var nativeHero=hero(corpo);
-    var benefitsNode=benefits(),presentNode=presentation();
-    if(benefitsNode){
-      if(nativeHero && nativeHero.parentNode===corpo)corpo.insertBefore(benefitsNode,nativeHero.nextSibling);
-      else corpo.insertBefore(benefitsNode,corpo.firstChild);
+    if(!corpo.classList.contains('cc26-native-home')){
+      hero(corpo);
+      corpo.classList.add('cc26-native-home');
     }
-    if(presentNode){
-      if(benefitsNode)insertAfter(benefitsNode,presentNode);
-      else corpo.insertBefore(presentNode,corpo.firstChild);
+    function ensure(selector,factory){
+      if(corpo.querySelector(selector))return;
+      var node=factory();
+      if(node&&!node.parentNode)corpo.appendChild(node);
     }
-    var shelves=enhanceShelves(corpo);
-    var cabos=categoryGrid('cabos'),conect=categoryGrid('conectores');
-    var shortcut=shortcuts(),mini=miniBanners(),brand=brands(),inst=institutional(),ig=instagram();
-    // Ordem do layout aprovado: vitrines, cabos, atalhos, conectores, mais vendidos, mini banners, marcas.
-    // Preserva os produtos e suas acoes nativas da Loja Integrada.
-    var first=shelves[0],second=shelves[1];
-    if(first&&first.parentNode){
-      var target=first;
-      [cabos,shortcut,conect].forEach(function(node){if(node){insertAfter(target,node);target=node;}});
-    }else [cabos,shortcut,conect].forEach(function(node){if(node)corpo.appendChild(node);});
-    var miniAnchor=second || (corpo.querySelector('#listagemProdutos .produtos-carrossel:last-of-type')) || first;
-    if(miniAnchor && miniAnchor.parentNode){
-      var next=miniAnchor;
-      [mini,brand].forEach(function(node){if(node){insertAfter(next,node);next=node;}});
-    }else [mini,brand].forEach(function(node){if(node)corpo.appendChild(node);});
-    [inst,ig].forEach(function(node){if(node)corpo.appendChild(node);});
-    corpo.classList.add('cc26-native-home');
+    ensure('.cc26-benefits',benefits);
+    ensure('.cc26-presentation',presentation);
+    ensure('.cc26-category-grid--cabos',function(){return categoryGrid('cabos');});
+    ensure('.cc26-shortcuts',shortcuts);
+    ensure('.cc26-category-grid--conectores',function(){return categoryGrid('conectores');});
+    var mini=miniBanners();if(mini&&!mini.parentNode)corpo.appendChild(mini);
+    ensure('.cc26-brands',brands);
+    ensure('.cc26-institutional',institutional);
+    ensure('.cc26-instagram',instagram);
+    enhanceShelves(corpo);
+    orderHomeSections();
   }
   // v1.2 | Cart/quote page progressive enhancement, modeled after TractorBel.
   // Never replace original checkout, quotation, or native cart form/handlers.
@@ -2037,35 +2095,9 @@
   function refresh(){
     scheduled=false;
     if(!d.body)return;
-    if(home){
-      enhanceShelves(d.querySelector('#corpo')||d.body);
-      var corpo=d.querySelector('#corpo');
-      if(corpo){
-        // Atualiza também a grade existente quando a LI carregar o 4º
-        // Mini Banner depois da inicialização da home.
-        var mini=miniBanners();
-        if(mini && !mini.parentNode){
-          var brandNode=d.querySelector('.cc26-brands');
-          if(brandNode)brandNode.parentNode.insertBefore(mini,brandNode);
-          else corpo.appendChild(mini);
-        }
-      }
-      if(corpo && !d.querySelector('.cc26-brands')){
-        var brandsLate=brands();
-        if(brandsLate){var company=d.querySelector('.cc26-institutional');if(company)company.parentNode.insertBefore(brandsLate,company);else corpo.appendChild(brandsLate);}
-      }
-    }
+    if(home)homeContent();
     decorateNativeShelves();
     enhanceNative();
-    // Temas LI injetam banners/carrosseis apos DOMContentLoaded.
-    if(home && !d.querySelector('.cc26-shortcuts')){
-      var lateShortcuts=shortcuts(),body=d.querySelector('#corpo');
-      if(lateShortcuts && body){
-        var after=d.querySelector('.cc26-category-grid--cabos');
-        if(after && after.parentNode)insertAfter(after,lateShortcuts);
-        else body.appendChild(lateShortcuts);
-      }
-    }
     previewLegacy();
     if(!experience.mounted) {
       if(!d.getElementById('cc26-new-header'))enableHeader();
