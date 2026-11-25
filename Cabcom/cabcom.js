@@ -6,7 +6,7 @@
 (function (w,d) {
   'use strict';
   if(w.Cabcom2026) return;
-  var VERSION='2.2.4';
+  var VERSION='2.2.5';
   var CDN='https://cdn.awsli.com.br/80/80577/arquivos/';
   var DEFAULTS={
     geral:{ativo:true,publicarNaLoja:false,debug:false},
@@ -25,7 +25,7 @@
       email:'sac@cabcom.com.br',
       instagram:'https://www.instagram.com/cabcomoficial/',
       tituloEmpresa:'Conectividade profissional desde 2011',
-      textoEmpresa:'A Cabcom fornece fios, cabos especiais, conectores, ferramentas e acessórios para projetos de telecomunicações, broadcast, automação e segurança digital. Atendimento técnico para encontrar a solução adequada a cada aplicação.'
+      textoEmpresa:["Somos a CABCOM, uma empresa especializada no fornecimento de Fios e Cabos Especiais para transmissão de dados, áudio e vídeo, bem como sinais de rádio e TV. Nosso nome representa nosso compromisso com a transmissão de comunicação confiável e de alta qualidade na era digital, onde a conectividade é fundamental para o sucesso dos negócios.","Fundada em novembro de 2011, a CABCOM está comprometida em fornecer soluções inovadoras e de alta qualidade para os setores de Telecomunicação, Broadcast, Automação e Segurança Digital. Nós fornecemos uma ampla gama de produtos, incluindo conectores, ferramentas e acessórios, além de fios e cabos especializados, para atender às necessidades específicas de cada cliente.","Nossa missão é ser um provedor confiável e eficiente de soluções de conectividade para nossos clientes, oferecendo produtos de qualidade superior e serviços excepcionais. Nós nos esforçamos para estar sempre atualizados com as tendências tecnológicas em constante evolução, para que possamos oferecer aos nossos clientes as soluções mais inovadoras e avançadas disponíveis no mercado.","Nossa visão é sermos reconhecidos como líderes de mercado no fornecimento de soluções de conectividade de alta qualidade, bem como sermos uma referência em atendimento ao cliente e satisfação do cliente.","Nossos valores são a qualidade, inovação, eficiência, integridade e comprometimento com nossos clientes. Nós valorizamos nossos clientes acima de tudo e estamos empenhados em fornecer um atendimento excepcional e personalizado a cada um deles.","Na CABCOM, acreditamos que o sucesso de nossos clientes é nosso sucesso também. Por isso, estamos comprometidos em fornecer soluções de conectividade confiáveis e eficientes para ajudá-los a alcançar seus objetivos de negócios. Como líderes em nosso setor, estamos sempre procurando maneiras de melhorar e inovar para garantir que nossos clientes tenham acesso às soluções mais avançadas disponíveis no mercado."]
     }
   };
   function merge(a,b){
@@ -1030,17 +1030,48 @@
     state.brands={origin:'Loja Integrada / marcas',count:items.length};
     return s;
   }
+  // Conteúdo institucional administrável por HTML, sem duplicar o logotipo.
+  function syncInstitutional(sectionNode){
+    if(!sectionNode)return;
+    var admin=d.getElementById('cc26-institutional-content');
+    var source=admin&&(admin.content||admin);
+    var paragraphs=source?[].slice.call(source.querySelectorAll('p')).map(function(p){
+      return (p.textContent||'').trim();
+    }).filter(Boolean):[];
+    var configured=cfg.conteudo.textoEmpresa;
+    if(!paragraphs.length)paragraphs=(Array.isArray(configured)?configured:String(configured||'').split(/\n\s*\n/))
+      .map(function(p){return String(p).trim();}).filter(Boolean);
+    var copy=sectionNode.querySelector('.cc26-institutional__copy');
+    var signature=JSON.stringify(paragraphs);
+    if(copy && copy.dataset.cc26Text!==signature){
+      copy.replaceChildren.apply(copy,paragraphs.map(function(p){return el('p','',p);}));
+      copy.dataset.cc26Text=signature;
+    }
+    var headerLogo=d.querySelector('#cc26-new-header .cc26-site-header__brand img[src]')||
+                   d.querySelector('#cabecalho .logo img[src]');
+    var logo=sectionNode.querySelector('.cc26-institutional__logo');
+    var src=headerLogo&&(headerLogo.currentSrc||headerLogo.getAttribute('src'));
+    if(logo&&src){
+      if(logo.getAttribute('src')!==src)logo.setAttribute('src',src);
+      var alt=headerLogo.alt||'Cabcom';
+      if(logo.alt!==alt)logo.alt=alt;
+      logo.hidden=false;
+    }
+    state.institutional={source:source&&source.querySelector('p')?'HTML da Loja Integrada':'configuração padrão',
+      paragraphs:paragraphs.length,logo:src?'logo do topo':'aguardando logo do topo'};
+  }
   function institutional(){
     if(!cfg.home.institucional)return null;
     var s=section('cc26-institutional');
-    var c=wrap();
-    var panel=el('div','cc26-institutional__panel');
-    panel.appendChild(el('div','cc26-institutional__eyebrow','CABCOM · FIOS E CABOS ELÉTRICOS'));
-    panel.appendChild(el('h2','',cfg.conteudo.tituloEmpresa));
-    panel.appendChild(el('p','',cfg.conteudo.textoEmpresa));
-    var about=navAnchor('A CABCOM')||navAnchor('SOBRE NÓS');
-    if(about)panel.appendChild(a(about,'cc26-institutional__cta','Conheça a Cabcom'));
-    c.appendChild(panel);s.appendChild(c);return s;
+    var c=wrap(),panel=el('div','cc26-institutional__panel');
+    var logo=el('img','cc26-institutional__logo');
+    logo.alt='Cabcom';logo.decoding='async';logo.loading='lazy';logo.hidden=true;
+    panel.appendChild(logo);
+    panel.appendChild(el('div','cc26-institutional__copy'));
+    c.appendChild(panel);s.appendChild(c);
+    s.setAttribute('aria-label','Sobre a Cabcom');
+    syncInstitutional(s);
+    return s;
   }
   function instagram(){
     if(!cfg.home.instagram)return null;
@@ -1977,6 +2008,7 @@
       if(!d.getElementById('cc26-new-header'))enableHeader();
       initNavigationExperience();
     }
+    if(home)syncInstitutional(d.querySelector('.cc26-institutional'));
     watchFade();
   }
   function schedule(){
