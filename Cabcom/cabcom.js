@@ -6,7 +6,7 @@
 (function (w,d) {
   'use strict';
   if(w.Cabcom2026) return;
-  var VERSION='2.2.5';
+  var VERSION='2.2.6';
   var CDN='https://cdn.awsli.com.br/80/80577/arquivos/';
   var DEFAULTS={
     geral:{ativo:true,publicarNaLoja:false,debug:false},
@@ -339,7 +339,7 @@
     }
     function readQty(item){
       var input=first(item,['.quantidade input[name]','input[name*="quantidade"]','input[name*="qtd"]','input[type="number"]']);
-      var value=input&&input.value;
+      var value=item.getAttribute('data-produto-quantidade')||(input&&input.value);
       if(!value){
         var node=first(item,['[data-quantity]','[data-qtd]','.quantidade','.item-quantidade','.qtd']);
         value=node&&(node.getAttribute('data-quantity')||node.getAttribute('data-qtd')||text(node));
@@ -359,7 +359,7 @@
       var productHref=anchor?safeHref(anchor.getAttribute('href'),true):'';
       if(productHref && /\/carrinho(?:\/|$)|\/conta(?:\/|$)/i.test(new URL(productHref).pathname))productHref='';
       var price=money(first(row,['.preco-promocional','.preco-venda','.preco-produto','.preco-por','.item-preco','.preco','.valor']));
-      return {name:name.slice(0,210),href:productHref,image:imageHref,quantity:readQty(row),price:price};
+      return {id:row.getAttribute('data-produto-id')||'',name:name.slice(0,210),href:productHref,image:imageHref,quantity:readQty(row),price:price};
     }
     function readItems(root,selectors){
       for(var i=0;i<selectors.length;i++){
@@ -430,6 +430,7 @@
       badge.hidden=count===0;
       trigger.setAttribute('aria-label',count?'Meu orçamento, '+count+' itens':'Meu orçamento vazio');
     }
+    var adding=false,modalLoading=false;
     function show(data,mode){
       body.replaceChildren();foot.replaceChildren();
       var items=data&&data.items||[];
@@ -451,16 +452,32 @@
           var info=el('div','cc26-cart-sidebar__info');
           info.appendChild(it.href?a(it.href,'cc26-cart-sidebar__item-title',it.name):el('strong','cc26-cart-sidebar__item-title',it.name));
           if(it.quantity!==null)info.appendChild(el('span','cc26-cart-sidebar__quantity','Quantidade: '+it.quantity));
-          if(it.price)info.appendChild(el('strong','cc26-cart-sidebar__price',it.price));
+          
           item.appendChild(thumb);item.appendChild(info);list.appendChild(item);
         });
         body.appendChild(list);
         var summary=el('div','cc26-cart-sidebar__summary');
-        summary.appendChild(el('span','','Total informado pela loja'));
-        if(data.total)summary.appendChild(el('strong','',data.total));
-        else summary.appendChild(el('span','cc26-cart-sidebar__pending','Consultar no carrinho'));
+        summary.appendChild(el('span','','Produtos para cotação'));
+        summary.appendChild(el('strong','',String(items.length)));
         foot.appendChild(summary);
-        foot.appendChild(el('small','cc26-cart-sidebar__note','Quantidades, frete e condições finais são confirmados pela Loja Integrada.'));
+        foot.appendChild(el('small','cc26-cart-sidebar__note','Escolha como deseja receber seu orçamento. Os valores serão confirmados pela equipe Cabcom.'));
+        if(data.source==='carrinho'){
+          var phone=String(cfg.conteudo.contato||'').replace(/\D/g,'');
+          if(/^\d{10,11}$/.test(phone)){
+            var message='Olá! Gostaria de solicitar um orçamento na Cabcom:\n\n'+items.map(function(it,index){
+              return (index+1)+'. '+it.name+(it.quantity!==null?' — Quantidade: '+it.quantity:'')+(it.href?'\n'+it.href:'');
+            }).join('\n\n');
+            var whats=a('https://wa.me/55'+phone+'?text='+encodeURIComponent(message),'cc26-cart-sidebar__whatsapp');
+            whats.target='_blank';whats.rel='noopener noreferrer';
+            whats.appendChild(inlineIcon('phone'));whats.appendChild(el('span','','Cotar por WhatsApp'));
+            foot.appendChild(whats);
+          }
+          var email=el('button','cc26-cart-sidebar__email');
+          email.type='button';email.appendChild(inlineIcon('mail'));email.appendChild(el('span','','Cotar por E-mail'));
+          email.addEventListener('click',function(){openNativeQuote(email);});
+          foot.appendChild(email);
+        }
+        foot.appendChild(a(url,'cc26-cart-sidebar__manage','Editar produtos e quantidades'));
       }else{
         var status=el('div','cc26-cart-sidebar__status');
         var icon=el('span','cc26-cart-sidebar__empty-icon');
@@ -471,7 +488,7 @@
         body.appendChild(status);
       }
       if(mode!=='loading'){
-        foot.appendChild(a(mode==='empty'?location.origin+'/':url,'cc26-cart-sidebar__checkout',mode==='empty'?'CONTINUAR NA LOJA':'VER ORÇAMENTO E FINALIZAR'));
+        if(mode!=='items')foot.appendChild(a(mode==='empty'?location.origin+'/':url,'cc26-cart-sidebar__checkout',mode==='empty'?'CONTINUAR NA LOJA':'VER LISTA DE ORÇAMENTO'));
         var back=el('button','cc26-cart-sidebar__continue','Continuar comprando');
         back.type='button';back.addEventListener('click',closeSidebar);
         foot.appendChild(back);
@@ -516,18 +533,9 @@
         .finally(function(){if(fetchController===controller)fetchController=null;});
     }
     function refresh(fallback){
-      var native=parseSource(d,'minicart');
-      updateBadge(native.count);
-      if(!open)return;
-      if(native.items.length){
-        show(native,'items');
-        if(fallback)fetchOfficial(native);
-      }else if(native.count===0){
-        show(native,'empty');
-        if(fallback)fetchOfficial(native); // Confirmar a LI quando o mini carrinho estiver desatualizado.
-      }else if(fallback && cfg.carrinhoLateral.consultarCarrinho!==false && w.fetch){
-        fetchOfficial(native);
-      }else show({items:[],count:native.count,source:'minicart'},'unavailable');
+      if(adding||modalLoading)return;
+      if(!open){updateBadge(parseSource(d,'minicart').count);return;}
+      if(fallback&&w.fetch)fetchOfficial(null);
     }
     function openSidebar(ev){
       if(ev)ev.preventDefault();
@@ -559,43 +567,93 @@
       if(ev.shiftKey&&d.activeElement===firstNode){ev.preventDefault();last.focus();}
       else if(!ev.shiftKey&&d.activeElement===last){ev.preventDefault();firstNode.focus();}
     }
-    // Cotar por E-mail na LI usa a rota oficial /carrinho/produto/ID/adicionar.
-    // O clique faz a mesma operação nativa, depois abre/atualiza o sidebar.
-    // Em caso de falha, usa o link original para não bloquear a cotação.
-    function handleNativeEmailQuote(event){
-      if(!active || !cartSidebarApi || !w.fetch || event.defaultPrevented)return;
-      if(typeof event.button==='number' && event.button!==0)return;
-      if(event.metaKey||event.ctrlKey||event.altKey||event.shiftKey)return;
-      var clicked=event.target&&event.target.closest&&event.target.closest('a[href]');
-      if(!clicked || clicked.closest('#cc26-cart-sidebar') || clicked.closest('#cc26-new-header'))return;
-      var caption=normalized(clicked.textContent||clicked.getAttribute('aria-label')||'');
-      if(!/COTAR\s+POR\s+E.?MAIL|COTAR\s+E.?MAIL/.test(caption) &&
-         !clicked.matches('.cotar-email,.botao-cotar-email,[data-cc26-cotar-email]'))return;
-      var action;
-      try{action=new URL(clicked.href,location.href);}catch(e){return;}
-      if(action.origin!==location.origin ||
-         !/^\/carrinho\/produto\/\d+\/adicionar\/?$/i.test(action.pathname))return;
-      event.preventDefault();event.stopImmediatePropagation();
-      // O servidor LI é a única fonte de verdade: nenhum preço ou item fictício.
-      cartSidebarApi.open();
-      clicked.classList.add('cc26-quote-adding');
-      clicked.setAttribute('aria-busy','true');
-      w.fetch(action.href,{
-        method:'GET',credentials:'same-origin',cache:'no-store',redirect:'follow',
-        headers:{Accept:'text/html'}
-      }).then(function(response){
-        if(!response.ok || !response.url ||
-           new URL(response.url,location.href).origin!==location.origin)throw Error('Erro ao adicionar');
-        cartSidebarApi.refresh();
-      }).catch(function(){
-        // Fluxo nativo de adicionar como fallback confiável.
-        w.location.assign(action.href);
-      }).finally(function(){
-        clicked.classList.remove('cc26-quote-adding');
-        clicked.removeAttribute('aria-busy');
+    // Modal remoto oficial da LI: mesmos campos, máscaras, CAPTCHA e envio.
+    function openNativeQuote(button){
+      if(modalLoading||adding)return;
+      var $=w.jQuery,endpoint='/checkout/orcamento.json';
+      if(!$||!$.fn||!$.fn.modal||!$.fn.load){w.location.assign(url);return;}
+      modalLoading=true;button.disabled=true;button.setAttribute('aria-busy','true');
+      var modal=d.getElementById('modalSolicitarOrcamento');
+      if(modal && !modal.classList.contains('cc26-owned-quote-modal')){
+        var nativeTrigger=d.querySelector('a[data-target="#modalSolicitarOrcamento"][data-toggle="modal"]');
+        if(nativeTrigger){
+          modalLoading=false;button.disabled=false;button.removeAttribute('aria-busy');
+          closeSidebar();nativeTrigger.click();return;
+        }
+        w.location.assign(url);return;
+      }
+      if(modal)modal.remove();
+      modal=el('div','modal hide fade cc26-owned-quote-modal');modal.id='modalSolicitarOrcamento';
+      modal.setAttribute('role','dialog');modal.setAttribute('aria-labelledby','cc26-native-quote-title');
+      modal.setAttribute('aria-hidden','true');modal.setAttribute('tabindex','-1');
+      var mh=el('div','modal-header');
+      var cross=el('button','close','×');cross.type='button';cross.setAttribute('data-dismiss','modal');cross.setAttribute('aria-label','Fechar');
+      var mt=el('span','titulo cor-secundaria','Solicitar orçamento');mt.id='cc26-native-quote-title';
+      mh.appendChild(cross);mh.appendChild(mt);
+      var form=el('form');form.id='formOrcamento';form.action=endpoint;form.method='post';
+      var mb=el('div','modal-body borda-principal'),mf=el('div','modal-footer');
+      var cancel=el('button','botao','Fechar');cancel.type='button';cancel.setAttribute('data-dismiss','modal');
+      var send=el('button','botao principal grande','Enviar orçamento');send.type='submit';send.disabled=true;
+      mf.appendChild(cancel);mf.appendChild(send);form.appendChild(mb);form.appendChild(mf);modal.appendChild(mh);modal.appendChild(form);d.body.appendChild(modal);
+      $(mb).load(endpoint,function(response,status){
+        modalLoading=false;button.disabled=false;button.removeAttribute('aria-busy');
+        if((status!=='success'&&status!=='notmodified')||!mb.querySelector('#id_nome')||!mb.querySelector('#id_email')||!mb.querySelector('.tabela-carrinho tbody tr')){
+          modal.remove();w.location.assign(url);return;
+        }
+        if(!open){modal.remove();return;}
+        send.disabled=false;closeSidebar();
+        $(modal).on('hidden',function(){if(d.contains(modal))modal.remove();});
+        $(modal).modal('show');
       });
     }
-    d.addEventListener('click',handleNativeEmailQuote,true);
+    function officialAddLink(node){
+      if(!node)return null;
+      try{
+        var action=new URL(node.getAttribute('href'),location.href);
+        return action.origin===location.origin&&/^\/carrinho\/produto\/\d+\/adicionar\/?$/i.test(action.pathname)?action:null;
+      }catch(e){return null;}
+    }
+    function handleQuoteClick(event){
+      if(!active||!cartSidebarApi||!w.fetch||event.defaultPrevented)return;
+      if(typeof event.button==='number'&&event.button!==0)return;
+      if(event.metaKey||event.ctrlKey||event.altKey||event.shiftKey)return;
+      var clicked=event.target&&event.target.closest&&event.target.closest('a[href]');
+      if(!clicked||clicked.closest('#cc26-cart-sidebar,#cc26-new-header,#modalSolicitarOrcamento'))return;
+      var caption=normalized(clicked.textContent||clicked.getAttribute('aria-label')||'');
+      var isEmail=/COTAR\s+POR\s+E.?MAIL|COTAR\s+E.?MAIL/.test(caption)||clicked.matches('.cc26-card-quote-actions__email,.cotar-email,.botao-cotar-email,[data-cc26-cotar-email]');
+      var isWhats=clicked.matches('.cc26-card-quote-actions__whatsapp,.cc26-pdp__cta--whatsapp,.cotar-whats a')||!!clicked.closest('.cotar-whats');
+      if(!isEmail&&!isWhats)return;
+      var action=officialAddLink(clicked);
+      if(!action){
+        var scope=clicked.closest('.cc26-card-two-cta,.cc26-pdp__details,.produto');
+        if(scope)action=[].slice.call(scope.querySelectorAll('a[href*="/carrinho/produto/"]')).map(officialAddLink).find(Boolean);
+      }
+      if(!action)return; // Sem rota oficial: manter a seleção de variantes original.
+      event.preventDefault();event.stopImmediatePropagation();
+      if(adding||modalLoading)return;
+      adding=true;cartSidebarApi.open();
+      if(fetchController)fetchController.abort();
+      ++fetchSeq;show(null,'loading');
+      clicked.classList.add('cc26-quote-adding');clicked.setAttribute('aria-busy','true');
+      w.fetch(action.href,{method:'GET',credentials:'same-origin',cache:'no-store',redirect:'follow',headers:{Accept:'text/html'}})
+      .then(function(response){
+        if(!response.ok||new URL(response.url,location.href).origin!==location.origin)throw Error('Não foi possível confirmar a inclusão');
+        return response.text();
+      }).then(function(html){
+        var official=parseSource(new DOMParser().parseFromString(html,'text/html'),'carrinho');
+        if(open&&official.items.length){
+          var quantities=official.items.every(function(it){return Number.isInteger(it.quantity)&&it.quantity>0;});
+          official.count=quantities?official.items.reduce(function(n,it){return n+it.quantity;},0):null;
+          show(official,'items');
+        }else if(open)fetchOfficial(null);
+      }).catch(function(){
+        // Não repetir automaticamente uma inclusão possivelmente concluída.
+        if(open)fetchOfficial(null);
+      }).finally(function(){
+        adding=false;clicked.classList.remove('cc26-quote-adding');clicked.removeAttribute('aria-busy');
+      });
+    }
+    d.addEventListener('click',handleQuoteClick,true);
     trigger.addEventListener('click',openSidebar);
     overlay.addEventListener('click',closeSidebar);
     close.addEventListener('click',closeSidebar);
@@ -951,6 +1009,11 @@
   function miniBanners(){
     if(cfg.home.miniBanners===false || !cfg.home.miniBanners)return null;
     var sources=findNativeMiniSources(),items=readMiniBanners(sources);
+    var extra=d.getElementById('cc26-mini-banner-extra');
+    if(items.length<4&&extra){
+      var extraItems=readMiniBanners([extra.content||extra]);
+      extraItems.forEach(function(it){if(items.length<4&&!items.some(function(existing){return existing.image===it.image;}))items.push(it);});
+    }
     var existing=d.querySelector('.cc26-mini-banners');
     if(items.length<2){
       if(!existing)warn('Mini Banner LI: menos de 2 imagens encontradas no HTML.');
