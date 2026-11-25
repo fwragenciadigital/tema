@@ -2985,7 +2985,6 @@ body.cc26-active #corpo .cc26-card-two-cta{
   min-width:0!important;
   height:516px!important;
   min-height:516px!important;
-  width:100%!important;
   padding:16px 18px 32px!important;
   overflow:hidden!important;
   background:#fff!important;
@@ -2995,6 +2994,7 @@ body.cc26-active #corpo .cc26-card-two-cta{
   text-align:center!important;
   transition:box-shadow .22s ease,translate .22s ease;
 }
+body.cc26-active #corpo .cc26-card-two-cta:not(.slick-slide,.owl-item,.swiper-slide){width:100%!important}
 body.cc26-active #corpo .cc26-card-two-cta:hover{
   box-shadow:0 9px 22px rgba(0,0,0,.14)!important;
   translate:0 -2px;
