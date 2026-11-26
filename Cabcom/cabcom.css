@@ -3989,3 +3989,60 @@ body.cc26-active.cc26-pdp-ready #corpo .cc26-pdp--editorial .cc26-pdp__arrow--th
     max-width:min(140px,12.5vw)!important;
   }
 }
+
+/* Tarja superior Cabcom: carrossel editável no HTML global da Loja Integrada. */
+body.cc26-active #cc26-topbar-admin{display:none!important}
+body.cc26-active #cc26-new-header .cc26-site-header__top:not(.cc26-site-header__top--empty){
+  box-sizing:border-box!important;white-space:normal!important;text-overflow:clip!important;
+  min-height:26px!important;padding:4px clamp(9px,2vw,32px)!important;
+}
+body.cc26-active #cc26-new-header .cc26-topbar__carousel{
+  display:grid;grid-template-columns:minmax(0,1fr);align-items:center;
+  max-width:1760px;margin:0 auto;width:100%;min-width:0;
+}
+body.cc26-active #cc26-new-header .cc26-topbar__carousel--multiple{
+  grid-template-columns:44px minmax(0,1fr) 44px;
+}
+body.cc26-active #cc26-new-header .cc26-topbar__slides{
+  display:grid;grid-template-columns:minmax(0,1fr);align-items:center;min-width:0;overflow:hidden;
+}
+body.cc26-active #cc26-new-header .cc26-topbar__slide{
+  grid-area:1/1;display:flex;justify-content:center;align-items:center;
+  text-align:center;white-space:normal;overflow-wrap:anywhere;min-width:0;
+  opacity:0;visibility:hidden;transform:translateY(4px);
+  transition:opacity .28s ease,transform .28s ease;
+}
+body.cc26-active #cc26-new-header .cc26-topbar__slide--active{
+  opacity:1;visibility:visible;transform:translateY(0);
+}
+body.cc26-active #cc26-new-header .cc26-topbar__link{
+  color:#fff!important;text-decoration:none!important;font:inherit;
+}
+body.cc26-active #cc26-new-header .cc26-topbar__link:hover,
+body.cc26-active #cc26-new-header .cc26-topbar__link:focus-visible{
+  text-decoration:underline!important;
+}
+body.cc26-active #cc26-new-header .cc26-topbar__control{
+  display:grid!important;place-items:center;box-sizing:border-box;
+  width:22px;height:18px;flex:0 0 22px;padding:0!important;margin:0!important;
+  border:0!important;border-radius:3px;background:transparent!important;
+  color:#fff!important;opacity:.72;cursor:pointer;text-shadow:none!important;box-shadow:none!important;
+}
+body.cc26-active #cc26-new-header .cc26-topbar__control:hover,
+body.cc26-active #cc26-new-header .cc26-topbar__control:focus-visible{opacity:1;background:#ffffff20!important}
+body.cc26-active #cc26-new-header .cc26-topbar__control:focus-visible{outline:1px solid #fff;outline-offset:0}
+body.cc26-active #cc26-new-header .cc26-topbar__control .cc26-icon,
+body.cc26-active #cc26-new-header .cc26-topbar__control .cc26-icon svg{width:13px!important;height:13px!important;display:block}
+body.cc26-active #cc26-new-header .cc26-topbar__control--prev .cc26-icon{transform:rotate(180deg)}
+body.cc26-active #cc26-new-header .cc26-topbar__right{display:flex;align-items:center;justify-content:flex-end}
+body.cc26-active #cc26-new-header .cc26-topbar__pause-glyph{font:700 11px/1 Arial,sans-serif}
+@media(max-width:767px){
+  body.cc26-active #cc26-new-header .cc26-site-header__top:not(.cc26-site-header__top--empty){
+    font-size:10px!important;line-height:1.35!important;padding-inline:6px!important;
+  }
+  body.cc26-active #cc26-new-header .cc26-topbar__carousel--multiple{grid-template-columns:40px minmax(0,1fr) 40px}
+  body.cc26-active #cc26-new-header .cc26-topbar__control{width:20px;flex-basis:20px;height:20px}
+}
+@media(prefers-reduced-motion:reduce){
+  body.cc26-active #cc26-new-header .cc26-topbar__slide{transition:none!important;transform:none!important}
+}
