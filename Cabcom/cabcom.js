@@ -6,7 +6,7 @@
 (function (w,d) {
   'use strict';
   if(w.Cabcom2026) return;
-  var VERSION='2.2.18';
+  var VERSION='2.2.19';
   var CDN='https://cdn.awsli.com.br/80/80577/arquivos/';
   var DEFAULTS={
     geral:{ativo:true,publicarNaLoja:false,debug:false},
@@ -1056,29 +1056,182 @@
     });
     return result;
   }
+  // Atalhos: carrossel circular, sem dependências, com fonte editável no HTML da LI.
   function shortcuts(){
     if(!cfg.home.atalhos)return null;
     var source=shortcutSource(),items=readShortcuts(source);
-    if(!items.length) {
+    if(!items.length){
       warn('banner-central-marcas sem imagens/links de categorias acessiveis; atalhos aguardando fonte LI');
       return null;
     }
     var s=section('cc26-shortcuts');
+    s.classList.add('cc26-shortcuts--carousel');
+    s.setAttribute('role','region');
+    s.setAttribute('aria-roledescription','carrossel');
+    s.setAttribute('aria-label','Atalhos de categorias');
     var grid=wrap();grid.classList.add('cc26-shortcuts__grid');
-    items.slice(0,8).forEach(function(item){
+    var viewport=el('div','cc26-shortcuts__viewport');
+    var track=el('div','cc26-shortcuts__track');
+    viewport.appendChild(track);
+    var total=items.length,interval=Number(source.getAttribute('data-interval'))||4000;
+    interval=Math.max(2500,Math.min(20000,interval));
+    var autoplay=source.getAttribute('data-autoplay')!=='false';
+    var visible=0,timer=0,finishTimer=0,moving=false,paused=!autoplay||reducedMotion();
+    var hover=false,focused=false,inView=!w.IntersectionObserver,touch=null,swipeUntil=0;
+    var before=null,after=null;
+    var cards=items.map(function(item){
       var link=a(item.href,'cc26-shortcut');
       var med=el('span','cc26-shortcut__media');
       var picture=el('img');picture.src=item.url;picture.alt=item.label||'Categoria Cabcom';
+      picture.width=194;picture.height=206;
       picture.decoding='async';picture.loading='lazy';
       imageTransition(picture);
       med.appendChild(picture);link.appendChild(med);
-      if(item.label)link.appendChild(el('strong','cc26-shortcut__label',item.label));
+      if(item.label && !/\/categorie_\d+\.jpg(?:[?#]|$)/i.test(item.url)){
+        link.appendChild(el('strong','cc26-shortcut__label',item.label));
+      }
       link.setAttribute('aria-label',item.label||'Abrir categoria');
-      grid.appendChild(link);
+      track.appendChild(link);
+      return link;
     });
-    if(!grid.children.length)return null;
+    var info={origin:'Loja Integrada / banner-central-marcas',count:total,carousel:true,interval:interval,autoplay:autoplay,visible:0,paused:paused};
+    state.shortcuts=info;
+    function control(name,label){
+      var b=el('button','cc26-shortcuts__control cc26-shortcuts__control--'+name);
+      b.type='button';b.setAttribute('aria-label',label);b.title=label;
+      if(name!=='pause')b.appendChild(inlineIcon('arrow'));
+      return b;
+    }
+    var prev=control('prev','Categoria anterior'),next=control('next','Próxima categoria');
+    var pause=control('pause','Pausar carrossel');
+    function clearTimer(){if(timer){w.clearTimeout(timer);timer=0;}}
+    function arm(){
+      clearTimer();
+      if(total<2||paused||reducedMotion()||hover||focused||touch||!inView||d.hidden||!s.isConnected)return;
+      timer=w.setTimeout(function(){timer=0;step(1);},interval);
+    }
+    function refreshPause(){
+      info.paused=paused||reducedMotion();
+      pause.innerHTML='<svg aria-hidden="true" viewBox="0 0 16 16" width="12" height="12" fill="currentColor">'+(paused?'<path d="M5 2.5 13 8l-8 5.5z"/>':'<path d="M4 3h3v10H4zm5 0h3v10H9z"/>')+'</svg>';
+      var label=paused?'Reproduzir carrossel':'Pausar carrossel';
+      pause.setAttribute('aria-label',label);pause.title=label;
+      pause.hidden=total<2||!autoplay||reducedMotion();
+    }
+    function cloneCard(card){
+      var copy=card.cloneNode(true);
+      copy.classList.add('cc26-shortcut--clone');
+      copy.setAttribute('aria-hidden','true');copy.tabIndex=-1;
+      var image=copy.querySelector('img');
+      if(image){image.loading='eager';imageTransition(image);}
+      return copy;
+    }
+    function setClones(){
+      if(before)before.remove();
+      if(after)after.remove();
+      if(total<2)return;
+      before=cloneCard(cards[total-1]);after=cloneCard(cards[0]);
+      track.insertBefore(before,track.firstChild);track.appendChild(after);
+    }
+    function setOffset(slots,animate){
+      track.style.transition=animate?'transform 420ms cubic-bezier(.22,.61,.36,1)':'none';
+      track.style.transform='translate3d('+(-slots*100/visible)+'%,0,0)';
+    }
+    function updateVisibility(){
+      cards.forEach(function(card,i){
+        var on=i<visible;
+        card.tabIndex=on?0:-1;
+        if(on)card.removeAttribute('aria-hidden');else card.setAttribute('aria-hidden','true');
+      });
+    }
+    function layout(){
+      var count=Math.min(total,w.innerWidth<=900?3:5);
+      if(count===visible)return;
+      if(moving)finish();
+      visible=count;info.visible=visible;
+      grid.style.setProperty('--cc26-shortcuts-visible',String(count));
+      setOffset(total>1?1:0,false);
+      updateVisibility();
+    }
+    var direction=0;
+    function finish(){
+      if(!moving)return;
+      w.clearTimeout(finishTimer);finishTimer=0;
+      if(direction>0){
+        var first=cards.shift();cards.push(first);track.insertBefore(first,after);
+      }else{
+        var last=cards.pop();cards.unshift(last);track.insertBefore(last,before.nextSibling);
+      }
+      setClones();moving=false;
+      setOffset(1,false);updateVisibility();arm();
+    }
+    function step(dir){
+      clearTimer();
+      if(total<2||moving)return;
+      direction=dir;moving=true;
+      var animate=!reducedMotion();
+      if(!animate){finish();return;}
+      // Consolida a posição inicial antes de iniciar a transição.
+      track.getBoundingClientRect();
+      setOffset(dir>0?2:0,true);
+      finishTimer=w.setTimeout(finish,460);
+    }
+    track.addEventListener('transitionend',function(event){
+      if(event.target===track&&event.propertyName==='transform')finish();
+    });
+    prev.addEventListener('click',function(){step(-1);});
+    next.addEventListener('click',function(){step(1);});
+    pause.addEventListener('click',function(){paused=!paused;refreshPause();arm();});
+    s.addEventListener('mouseenter',function(){hover=true;clearTimer();});
+    s.addEventListener('mouseleave',function(){hover=false;arm();});
+    s.addEventListener('focusin',function(){focused=true;clearTimer();});
+    s.addEventListener('focusout',function(event){if(!s.contains(event.relatedTarget)){focused=false;arm();}});
+    s.addEventListener('keydown',function(event){
+      if(event.target.closest('.cc26-shortcuts__control')&&(event.key==='ArrowLeft'||event.key==='ArrowRight')){
+        event.preventDefault();step(event.key==='ArrowLeft'?-1:1);
+      }
+    });
+    viewport.addEventListener('touchstart',function(event){
+      if(event.touches.length!==1){touch=null;arm();return;}
+      touch={x:event.touches[0].clientX,y:event.touches[0].clientY};clearTimer();
+    },{passive:true});
+    viewport.addEventListener('touchend',function(event){
+      var start=touch;touch=null;
+      if(start&&event.changedTouches.length){
+        var dx=event.changedTouches[0].clientX-start.x,dy=event.changedTouches[0].clientY-start.y;
+        if(Math.abs(dx)>35&&Math.abs(dx)>Math.abs(dy)*1.25){
+          swipeUntil=Date.now()+350;step(dx<0?1:-1);return;
+        }
+      }
+      arm();
+    },{passive:true});
+    viewport.addEventListener('touchcancel',function(){touch=null;arm();},{passive:true});
+    viewport.addEventListener('click',function(event){
+      if(Date.now()<swipeUntil){event.preventDefault();event.stopPropagation();}
+    },true);
+    if(total>1){
+      grid.appendChild(prev);grid.appendChild(viewport);grid.appendChild(next);
+      grid.appendChild(pause);
+    }else{
+      grid.classList.add('cc26-shortcuts__grid--single');grid.appendChild(viewport);
+    }
     s.appendChild(grid);
-    state.shortcuts={origin:'Loja Integrada / banner-central-marcas',count:grid.children.length};
+    setClones();layout();refreshPause();
+    if(w.IntersectionObserver){
+      var observer=new w.IntersectionObserver(function(entries){
+        inView=entries.some(function(entry){return entry.isIntersecting;});
+        arm();
+      },{threshold:0.1});
+      observer.observe(s);
+    }
+    w.addEventListener('resize',layout,{passive:true});
+    d.addEventListener('visibilitychange',arm);
+    if(w.matchMedia){
+      var motion=w.matchMedia('(prefers-reduced-motion: reduce)');
+      var changeMotion=function(){if(reducedMotion()){paused=true;if(moving)finish();}refreshPause();arm();};
+      if(motion.addEventListener)motion.addEventListener('change',changeMotion);
+      else if(motion.addListener)motion.addListener(changeMotion);
+    }
+    w.setTimeout(arm,0);
     return s;
   }
   function nativeMediaItems(source,limit){
@@ -2069,7 +2222,7 @@
     );
     [].slice.call(els).forEach(function(node,index){
       // Animar a seção, não slides individuais clonados pelo Owl.
-      if(node.matches('.listagem-item,.cc26-benefit')&&node.closest('.produtos-carrossel,.cc26-benefits')){
+      if((node.matches('.listagem-item,.cc26-benefit')&&node.closest('.produtos-carrossel,.cc26-benefits')) || node.matches('.cc26-shortcut')&&node.closest('.cc26-shortcuts--carousel')){
         node.classList.remove('cc26-reveal','cc26-inview');return;
       }
       if(w.innerWidth<=767&&d.body.matches('.pagina-categoria,.pagina-busca')&&node.matches('.listagem-item')){
