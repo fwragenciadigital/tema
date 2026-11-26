@@ -6,7 +6,7 @@
 (function (w,d) {
   'use strict';
   if(w.Cabcom2026) return;
-  var VERSION='2.2.22';
+  var VERSION='2.2.23';
   var CDN='https://cdn.awsli.com.br/80/80577/arquivos/';
   var DEFAULTS={
     geral:{ativo:true,publicarNaLoja:false,debug:false},
@@ -87,17 +87,18 @@
   function normalized(text){
     return String(text||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\s+/g,' ').trim().toUpperCase();
   }
-  // Cotação direta da ficha: mensagem específica do produto, sem alterar o carrinho.
-  function pdpWhatsAppHref(info){
-    if(!info)return '';
-    var title=info.querySelector('h1.nome-produto,.info-principal-produto h1');
-    var phone=String(cfg.conteudo.contato||'').replace(/\D/g,'');
-    if(!title||!title.textContent.trim()||!/^\d{10,11}$/.test(phone))return '';
-    var sku=info.querySelector('[itemprop="sku"]');
-    var code=sku&&(sku.getAttribute('content')||sku.textContent||'').trim();
-    var message='Olá! Gostaria de solicitar uma cotação para:\n\n'+title.textContent.trim()+
-      (code?'\nCódigo: '+code:'')+'\nProduto: '+new URL(location.pathname,location.origin).href;
-    return 'https://wa.me/55'+phone+'?text='+encodeURIComponent(message);
+  // A ficha usa a mesma ação nativa do orçamento em ambos os botões.
+  function syncQuoteWhatsLink(whatsapp,quote){
+    if(!whatsapp||!quote||!whatsapp.matches('a[href]'))return;
+    var href=quote.getAttribute('href');
+    if(!href)return;
+    try{
+      var url=new URL(href,location.href);
+      if(url.origin===location.origin && /^\/carrinho\/produto\/\d+\/adicionar\/?$/i.test(url.pathname)){
+        if(whatsapp.href!==url.href)whatsapp.href=url.href;
+        whatsapp.removeAttribute('target');
+      }
+    }catch(e){}
   }
   function navAnchor(label){
     var needle=normalized(label);
@@ -711,10 +712,6 @@
         notice.setAttribute('role','alert');
         notice.appendChild(el('strong','','Não foi possível adicionar este produto ao orçamento.'));
         notice.appendChild(el('p','','A Loja Integrada não aceitou a inclusão. O produto não foi adicionado à lista.'));
-        if(addFailure.whatsapp){
-          var direct=a(addFailure.whatsapp,'cc26-cart-sidebar__add-error-link','Cotar este produto por WhatsApp');
-          direct.target='_blank';direct.rel='noopener noreferrer';notice.appendChild(direct);
-        }
         body.prepend(notice);
       }
       if(mode!=='loading'){
@@ -866,13 +863,21 @@
       if(typeof event.button==='number'&&event.button!==0)return;
       if(event.metaKey||event.ctrlKey||event.altKey||event.shiftKey)return;
       var clicked=event.target&&event.target.closest&&event.target.closest('a[href]');
-      if(!clicked||clicked.closest('#cc26-cart-sidebar,#cc26-new-header,#modalSolicitarOrcamento')||
-         clicked.hasAttribute('data-cc26-direct-whatsapp'))return;
+      if(!clicked||clicked.closest('#cc26-cart-sidebar,#cc26-new-header,#modalSolicitarOrcamento'))return;
       var caption=normalized(clicked.textContent||clicked.getAttribute('aria-label')||'');
       var isEmail=/COTAR\s+POR\s+E.?MAIL|COTAR\s+E.?MAIL/.test(caption)||clicked.matches('.cc26-card-quote-actions__email,.cotar-email,.botao-cotar-email,[data-cc26-cotar-email]');
       var isWhats=clicked.matches('.cc26-card-quote-actions__whatsapp,.cc26-pdp__cta--whatsapp,.cotar-whats a')||!!clicked.closest('.cotar-whats');
       if(!isEmail&&!isWhats)return;
       var action=officialAddLink(clicked);
+      // WhatsApp na ficha segue o CTA nativo atual, incluindo a escolha de variação.
+      var details=clicked.closest('.cc26-pdp__details');
+      var productQuote=isWhats&&details&&details.querySelector('.cc26-pdp__cta--quote');
+      if(productQuote&&productQuote!==clicked){
+        action=officialAddLink(productQuote);
+        if(!action){
+          event.preventDefault();event.stopImmediatePropagation();productQuote.click();return;
+        }
+      }
       if(!action){
         var scope=clicked.closest('.cc26-card-two-cta,.cc26-pdp__details,.produto');
         if(scope)action=[].slice.call(scope.querySelectorAll('a[href*="/carrinho/produto/"]')).map(officialAddLink).find(Boolean);
@@ -898,7 +903,7 @@
         if(rejected){
           official.count=official.items.length&&official.items.every(function(it){return Number.isInteger(it.quantity)&&it.quantity>0;})?
             official.items.reduce(function(n,it){return n+it.quantity;},0):official.empty?0:null;
-          if(open)show(official,official.items.length?'items':'add-error',{whatsapp:pdpWhatsAppHref(clicked.closest('.cc26-pdp__details'))});
+          if(open)show(official,official.items.length?'items':'add-error',true);
           return;
         }
         if(open&&official.items.length){
@@ -1698,15 +1703,8 @@
             /^\/carrinho\/produto\/\d+\/adicionar\/?$/i.test(u.pathname);
         }catch(e){return false;}
       });
-      var whats=whatsExisting;
-      if(!whats){
-        var phone=String(cfg.conteudo.contato||'').replace(/\D/g,'');
-        if(!/^\d{10,11}$/.test(phone))return;
-        var url='https://wa.me/55'+phone+'?text='+
-          encodeURIComponent('Olá! Gostaria de cotar o produto: '+productName+' — '+href);
-        whats=a(url,'cc26-card-quote-actions__whatsapp','');
-        whats.target='_blank';whats.rel='noopener noreferrer';
-      }
+      // Os dois CTAs do card encaminham para a mesma inclusão ou seleção nativa.
+      if(whatsExisting)whatsExisting.classList.add('cc26-card-legacy-action');
       var email=emailExisting||addExisting;
       if(!email){
         var id=card.getAttribute('data-produto-id')||card.getAttribute('data-product-id')||
@@ -1734,9 +1732,8 @@
         if(existing.indexOf(original)>=0){
           var nativeURL;
           try{nativeURL=new URL(original.href,location.href);}catch(e){}
-          var official=kind==='email'&&nativeURL&&nativeURL.origin===location.origin&&/^\/carrinho\/produto\/\d+\/adicionar\/?$/i.test(nativeURL.pathname);
-          var directWhats=kind==='whatsapp'&&nativeURL&&/^(wa\.me|api\.whatsapp\.com|web\.whatsapp\.com)$/i.test(nativeURL.hostname);
-          if(!official&&!directWhats){
+          var official=nativeURL&&nativeURL.origin===location.origin&&/^\/carrinho\/produto\/\d+\/adicionar\/?$/i.test(nativeURL.pathname);
+          if(!official){
             link.addEventListener('click',function(ev){
               if(ev.ctrlKey||ev.metaKey||ev.shiftKey||ev.altKey)return;
               ev.preventDefault();original.click();
@@ -1746,7 +1743,7 @@
         }
         return link;
       }
-      newActions.appendChild(visibleCTA(whats,'whatsapp','Cotar por WhatsApp','phone'));
+      newActions.appendChild(visibleCTA(email,'whatsapp','Cotar por WhatsApp','phone'));
       newActions.appendChild(visibleCTA(email,'email','Cotar por e-mail','mail'));
       existing.forEach(function(node){
         if((actions&&actions.contains(node))||isMore(node))node.classList.add('cc26-card-legacy-action');
@@ -2339,19 +2336,21 @@
     }
     // O tema legado deixa .cotar-whats fora da ficha antes de movê-lo no load.
     if(!whatsapp)whatsapp=d.querySelector('.cotar-whats a[href]');
-    // O tema legado nem sempre traz o WhatsApp em produtos sem preço.
-    // Nestes casos, usar contato direto da Cabcom sem depender de inclusão no carrinho.
-    if(!whatsapp&&(quote||nativeActions.querySelector('.produto-mais-info'))){
-      var directHref=pdpWhatsAppHref(info);
-      if(directHref){
-        var directBlock=el('div','cc26-pdp__whatsapp-fallback');
-        whatsapp=a(directHref,'','Cotar por WhatsApp');
-        whatsapp.prepend(inlineIcon('phone'));
-        whatsapp.target='_blank';whatsapp.rel='noopener noreferrer';
-        whatsapp.setAttribute('data-cc26-direct-whatsapp','1');
-        whatsapp.addEventListener('click',function(){var href=pdpWhatsAppHref(info);if(href)whatsapp.href=href;});
-        directBlock.appendChild(whatsapp);nativeActions.appendChild(directBlock);
-      }
+    // Restaurar botão ausente sem abrir WhatsApp diretamente.
+    // A inclusão é feita pela mesma ação do botão nativo de orçamento.
+    if(!whatsapp&&quote){
+      var quoteBlock=el('div','cc26-pdp__whatsapp-fallback');
+      whatsapp=a(quote.getAttribute('href')||'#','','Cotar por WhatsApp');
+      whatsapp.prepend(inlineIcon('phone'));
+      whatsapp.setAttribute('data-cc26-quote-proxy','1');
+      whatsapp.addEventListener('click',function(ev){
+        // Fallback quando o carrinho lateral está desativado ou a LI exige seleção.
+        if(ev.defaultPrevented||ev.ctrlKey||ev.metaKey||ev.shiftKey||ev.altKey)return;
+        var currentQuote=info.querySelector('.cc26-pdp__cta--quote');
+        if(!currentQuote)return;
+        ev.preventDefault();currentQuote.click();
+      });
+      quoteBlock.appendChild(whatsapp);nativeActions.appendChild(quoteBlock);
     }
     root.classList.add('cc26-pdp','cc26-pdp--editorial');
     grid.classList.add('cc26-pdp__grid');
@@ -2400,6 +2399,7 @@
     if(quote){
       quote.classList.add('cc26-pdp__cta','cc26-pdp__cta--quote');
       if(!quote.getAttribute('aria-label'))quote.setAttribute('aria-label','Adicionar à lista de orçamento por e-mail');
+      syncQuoteWhatsLink(whatsapp,quote);
     }
     if(quote){
       // Mantém o botão real da LI; apenas orienta o contato por orçamento.
@@ -2486,14 +2486,14 @@
         var whatsBtn=el('button','cc26-pdp__mobile-whatsapp');
         whatsBtn.type='button';whatsBtn.appendChild(inlineIcon('phone'));
         whatsBtn.appendChild(el('span','','WhatsApp'));
-        whatsBtn.addEventListener('click',function(){whatsapp.click();});
+        whatsBtn.addEventListener('click',function(){var current=info.querySelector('.cc26-pdp__cta--whatsapp')||whatsapp;current.click();});
         mobileActions.appendChild(whatsBtn);
       }
       if(quote){
         var budgetBtn=el('button','cc26-pdp__mobile-quote');
         budgetBtn.type='button';budgetBtn.appendChild(inlineIcon('cart'));
         budgetBtn.appendChild(el('span','','Orçamento'));
-        budgetBtn.addEventListener('click',function(){quote.click();});
+        budgetBtn.addEventListener('click',function(){var current=info.querySelector('.cc26-pdp__cta--quote')||quote;current.click();});
         mobileActions.appendChild(budgetBtn);
       }
       bar.appendChild(mobileActions);d.body.appendChild(bar);
@@ -2512,8 +2512,12 @@
     var info=d.querySelector('.cc26-pdp__details');
     if(!info)return;
     var quote=info.querySelector('.cc26-pdp__cta--quote'),hint=info.querySelector('.cc26-pdp__quote-hint');
-    var whatsapp=info.querySelector('.cc26-pdp__cta--whatsapp,.cotar-whats a[href]')||d.querySelector('.cotar-whats a[href]');
+    var nativeWhats=info.querySelector('.cotar-whats a[href]');
+    var fallback=info.querySelector('.cc26-pdp__whatsapp-fallback');
+    if(nativeWhats&&fallback&&!fallback.contains(nativeWhats))fallback.remove();
+    var whatsapp=nativeWhats||info.querySelector('.cc26-pdp__cta--whatsapp')||d.querySelector('.cotar-whats a[href]');
     if(!quote||!hint||!whatsapp)return;
+    syncQuoteWhatsLink(whatsapp,quote);
     var container=quote.closest('.comprar')||quote,block=whatsapp.closest('.cotar-whats,.cc26-pdp__whatsapp-fallback')||whatsapp;
     if(!container.parentNode||block.contains(container))return;
     whatsapp.classList.add('cc26-pdp__cta','cc26-pdp__cta--whatsapp');
