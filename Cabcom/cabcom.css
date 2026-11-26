@@ -3950,3 +3950,42 @@ body.cc26-active.cc26-pdp-ready #corpo .cc26-pdp--editorial .cc26-pdp__arrow--th
 @media(prefers-reduced-motion:reduce){
   body.cc26-active.cc26-pdp-ready #corpo .cc26-pdp--editorial .cc26-pdp__arrow{transition:none!important}
 }
+
+/* Topo desktop — arte oficial bg-topo.png, sem recorte branco sobreposto.
+   A imagem possui o raio e a área do logo integrados (1909 × 102).
+   O cabeçalho mobile de dois raios permanece intacto. */
+@media(min-width:768px){
+  body.cc26-active #cc26-new-header.cc26-site-header{
+    background:#00c895!important;
+  }
+  body.cc26-active #cc26-new-header .cc26-site-header__inner{
+    max-width:none!important;
+    background:#00c895 url("https://cdn.awsli.com.br/80/80577/arquivos/bg-topo.png") left center/100% 100% no-repeat!important;
+  }
+  body.cc26-active #cc26-new-header .cc26-site-header__main::before{
+    content:none!important;display:none!important;
+  }
+  body.cc26-active #cc26-new-header .cc26-site-header__brand img{
+    max-width:min(214px,10.5vw)!important;
+  }
+}
+@media(min-width:1601px){
+  body.cc26-active #cc26-new-header .cc26-site-header__main{
+    grid-template-columns:minmax(0,14.25vw) minmax(550px,1fr) minmax(340px,550px);
+  }
+}
+@media(min-width:1251px) and (max-width:1600px){
+  body.cc26-active #cc26-new-header .cc26-site-header__main{
+    grid-template-columns:minmax(0,14.25vw) minmax(470px,1fr) minmax(300px,445px);
+  }
+}
+@media(min-width:1121px) and (max-width:1250px){
+  body.cc26-active #cc26-new-header .cc26-site-header__main{
+    grid-template-columns:minmax(0,14.25vw) minmax(370px,1fr) minmax(270px,330px);
+  }
+}
+@media(min-width:768px) and (max-width:1120px){
+  body.cc26-active #cc26-new-header .cc26-site-header__brand img{
+    max-width:min(140px,12.5vw)!important;
+  }
+}
