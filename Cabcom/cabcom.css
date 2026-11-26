@@ -1867,10 +1867,23 @@ body.cc26-active .cc26-quote-qty__step{
 }
 body.cc26-active .cc26-quote-qty__step:not(:disabled):hover{background:#0868ff!important;color:#fff!important}
 body.cc26-active .cc26-quote-qty__step:disabled{opacity:.42;cursor:default}
-body.cc26-active .cc26-quote-qty__amount{
-  min-width:34px;padding:0 6px;text-align:center;color:#17324c;
-  font:600 13px/1.3 var(--cc26-font-text)!important;
+/* Quantidade editável, mesma geometria no sidebar e no modal oficial. */
+body.cc26-active .cc26-quote-qty input.cc26-quote-qty__amount,
+body.cc26-active #modalSolicitarOrcamento .cc26-quote-qty input.cc26-quote-qty__amount{
+  box-sizing:border-box!important;display:block!important;flex:0 0 56px;
+  width:56px!important;min-width:0!important;max-width:56px!important;
+  height:34px!important;min-height:0!important;padding:0 4px!important;margin:0!important;
+  border:0!important;border-radius:0!important;background:#fff!important;color:#17324c!important;
+  text-align:center;font:600 16px/1.25 var(--cc26-font-text)!important;box-shadow:none!important;
 }
+body.cc26-active .cc26-quote-qty input.cc26-quote-qty__amount:focus,
+body.cc26-active #modalSolicitarOrcamento .cc26-quote-qty input.cc26-quote-qty__amount:focus{
+  outline:2px solid #0868ff!important;outline-offset:-2px;
+}
+body.cc26-active .cc26-quote-qty input.cc26-quote-qty__amount[aria-invalid="true"]{
+  color:#a84a29!important;
+}
+body.cc26-active .cc26-quote-qty input.cc26-quote-qty__amount:disabled{opacity:.6;cursor:wait;}
 body.cc26-active .cc26-quote-qty-status{font:500 12px/1.5 var(--cc26-font-text)!important;color:#52667e;margin:10px 0}
 body.cc26-active #modalSolicitarOrcamento .modal-footer button[type="submit"]:disabled{opacity:.5;cursor:not-allowed}
 
