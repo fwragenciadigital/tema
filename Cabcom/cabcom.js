@@ -6,7 +6,7 @@
 (function (w,d) {
   'use strict';
   if(w.Cabcom2026) return;
-  var VERSION='2.2.19';
+  var VERSION='2.2.20';
   var CDN='https://cdn.awsli.com.br/80/80577/arquivos/';
   var DEFAULTS={
     geral:{ativo:true,publicarNaLoja:false,debug:false},
@@ -1060,6 +1060,19 @@
   function shortcuts(){
     if(!cfg.home.atalhos)return null;
     var source=shortcutSource(),items=readShortcuts(source);
+    // Se o HTML anterior foi removido, restaura a seleção original aprovada.
+    // Um bloco válido do painel continua prioritário; home.atalhos:false desativa.
+    if(!source){
+      items=[
+        ['categorie_03.jpg','Cabo RJ45','CABOS DE REDE','/cabos-de-rede'],
+        ['categorie_05.jpg','Cabo Coaxial','CABOS COAXIAIS','/coaxiais-rg/hdtv'],
+        ['categorie_07.jpg','Conectores','CONECTORES','/conectores'],
+        ['categorie_09.jpg','Crimpadores','ALICATE DE CRIMPAGEM RJ 45','/alicate-de-crimpagem-rj-45'],
+        ['categorie_11.jpg','Fitas Isolantes','ADESIVOS','/adesivos']
+      ].map(function(item){
+        return {url:asset(item[0]),label:item[1],href:navAnchor(item[2])||new URL(item[3],location.href).href};
+      });
+    }
     if(!items.length){
       warn('banner-central-marcas sem imagens/links de categorias acessiveis; atalhos aguardando fonte LI');
       return null;
@@ -1073,9 +1086,9 @@
     var viewport=el('div','cc26-shortcuts__viewport');
     var track=el('div','cc26-shortcuts__track');
     viewport.appendChild(track);
-    var total=items.length,interval=Number(source.getAttribute('data-interval'))||4000;
+    var total=items.length,interval=Number(source&&source.getAttribute('data-interval'))||4000;
     interval=Math.max(2500,Math.min(20000,interval));
-    var autoplay=source.getAttribute('data-autoplay')!=='false';
+    var autoplay=!source||source.getAttribute('data-autoplay')!=='false';
     var visible=0,timer=0,finishTimer=0,moving=false,paused=!autoplay||reducedMotion();
     var hover=false,focused=false,inView=!w.IntersectionObserver,touch=null,swipeUntil=0;
     var before=null,after=null;
@@ -1094,7 +1107,7 @@
       track.appendChild(link);
       return link;
     });
-    var info={origin:'Loja Integrada / banner-central-marcas',count:total,carousel:true,interval:interval,autoplay:autoplay,visible:0,paused:paused};
+    var info={origin:source?'Loja Integrada / banner-central-marcas':'Imagens oficiais / fallback',count:total,carousel:true,interval:interval,autoplay:autoplay,visible:0,paused:paused};
     state.shortcuts=info;
     function control(name,label){
       var b=el('button','cc26-shortcuts__control cc26-shortcuts__control--'+name);
