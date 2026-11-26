@@ -6,7 +6,7 @@
 (function (w,d) {
   'use strict';
   if(w.Cabcom2026) return;
-  var VERSION='2.2.20';
+  var VERSION='2.2.21';
   var CDN='https://cdn.awsli.com.br/80/80577/arquivos/';
   var DEFAULTS={
     geral:{ativo:true,publicarNaLoja:false,debug:false},
@@ -1089,7 +1089,7 @@
     var total=items.length,interval=Number(source&&source.getAttribute('data-interval'))||4000;
     interval=Math.max(2500,Math.min(20000,interval));
     var autoplay=!source||source.getAttribute('data-autoplay')!=='false';
-    var visible=0,timer=0,finishTimer=0,moving=false,paused=!autoplay||reducedMotion();
+    var visible=0,timer=0,finishTimer=0,moving=false;
     var hover=false,focused=false,inView=!w.IntersectionObserver,touch=null,swipeUntil=0;
     var before=null,after=null;
     var cards=items.map(function(item){
@@ -1107,28 +1107,20 @@
       track.appendChild(link);
       return link;
     });
-    var info={origin:source?'Loja Integrada / banner-central-marcas':'Imagens oficiais / fallback',count:total,carousel:true,interval:interval,autoplay:autoplay,visible:0,paused:paused};
+    var info={origin:source?'Loja Integrada / banner-central-marcas':'Imagens oficiais / fallback',count:total,carousel:true,interval:interval,autoplay:autoplay,visible:0,paused:!autoplay||reducedMotion()};
     state.shortcuts=info;
     function control(name,label){
       var b=el('button','cc26-shortcuts__control cc26-shortcuts__control--'+name);
       b.type='button';b.setAttribute('aria-label',label);b.title=label;
-      if(name!=='pause')b.appendChild(inlineIcon('arrow'));
+      b.appendChild(inlineIcon('arrow'));
       return b;
     }
     var prev=control('prev','Categoria anterior'),next=control('next','Próxima categoria');
-    var pause=control('pause','Pausar carrossel');
     function clearTimer(){if(timer){w.clearTimeout(timer);timer=0;}}
     function arm(){
       clearTimer();
-      if(total<2||paused||reducedMotion()||hover||focused||touch||!inView||d.hidden||!s.isConnected)return;
+      if(total<2||!autoplay||reducedMotion()||hover||focused||touch||!inView||d.hidden||!s.isConnected)return;
       timer=w.setTimeout(function(){timer=0;step(1);},interval);
-    }
-    function refreshPause(){
-      info.paused=paused||reducedMotion();
-      pause.innerHTML='<svg aria-hidden="true" viewBox="0 0 16 16" width="12" height="12" fill="currentColor">'+(paused?'<path d="M5 2.5 13 8l-8 5.5z"/>':'<path d="M4 3h3v10H4zm5 0h3v10H9z"/>')+'</svg>';
-      var label=paused?'Reproduzir carrossel':'Pausar carrossel';
-      pause.setAttribute('aria-label',label);pause.title=label;
-      pause.hidden=total<2||!autoplay||reducedMotion();
     }
     function cloneCard(card){
       var copy=card.cloneNode(true);
@@ -1193,7 +1185,6 @@
     });
     prev.addEventListener('click',function(){step(-1);});
     next.addEventListener('click',function(){step(1);});
-    pause.addEventListener('click',function(){paused=!paused;refreshPause();arm();});
     s.addEventListener('mouseenter',function(){hover=true;clearTimer();});
     s.addEventListener('mouseleave',function(){hover=false;arm();});
     s.addEventListener('focusin',function(){focused=true;clearTimer();});
@@ -1223,12 +1214,11 @@
     },true);
     if(total>1){
       grid.appendChild(prev);grid.appendChild(viewport);grid.appendChild(next);
-      grid.appendChild(pause);
     }else{
       grid.classList.add('cc26-shortcuts__grid--single');grid.appendChild(viewport);
     }
     s.appendChild(grid);
-    setClones();layout();refreshPause();
+    setClones();layout();
     if(w.IntersectionObserver){
       var observer=new w.IntersectionObserver(function(entries){
         inView=entries.some(function(entry){return entry.isIntersecting;});
@@ -1240,7 +1230,7 @@
     d.addEventListener('visibilitychange',arm);
     if(w.matchMedia){
       var motion=w.matchMedia('(prefers-reduced-motion: reduce)');
-      var changeMotion=function(){if(reducedMotion()){paused=true;if(moving)finish();}refreshPause();arm();};
+      var changeMotion=function(){if(reducedMotion()&&moving)finish();info.paused=!autoplay||reducedMotion();arm();};
       if(motion.addEventListener)motion.addEventListener('change',changeMotion);
       else if(motion.addListener)motion.addListener(changeMotion);
     }
