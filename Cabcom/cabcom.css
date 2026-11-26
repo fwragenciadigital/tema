@@ -3677,6 +3677,34 @@ body.cc26-active #corpo .cc26-catalog-grid>li{
 }
 
 
+/* Categoria e busca: a LI entrega quatro produtos por linha.
+   Evitar células vazias dos pseudo-elementos clearfix do tema nativo. */
+@media(min-width:768px){
+  body.cc26-active:is(.pagina-categoria,.pagina-busca) #corpo #listagemProdutos .cc26-catalog-grid{
+    display:grid!important;
+    grid-template-columns:repeat(4,minmax(0,1fr))!important;
+    grid-auto-flow:row!important;
+    gap:15px!important;
+  }
+  body.cc26-active:is(.pagina-categoria,.pagina-busca) #corpo #listagemProdutos .cc26-catalog-grid::before,
+  body.cc26-active:is(.pagina-categoria,.pagina-busca) #corpo #listagemProdutos .cc26-catalog-grid::after{
+    display:none!important;content:none!important;
+  }
+  body.cc26-active:is(.pagina-categoria,.pagina-busca) #corpo #listagemProdutos .cc26-catalog-grid > li{
+    float:none!important;clear:none!important;
+    width:100%!important;min-width:0!important;max-width:100%!important;
+    grid-column:auto!important;grid-row:auto!important;margin:0!important;padding:0!important;
+  }
+  body.cc26-active:is(.pagina-categoria,.pagina-busca) #corpo #listagemProdutos .cc26-catalog-grid > li:not(:has(.cc26-card-two-cta)):not(.cc26-card-two-cta){
+    display:none!important;
+  }
+}
+@media(min-width:768px) and (max-width:1023px){
+  body.cc26-active:is(.pagina-categoria,.pagina-busca) #corpo #listagemProdutos .cc26-catalog-grid{
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  }
+}
+
 /* Mobile: conservar a galeria responsiva nativa, sem a segunda faixa desktop.
    Grade estática: pseudo-elementos clearfix não podem ocupar células. */
 @media(max-width:767px){
