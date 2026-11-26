@@ -4133,9 +4133,3 @@ body.cc26-active .cc26-cart-sidebar__add-error{
 }
 body.cc26-active .cc26-cart-sidebar__add-error strong{display:block;color:#814512;font-size:15px;line-height:1.4;}
 body.cc26-active .cc26-cart-sidebar__add-error p{margin:8px 0 0;font:inherit!important;color:inherit!important;}
-body.cc26-active .cc26-cart-sidebar__add-error-link{
-  display:flex;align-items:center;justify-content:center;box-sizing:border-box;min-height:46px;margin:14px 0 0;
-  padding:10px 12px;border-radius:9px;background:#008c69;color:#fff!important;text-align:center;
-  font:700 13px/1.4 var(--cc26-font-text)!important;text-decoration:none!important;
-}
-body.cc26-active .cc26-cart-sidebar__add-error-link:hover{background:#00795b;}
