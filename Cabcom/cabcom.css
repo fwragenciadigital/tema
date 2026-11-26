@@ -4100,14 +4100,6 @@ body.cc26-active .cc26-shortcuts--carousel .cc26-shortcuts__control .cc26-icon s
 body.cc26-active .cc26-shortcuts--carousel .cc26-shortcuts__control--prev .cc26-icon{
   transform:rotate(180deg);
 }
-body.cc26-active .cc26-shortcuts--carousel .cc26-shortcuts__control--pause{
-  position:absolute;right:clamp(10px,1.6vw,28px);bottom:-24px;
-  width:24px;height:24px;background:#eee!important;color:#757575!important;
-  font:700 11px/1 Arial,sans-serif;
-}
-body.cc26-active .cc26-shortcuts--carousel .cc26-shortcuts__control--pause:hover,
-body.cc26-active .cc26-shortcuts--carousel .cc26-shortcuts__control--pause:focus-visible{color:#fff!important}
-body.cc26-active .cc26-shortcuts--carousel .cc26-shortcuts__control[hidden]{display:none!important}
 @media(max-width:900px){
   body.cc26-active .cc26-shortcuts.cc26-shortcuts--carousel .cc26-shortcuts__grid{
     grid-template-columns:24px minmax(0,1fr) 24px!important;--cc26-shortcuts-visible:3;
