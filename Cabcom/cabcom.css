@@ -4046,3 +4046,87 @@ body.cc26-active #cc26-new-header .cc26-topbar__pause-glyph{font:700 11px/1 Aria
 @media(prefers-reduced-motion:reduce){
   body.cc26-active #cc26-new-header .cc26-topbar__slide{transition:none!important;transform:none!important}
 }
+
+/* v2.2.19 | Atalhos circularmente navegáveis, 5 desktop / 3 mobile.
+   A seção conserva a altura e proporção das imagens para evitar CLS. */
+body.cc26-active .cc26-shortcuts.cc26-shortcuts--carousel .cc26-shortcuts__grid{
+  position:relative;display:grid!important;box-sizing:border-box;
+  grid-template-columns:32px minmax(0,1fr) 32px!important;
+  align-items:center!important;gap:clamp(4px,1vw,14px)!important;
+  max-width:1580px!important;padding-inline:clamp(10px,1.6vw,28px)!important;
+  --cc26-shortcuts-visible:5;
+}
+body.cc26-active .cc26-shortcuts.cc26-shortcuts--carousel .cc26-shortcuts__grid--single{
+  grid-template-columns:minmax(0,1fr)!important;
+  max-width:250px!important;
+}
+body.cc26-active .cc26-shortcuts--carousel .cc26-shortcuts__viewport{
+  width:100%;min-width:0;overflow:hidden;padding-block:8px;
+  touch-action:pan-y;
+}
+body.cc26-active .cc26-shortcuts--carousel .cc26-shortcuts__track{
+  display:flex!important;width:100%;min-width:0;align-items:flex-start;
+  gap:0!important;will-change:transform;
+}
+body.cc26-active .cc26-shortcuts--carousel .cc26-shortcuts__track .cc26-shortcut{
+  box-sizing:border-box;flex:0 0 calc(100% / var(--cc26-shortcuts-visible));
+  width:calc(100% / var(--cc26-shortcuts-visible));min-width:0;
+  padding:4px clamp(4px,1vw,14px) 6px!important;gap:7px!important;
+  grid-column:auto!important;
+}
+body.cc26-active .cc26-shortcuts--carousel .cc26-shortcuts__track .cc26-shortcut__media{
+  width:min(194px,100%)!important;height:auto!important;aspect-ratio:194/206!important;
+}
+body.cc26-active .cc26-shortcuts--carousel .cc26-shortcuts__track .cc26-shortcut__media img{
+  width:100%!important;height:100%!important;object-fit:contain!important;
+}
+body.cc26-active .cc26-shortcuts--carousel .cc26-shortcuts__control{
+  box-sizing:border-box;display:grid!important;place-items:center;
+  width:27px;height:27px;border:0!important;border-radius:50%!important;
+  background:#c9c9c9!important;color:#fff!important;padding:0!important;
+  margin:0 auto!important;cursor:pointer;box-shadow:none!important;text-shadow:none!important;
+}
+body.cc26-active .cc26-shortcuts--carousel .cc26-shortcuts__control:hover,
+body.cc26-active .cc26-shortcuts--carousel .cc26-shortcuts__control:focus-visible{
+  background:#00b991!important;
+}
+body.cc26-active .cc26-shortcuts--carousel .cc26-shortcuts__control:focus-visible{
+  outline:2px solid #0868f8;outline-offset:3px;
+}
+body.cc26-active .cc26-shortcuts--carousel .cc26-shortcuts__control .cc26-icon,
+body.cc26-active .cc26-shortcuts--carousel .cc26-shortcuts__control .cc26-icon svg{
+  display:block;width:17px;height:17px;
+}
+body.cc26-active .cc26-shortcuts--carousel .cc26-shortcuts__control--prev .cc26-icon{
+  transform:rotate(180deg);
+}
+body.cc26-active .cc26-shortcuts--carousel .cc26-shortcuts__control--pause{
+  position:absolute;right:clamp(10px,1.6vw,28px);bottom:-24px;
+  width:24px;height:24px;background:#eee!important;color:#757575!important;
+  font:700 11px/1 Arial,sans-serif;
+}
+body.cc26-active .cc26-shortcuts--carousel .cc26-shortcuts__control--pause:hover,
+body.cc26-active .cc26-shortcuts--carousel .cc26-shortcuts__control--pause:focus-visible{color:#fff!important}
+body.cc26-active .cc26-shortcuts--carousel .cc26-shortcuts__control[hidden]{display:none!important}
+@media(max-width:900px){
+  body.cc26-active .cc26-shortcuts.cc26-shortcuts--carousel .cc26-shortcuts__grid{
+    grid-template-columns:24px minmax(0,1fr) 24px!important;--cc26-shortcuts-visible:3;
+  }
+  body.cc26-active .cc26-shortcuts.cc26-shortcuts--carousel .cc26-shortcuts__grid--single{
+    grid-template-columns:minmax(0,1fr)!important;
+  }
+  body.cc26-active .cc26-shortcuts--carousel .cc26-shortcuts__control{width:24px;height:24px}
+}
+@media(max-width:580px){
+  body.cc26-active .cc26-shortcuts.cc26-shortcuts--carousel .cc26-shortcuts__grid{
+    gap:3px!important;padding-inline:6px!important;
+  }
+  body.cc26-active .cc26-shortcuts--carousel .cc26-shortcuts__track .cc26-shortcut{
+    padding-inline:4px!important;
+  }
+  body.cc26-active .cc26-shortcuts--carousel .cc26-shortcuts__control .cc26-icon,
+  body.cc26-active .cc26-shortcuts--carousel .cc26-shortcuts__control .cc26-icon svg{width:14px;height:14px}
+}
+@media(prefers-reduced-motion:reduce){
+  body.cc26-active .cc26-shortcuts--carousel .cc26-shortcuts__track{transition:none!important;will-change:auto}
+}
