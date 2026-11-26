@@ -6,7 +6,7 @@
 (function (w,d) {
   'use strict';
   if(w.Cabcom2026) return;
-  var VERSION='2.2.23';
+  var VERSION='2.2.24';
   var CDN='https://cdn.awsli.com.br/80/80577/arquivos/';
   var DEFAULTS={
     geral:{ativo:true,publicarNaLoja:false,debug:false},
@@ -425,11 +425,44 @@
     box.setAttribute('role','group');box.setAttribute('aria-label','Quantidade do produto');
     var minus=el('button','cc26-quote-qty__step','−'),plus=el('button','cc26-quote-qty__step','+');
     minus.type=plus.type='button';minus.setAttribute('aria-label','Diminuir quantidade');plus.setAttribute('aria-label','Aumentar quantidade');
-    var amount=el('span','cc26-quote-qty__amount',String(quantity));amount.setAttribute('aria-live','polite');
-    minus.disabled=quantity<=1;plus.disabled=quantity>=9999;
+    var amount=el('input','cc26-quote-qty__amount');
+    // Sem name: os dados do formulário de orçamento da LI permanecem intactos.
+    amount.type='text';amount.inputMode='numeric';amount.autocomplete='off';amount.spellcheck=false;
+    amount.setAttribute('aria-label','Digite a quantidade do produto');
+    amount.setAttribute('title','Digite de 1 a 9999 e pressione Enter ou saia do campo');
+    amount.value=String(quantity);
+    var pending=false;
+    function readDraft(){
+      var raw=amount.value.trim(),n=Number(raw);
+      return /^\d+$/.test(raw)&&Number.isInteger(n)&&n>=1&&n<=9999?n:null;
+    }
+    function syncSteps(n){minus.disabled=n<=1;plus.disabled=n>=9999;}
+    function reset(){amount.value=String(quantity);amount.removeAttribute('aria-invalid');syncSteps(quantity);}
+    function commit(next){
+      // Enter, blur e os botões compartilham a mesma transação.
+      if(pending)return;
+      if(next===null||next===quantity||quoteQtyPending||amount.disabled){reset();return;}
+      pending=true;amount.value=String(next);amount.removeAttribute('aria-invalid');
+      function finish(){pending=false;if(d.contains(box))reset();}
+      try{Promise.resolve(change(id,quantity,next)).then(finish,finish);}
+      catch(e){finish();}
+    }
+    syncSteps(quantity);
     box.appendChild(minus);box.appendChild(amount);box.appendChild(plus);
-    minus.addEventListener('click',function(){if(quantity>1)change(id,quantity,quantity-1);});
-    plus.addEventListener('click',function(){if(quantity<9999)change(id,quantity,quantity+1);});
+    amount.addEventListener('input',function(){
+      var n=readDraft();if(n===null){amount.setAttribute('aria-invalid','true');syncSteps(quantity);}
+      else{amount.removeAttribute('aria-invalid');syncSteps(n);}
+    });
+    amount.addEventListener('focus',function(){amount.select();});
+    amount.addEventListener('blur',function(){commit(readDraft());});
+    amount.addEventListener('keydown',function(ev){
+      if(ev.key==='Enter'){ev.preventDefault();ev.stopPropagation();commit(readDraft());}
+      else if(ev.key==='Escape'){ev.preventDefault();ev.stopPropagation();reset();amount.blur();}
+    });
+    // Quando o campo está em edição, +/- usa o valor digitado sem enviar duas atualizações.
+    [minus,plus].forEach(function(btn){btn.addEventListener('pointerdown',function(ev){if(d.activeElement===amount)ev.preventDefault();});});
+    minus.addEventListener('click',function(){var n=readDraft()||quantity;if(n>1)commit(n-1);});
+    plus.addEventListener('click',function(){var n=readDraft()||quantity;if(n<9999)commit(n+1);});
     return box;
   }
   function enhanceQuoteModalQuantities(){
@@ -453,7 +486,7 @@
         if(!error){error=el('p','cc26-quote-qty-status');error.setAttribute('role','status');table.parentElement.appendChild(error);}
         error.textContent='Atualizando quantidade…';
         if(send)send.disabled=true;
-        var controls=[].slice.call(table.querySelectorAll('.cc26-quote-qty button'));
+        var controls=[].slice.call(table.querySelectorAll('.cc26-quote-qty button,.cc26-quote-qty input'));
         controls.forEach(function(btn){btn.dataset.cc26WasDisabled=btn.disabled?'1':'0';btn.disabled=true;});
         try{
           var result=await requestQuoteQuantity(product,current,next);
@@ -666,7 +699,7 @@
           if(it.quantity!==null){
             var qtyLine=el('div','cc26-cart-sidebar__quantity');
             qtyLine.appendChild(el('span','','Quantidade'));
-            if(data.source==='carrinho'&&/^\d+$/.test(it.id)&&w.fetch)qtyLine.appendChild(quoteQuantityControl(it.id,it.quantity,function(id,current,next){changeSidebarQuantity(data,id,current,next);}));
+            if(data.source==='carrinho'&&/^\d+$/.test(it.id)&&w.fetch)qtyLine.appendChild(quoteQuantityControl(it.id,it.quantity,function(id,current,next){return changeSidebarQuantity(data,id,current,next);}));
             else qtyLine.appendChild(el('strong','',String(it.quantity)));
             info.appendChild(qtyLine);
           }
