@@ -6,7 +6,7 @@
 (function (w,d) {
   'use strict';
   if(w.Cabcom2026) return;
-  var VERSION='2.2.21';
+  var VERSION='2.2.22';
   var CDN='https://cdn.awsli.com.br/80/80577/arquivos/';
   var DEFAULTS={
     geral:{ativo:true,publicarNaLoja:false,debug:false},
@@ -86,6 +86,18 @@
   }
   function normalized(text){
     return String(text||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\s+/g,' ').trim().toUpperCase();
+  }
+  // Cotação direta da ficha: mensagem específica do produto, sem alterar o carrinho.
+  function pdpWhatsAppHref(info){
+    if(!info)return '';
+    var title=info.querySelector('h1.nome-produto,.info-principal-produto h1');
+    var phone=String(cfg.conteudo.contato||'').replace(/\D/g,'');
+    if(!title||!title.textContent.trim()||!/^\d{10,11}$/.test(phone))return '';
+    var sku=info.querySelector('[itemprop="sku"]');
+    var code=sku&&(sku.getAttribute('content')||sku.textContent||'').trim();
+    var message='Olá! Gostaria de solicitar uma cotação para:\n\n'+title.textContent.trim()+
+      (code?'\nCódigo: '+code:'')+'\nProduto: '+new URL(location.pathname,location.origin).href;
+    return 'https://wa.me/55'+phone+'?text='+encodeURIComponent(message);
   }
   function navAnchor(label){
     var needle=normalized(label);
@@ -630,7 +642,7 @@
       trigger.setAttribute('aria-label',count?'Meu orçamento, '+count+' itens':'Meu orçamento vazio');
     }
     var adding=false,modalLoading=false,lastOfficialCount=null;
-    function show(data,mode){
+    function show(data,mode,addFailure){
       body.replaceChildren();foot.replaceChildren();
       var items=data&&data.items||[];
       if(mode==='loading'){
@@ -685,7 +697,7 @@
           foot.appendChild(email);
         }
         foot.appendChild(a(url,'cc26-cart-sidebar__manage','Editar produtos e quantidades'));
-      }else{
+      }else if(!addFailure){
         var status=el('div','cc26-cart-sidebar__status');
         var icon=el('span','cc26-cart-sidebar__empty-icon');
         icon.appendChild(inlineIcon(mode==='empty'?'cart':'shield'));
@@ -693,6 +705,17 @@
         status.appendChild(el('h3','',mode==='empty'?'Seu orçamento está vazio':'Resumo temporariamente indisponível'));
         status.appendChild(el('p','',mode==='empty'?'Escolha os produtos para montar seu orçamento.':'Consulte os itens e finalize na página oficial da loja.'));
         body.appendChild(status);
+      }
+      if(addFailure){
+        var notice=el('div','cc26-cart-sidebar__add-error');
+        notice.setAttribute('role','alert');
+        notice.appendChild(el('strong','','Não foi possível adicionar este produto ao orçamento.'));
+        notice.appendChild(el('p','','A Loja Integrada não aceitou a inclusão. O produto não foi adicionado à lista.'));
+        if(addFailure.whatsapp){
+          var direct=a(addFailure.whatsapp,'cc26-cart-sidebar__add-error-link','Cotar este produto por WhatsApp');
+          direct.target='_blank';direct.rel='noopener noreferrer';notice.appendChild(direct);
+        }
+        body.prepend(notice);
       }
       if(mode!=='loading'){
         if(mode!=='items')foot.appendChild(a(mode==='empty'?location.origin+'/':url,'cc26-cart-sidebar__checkout',mode==='empty'?'CONTINUAR NA LOJA':'VER LISTA DE ORÇAMENTO'));
@@ -843,7 +866,8 @@
       if(typeof event.button==='number'&&event.button!==0)return;
       if(event.metaKey||event.ctrlKey||event.altKey||event.shiftKey)return;
       var clicked=event.target&&event.target.closest&&event.target.closest('a[href]');
-      if(!clicked||clicked.closest('#cc26-cart-sidebar,#cc26-new-header,#modalSolicitarOrcamento'))return;
+      if(!clicked||clicked.closest('#cc26-cart-sidebar,#cc26-new-header,#modalSolicitarOrcamento')||
+         clicked.hasAttribute('data-cc26-direct-whatsapp'))return;
       var caption=normalized(clicked.textContent||clicked.getAttribute('aria-label')||'');
       var isEmail=/COTAR\s+POR\s+E.?MAIL|COTAR\s+E.?MAIL/.test(caption)||clicked.matches('.cc26-card-quote-actions__email,.cotar-email,.botao-cotar-email,[data-cc26-cotar-email]');
       var isWhats=clicked.matches('.cc26-card-quote-actions__whatsapp,.cc26-pdp__cta--whatsapp,.cotar-whats a')||!!clicked.closest('.cotar-whats');
@@ -865,7 +889,18 @@
         if(!response.ok||new URL(response.url,location.href).origin!==location.origin)throw Error('Não foi possível confirmar a inclusão');
         return response.text();
       }).then(function(html){
-        var official=parseSource(new DOMParser().parseFromString(html,'text/html'),'carrinho');
+        var doc=new DOMParser().parseFromString(html,'text/html');
+        var official=parseSource(doc,'carrinho');
+        // O endpoint nativo pode retornar HTTP 200 após redirecionar com um erro.
+        // Não confundir uma rejeição explícita com inclusão ou lista vazia.
+        var responseArea=doc.querySelector('#corpo')||doc.body;
+        var rejected=/NAO FOI POSSIVEL ADICIONAR O PRODUTO (?:NO|AO) CARRINHO/.test(normalized(responseArea&&responseArea.textContent));
+        if(rejected){
+          official.count=official.items.length&&official.items.every(function(it){return Number.isInteger(it.quantity)&&it.quantity>0;})?
+            official.items.reduce(function(n,it){return n+it.quantity;},0):official.empty?0:null;
+          if(open)show(official,official.items.length?'items':'add-error',{whatsapp:pdpWhatsAppHref(clicked.closest('.cc26-pdp__details'))});
+          return;
+        }
         if(open&&official.items.length){
           var quantities=official.items.every(function(it){return Number.isInteger(it.quantity)&&it.quantity>0;});
           official.count=quantities?official.items.reduce(function(n,it){return n+it.quantity;},0):null;
@@ -2304,6 +2339,20 @@
     }
     // O tema legado deixa .cotar-whats fora da ficha antes de movê-lo no load.
     if(!whatsapp)whatsapp=d.querySelector('.cotar-whats a[href]');
+    // O tema legado nem sempre traz o WhatsApp em produtos sem preço.
+    // Nestes casos, usar contato direto da Cabcom sem depender de inclusão no carrinho.
+    if(!whatsapp&&(quote||nativeActions.querySelector('.produto-mais-info'))){
+      var directHref=pdpWhatsAppHref(info);
+      if(directHref){
+        var directBlock=el('div','cc26-pdp__whatsapp-fallback');
+        whatsapp=a(directHref,'','Cotar por WhatsApp');
+        whatsapp.prepend(inlineIcon('phone'));
+        whatsapp.target='_blank';whatsapp.rel='noopener noreferrer';
+        whatsapp.setAttribute('data-cc26-direct-whatsapp','1');
+        whatsapp.addEventListener('click',function(){var href=pdpWhatsAppHref(info);if(href)whatsapp.href=href;});
+        directBlock.appendChild(whatsapp);nativeActions.appendChild(directBlock);
+      }
+    }
     root.classList.add('cc26-pdp','cc26-pdp--editorial');
     grid.classList.add('cc26-pdp__grid');
     media.classList.add('cc26-pdp__media');
@@ -2358,7 +2407,7 @@
       var container=quote.closest('.comprar')||quote;
       if(container && container.parentNode)container.parentNode.insertBefore(hint,container);
       if(whatsapp&&container.parentNode){
-        var whatsBlock=whatsapp.closest('.cotar-whats')||whatsapp;
+        var whatsBlock=whatsapp.closest('.cotar-whats,.cc26-pdp__whatsapp-fallback')||whatsapp;
         if(!whatsBlock.contains(container))container.parentNode.insertBefore(whatsBlock,container);
       }
     }
@@ -2465,7 +2514,7 @@
     var quote=info.querySelector('.cc26-pdp__cta--quote'),hint=info.querySelector('.cc26-pdp__quote-hint');
     var whatsapp=info.querySelector('.cc26-pdp__cta--whatsapp,.cotar-whats a[href]')||d.querySelector('.cotar-whats a[href]');
     if(!quote||!hint||!whatsapp)return;
-    var container=quote.closest('.comprar')||quote,block=whatsapp.closest('.cotar-whats')||whatsapp;
+    var container=quote.closest('.comprar')||quote,block=whatsapp.closest('.cotar-whats,.cc26-pdp__whatsapp-fallback')||whatsapp;
     if(!container.parentNode||block.contains(container))return;
     whatsapp.classList.add('cc26-pdp__cta','cc26-pdp__cta--whatsapp');
     if(block.parentNode!==container.parentNode||block.nextElementSibling!==container)container.parentNode.insertBefore(block,container);
