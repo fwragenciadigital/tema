@@ -4122,3 +4122,20 @@ body.cc26-active .cc26-shortcuts--carousel .cc26-shortcuts__control--prev .cc26-
 @media(prefers-reduced-motion:reduce){
   body.cc26-active .cc26-shortcuts--carousel .cc26-shortcuts__track{transition:none!important;will-change:auto}
 }
+
+/* Cabcom 2.2.22 — cotação direta na ficha e retorno de erro da LI. */
+body.cc26-active.cc26-pdp-ready #corpo .cc26-pdp--editorial .cc26-pdp__details .cc26-pdp__whatsapp-fallback{
+  display:block!important;box-sizing:border-box!important;margin:0 0 12px!important;padding:0!important;width:100%!important;float:none!important;
+}
+body.cc26-active .cc26-cart-sidebar__add-error{
+  padding:18px;margin:0 0 16px;border:1px solid #f2d3ac;border-radius:12px;background:#fff9f1;
+  color:#6f481f;font:550 13px/1.6 var(--cc26-font-text)!important;
+}
+body.cc26-active .cc26-cart-sidebar__add-error strong{display:block;color:#814512;font-size:15px;line-height:1.4;}
+body.cc26-active .cc26-cart-sidebar__add-error p{margin:8px 0 0;font:inherit!important;color:inherit!important;}
+body.cc26-active .cc26-cart-sidebar__add-error-link{
+  display:flex;align-items:center;justify-content:center;box-sizing:border-box;min-height:46px;margin:14px 0 0;
+  padding:10px 12px;border-radius:9px;background:#008c69;color:#fff!important;text-align:center;
+  font:700 13px/1.4 var(--cc26-font-text)!important;text-decoration:none!important;
+}
+body.cc26-active .cc26-cart-sidebar__add-error-link:hover{background:#00795b;}
