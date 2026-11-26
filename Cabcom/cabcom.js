@@ -6,7 +6,7 @@
 (function (w,d) {
   'use strict';
   if(w.Cabcom2026) return;
-  var VERSION='2.2.17';
+  var VERSION='2.2.18';
   var CDN='https://cdn.awsli.com.br/80/80577/arquivos/';
   var DEFAULTS={
     geral:{ativo:true,publicarNaLoja:false,debug:false},
@@ -138,6 +138,114 @@
     span.innerHTML='<svg aria-hidden="true" viewBox="0 0 24 24" focusable="false" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'+(icons[name]||'')+'</svg>';
     return span;
   }
+  // Tarja global: mensagens editáveis no HTML da LI, sem alterar JS/CSS.
+  var topbarController=null;
+  function topbarLink(value){
+    if(!value)return '';
+    try{var url=new URL(value,location.href);return /^(https?:|tel:|mailto:)$/.test(url.protocol)?url.href:'';}
+    catch(e){return '';}
+  }
+  function topbarData(){
+    var admin=d.getElementById('cc26-topbar-admin');
+    var source=admin&&(admin.content||admin);
+    var items=[],interval=4500,autoplay=true;
+    if(source){
+      var configured=Number(admin.getAttribute('data-interval'));
+      if(configured>0)interval=Math.max(2500,Math.min(20000,configured));
+      autoplay=admin.getAttribute('data-autoplay')!=='false';
+      items=[].slice.call(source.querySelectorAll('[data-cc26-message]')).map(function(node){
+        var link=node.querySelector('a[href]');
+        return {text:String(node.textContent||'').replace(/\s+/g,' ').trim(),
+          link:topbarLink(node.getAttribute('data-link')||(link&&link.getAttribute('href')))};
+      }).filter(function(item){return item.text;});
+    }else{
+      var promo=d.querySelector('.barra-inicial .conteiner, #barra-top .conteiner, .barra-topo .conteiner');
+      var promoText=promo?String(promo.textContent||'').replace(/\s+/g,' ').trim():'';
+      items=[
+        {text:promoText&&promoText.length<180?promoText:'Fale Conosco Telefone: (11) 3280-2008 Whatsapp: (11) 3280-2008',link:''},
+        {text:'Enviamos para todo o Brasil',link:''},
+        {text:'Solicite sua cotação por WhatsApp ou e-mail',link:''}
+      ].filter(function(item,i,list){return list.findIndex(function(x){return x.text===item.text;})===i;});
+    }
+    return {items:items,interval:interval,autoplay:autoplay,source:admin?'HTML personalizado':'Tarja padrão'};
+  }
+  function syncTopbar(top){
+    top=top||d.querySelector('#cc26-new-header .cc26-site-header__top');
+    if(!top)return;
+    var data=topbarData(),signature=JSON.stringify(data);
+    if(topbarController&&topbarController.top===top&&topbarController.signature===signature)return;
+    if(topbarController)topbarController.destroy();
+    var items=data.items;
+    top.replaceChildren();
+    top.classList.toggle('cc26-site-header__top--empty',!items.length);
+    state.topbar={source:data.source,count:items.length,interval:data.interval,autoplay:data.autoplay};
+    if(!items.length){topbarController={top:top,signature:signature,destroy:function(){}};return;}
+    top.setAttribute('role','region');
+    top.setAttribute('aria-label','Avisos da loja');
+    var carousel=el('div','cc26-topbar__carousel');
+    var slides=el('div','cc26-topbar__slides');
+    var active=0,timer=0,paused=!data.autoplay||reducedMotion(),hover=false,focused=false,dead=false;
+    var messages=items.map(function(item,i){
+      var slide=el('div','cc26-topbar__slide');
+      slide.setAttribute('role','group');slide.setAttribute('aria-label','Aviso '+(i+1)+' de '+items.length);
+      if(item.link){slide.appendChild(a(item.link,'cc26-topbar__link',item.text));}
+      else slide.appendChild(el('span','',item.text));
+      slides.appendChild(slide);
+      return slide;
+    });
+    function show(i,manual){
+      active=(i+messages.length)%messages.length;
+      slides.setAttribute('aria-live',manual?'polite':'off');
+      messages.forEach(function(slide,index){
+        var on=index===active;slide.classList.toggle('cc26-topbar__slide--active',on);
+        slide.setAttribute('aria-hidden',String(!on));
+        var link=slide.querySelector('a');if(link)link.tabIndex=on?0:-1;
+      });
+      top.dataset.cc26ActiveMessage=String(active+1);
+      state.topbar.index=active+1;
+    }
+    function nextTimer(){
+      w.clearTimeout(timer);
+      if(dead||messages.length<2||paused||hover||focused||d.hidden)return;
+      timer=w.setTimeout(function(){show(active+1,false);nextTimer();},data.interval);
+    }
+    function arrow(label,side){
+      var b=el('button','cc26-topbar__control cc26-topbar__control--'+side);
+      b.type='button';b.setAttribute('aria-label',label);b.appendChild(inlineIcon('arrow'));return b;
+    }
+    var prev=arrow('Aviso anterior','prev'),next=arrow('Próximo aviso','next');
+    var pause=el('button','cc26-topbar__control cc26-topbar__control--pause');
+    pause.type='button';var pauseGlyph=el('span','cc26-topbar__pause-glyph');pauseGlyph.setAttribute('aria-hidden','true');pause.appendChild(pauseGlyph);
+    function updatePause(){
+      pause.setAttribute('aria-label',paused?'Reproduzir avisos':'Pausar avisos');
+      pauseGlyph.textContent=paused?'▶':'Ⅱ';
+    }
+    prev.addEventListener('click',function(){show(active-1,true);nextTimer();});
+    next.addEventListener('click',function(){show(active+1,true);nextTimer();});
+    pause.addEventListener('click',function(){paused=!paused;updatePause();nextTimer();});
+    if(items.length>1){
+      top.setAttribute('aria-roledescription','carrossel');
+      carousel.classList.add('cc26-topbar__carousel--multiple');
+      carousel.appendChild(prev);
+      carousel.appendChild(slides);
+      var right=el('div','cc26-topbar__right');right.appendChild(next);right.appendChild(pause);carousel.appendChild(right);
+    }else{top.removeAttribute('aria-roledescription');carousel.appendChild(slides);}
+    top.appendChild(carousel);
+    function enter(){hover=true;nextTimer();}
+    function leave(){hover=false;nextTimer();}
+    function focusIn(){focused=true;nextTimer();}
+    function focusOut(event){if(!event.relatedTarget||!top.contains(event.relatedTarget)){focused=false;nextTimer();}}
+    top.addEventListener('mouseenter',enter);top.addEventListener('mouseleave',leave);
+    top.addEventListener('focusin',focusIn);top.addEventListener('focusout',focusOut);
+    d.addEventListener('visibilitychange',nextTimer);
+    topbarController={top:top,signature:signature,destroy:function(){
+      dead=true;w.clearTimeout(timer);
+      top.removeEventListener('mouseenter',enter);top.removeEventListener('mouseleave',leave);
+      top.removeEventListener('focusin',focusIn);top.removeEventListener('focusout',focusOut);
+      d.removeEventListener('visibilitychange',nextTimer);
+    }};
+    updatePause();show(0,false);nextTimer();
+  }
   function enableHeader(){
     if (!cfg.topo.ativo || d.getElementById('cc26-new-header')) return;
     var nativeHeader=d.querySelector('#cabecalho');
@@ -151,10 +259,7 @@
     var header=el('header','cc26-site-header');
     header.id='cc26-new-header';
     var top=el('div','cc26-site-header__top');
-    var promo=d.querySelector('.barra-inicial .conteiner, #barra-top .conteiner, .barra-topo .conteiner');
-    var promoText=promo?String(promo.textContent||'').replace(/\s+/g,' ').trim():'';
-    top.textContent=promoText && promoText.length<180 ? promoText : '';
-    if(!top.textContent.trim())top.classList.add('cc26-site-header__top--empty');
+    syncTopbar(top);
     header.appendChild(top);
     var inner=el('div','cc26-site-header__inner');
     var main=el('div','cc26-site-header__main');
@@ -2391,6 +2496,7 @@
       if(!d.getElementById('cc26-new-header'))enableHeader();
       initNavigationExperience();
     }
+    syncTopbar();
     if(home)syncInstitutional(d.querySelector('.cc26-institutional'));
     watchFade();
   }
